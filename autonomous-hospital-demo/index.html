@@ -706,6 +706,23 @@ body.telling #vig{box-shadow:none!important}
  .tl-over{overflow:auto;place-items:start center}
 }
 
+
+.hwbox.hwstory .hwhint{display:none}.hwbox.hwstory #hwS{display:none}
+.hwst{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.hwst .k2{font:700 11px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:#bff5ee}
+.hwst .cap{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.hwst .cap li{display:grid;grid-template-columns:104px 1fr;gap:8px;font-size:13px;line-height:1.35}
+.hwst .cap b{color:#4fd1c5;font-weight:700}
+.hwst .today{font-size:13px;color:#f4d8c8;border-left:3px solid var(--t);padding-left:10px}.hwst .today b{color:var(--t);margin-right:4px}
+.hwst .go{margin-top:4px;border:0;border-radius:10px;padding:11px 14px;background:#4fd1c5;color:#06201d;font:700 14px var(--f-body);cursor:pointer}
+.tl-senscmp{position:absolute;left:0;right:0;top:55%;display:grid;grid-template-columns:1fr 1fr;pointer-events:none;z-index:4}
+.tl-senscmp[hidden]{display:none}
+.tl-senscmp>div{justify-self:center;max-width:300px;padding:10px 14px;border-radius:12px;background:rgba(10,16,19,.86);font-size:14px;line-height:1.4;color:#e9f1f2;display:grid;gap:3px;animation:tlin .5s ease both}
+.tl-senscmp b{font:700 11px var(--f-body);letter-spacing:.1em;text-transform:uppercase}
+.tl-senscmp .t{border:1px solid var(--t)}.tl-senscmp .t b{color:var(--t)}.tl-senscmp .f{border:1px solid var(--f)}.tl-senscmp .f b{color:var(--f)}
+@media (max-width:760px){.tl-senscmp{top:24%}.tl.sensm .tl-vb{opacity:0}.tl-senscmp>div{max-width:44vw;font-size:12px;padding:8px 10px}.hwst .cap li{grid-template-columns:90px 1fr}}
+.tl-list{transition:opacity .5s}.tl.sensm .tl-list{opacity:0;pointer-events:none}
+.hwbox.hwstory #hwD{display:none}.hwst .cap{background:none;border:0;padding:0}
 </style>
 
 <div id="app">
@@ -762,16 +779,28 @@ body.telling #vig{box-shadow:none!important}
     <p class="tl-nowl" id="tlNowL" hidden></p>
     <div class="tl-nav"><button type="button" class="tl-back" id="tlBack" aria-label="Back">←</button><span class="tl-prog" id="tlProg"></span><button type="button" class="tl-next" id="tlNext">Next →</button></div>
   </div>
+  <div class="tl-senscmp" id="tlSensCmp" hidden><div class="t"><b>Today</b>An empty ceiling. Nothing in the room is writing this down.</div><div class="f"><b>Autonomous Hospital</b>A room sensor over every bed. It sees, hears and documents.</div></div>
   <div class="tl-tag t" id="tlTagT">Today</div><div class="tl-tag f" id="tlTagF">Autonomous Hospital</div>
   <div class="tl-scrw" id="tlScr" hidden></div>
   <div class="tl-pop glass" id="tlPop" hidden></div><div class="tl-tip" id="tlTip" hidden></div>
   <div class="tl-vb"><button type="button" class="tl-sv" id="tlStreet" aria-pressed="false" title="Stand anywhere and look around">🚶 Street view</button><button type="button" class="tl-fit" id="tlFit" title="Reset the view">⤢ Reset view</button></div>
   <div class="tl-svhint" id="tlSvHint" hidden></div>
   <div class="tl-dip" id="tlDip"></div>
-  <div class="tl-hw" id="tlHw" hidden><div class="hwbox glass" role="dialog" aria-modal="true" aria-labelledby="hwN">
+  <div class="tl-hw" id="tlHw" hidden><div class="hwbox glass" id="hwBox" role="dialog" aria-modal="true" aria-labelledby="hwN">
     <button type="button" class="x" id="hwX" aria-label="Close">×</button>
     <div class="hwv" id="hwV"><canvas id="hwC"></canvas><svg id="hwSvg" aria-hidden="true"></svg><div id="hwLabs"></div><small class="hwhint">Drag to turn it · scroll to zoom</small></div>
-    <div class="hwt"><div class="k">The hardware</div><h3 id="hwN"></h3><small id="hwSz"></small><p id="hwD"></p><ul id="hwS"></ul><p class="like" id="hwLike"></p>
+    <div class="hwt"><div class="k" id="hwK">The hardware</div><h3 id="hwN"></h3><small id="hwSz"></small><p id="hwD"></p><ul id="hwS"></ul><p class="like" id="hwLike"></p>
+      <div class="hwst" id="hwSt" hidden><div class="k2">During this dressing change it writes down</div>
+        <ul class="cap">
+          <li><b>Hand hygiene</b><span>Sees you clean your hands before the gloves go on</span></li>
+          <li><b>Wound size</b><span>2.1 × 1.6 × 0.1 cm, measured against the paper ruler</span></li>
+          <li><b>Wound photo</b><span>Taken from overhead and filed. No iPad to fetch.</span></li>
+          <li><b>What's said</b><span>“Pain is 1 out of 10” becomes her pain score</span></li>
+          <li><b>Her turn</b><span>Left side, with the pressure mat under her mattress</span></li>
+          <li><b>One draft note</b><span>Every line shows its source. You check it and sign.</span></li>
+        </ul>
+        <p class="today"><b>Today</b> There's nothing on the ceiling. You repeat 2.1 × 1.6 in your head, hunt for the iPad, and chart it from memory at 17:45.</p>
+        <button type="button" class="go" id="hwGo">Continue the dressing change →</button></div>
       <div class="hwacts"><button type="button" id="hwEx" aria-pressed="false">Take it apart</button><button type="button" id="hwLab" aria-pressed="true">Labels</button></div></div>
   </div></div>
   <div class="tl-over" id="tlOver" hidden></div>
@@ -2325,7 +2354,7 @@ const BEATS=[
   F:{hl:["room14"],walk:[["room12","room14"]],line:"No calls to make. You use those fifteen minutes to get Mr. Chen up to the chair, like PT asked.",item:"Get Mr. Chen up to the chair, like PT asked",m:{walk:.1,head:1},labs:["brain"]}},
  {t:"09:40",ph:1,
   T:{hl:["bed"],walk:[["supply","room12"]],view:"fp",spot:"roomwide",line:"The dressing change. You measure with dirty gloves on: 2.1 by 1.6 by 0.1 cm. No free hand to write it down, so you keep repeating it in your head.",item:"Memorize the wound measurements",m:{walk:.3,head:12}},
-  F:{hl:["cam","mic","bed"],walk:[["room14","room12"]],view:"fp",spot:"roomwide",line:"You do the dressing change and talk Maria through it. The ceiling camera measures the wound against the ruler. The mic catches \"pain is 1 out of 10.\" The bed logs her turn to the left.",item:"Do the dressing change. The room writes it down.",m:{walk:.1,head:0},labs:["cam","mic","bed"],flow:[["cam","disp"],["mic","disp"],["bed","disp"]]}},
+  F:{hl:["cam","mic","bed"],walk:[["room14","room12"]],view:"fp",spot:"roomwide",sensor:true,line:"You do the dressing change and talk Maria through it. The ceiling camera measures the wound against the ruler. The mic catches \"pain is 1 out of 10.\" The bed logs her turn to the left.",item:"Do the dressing change. The room writes it down.",m:{walk:.1,head:0},labs:["cam","mic","bed"],flow:[["cam","disp"],["mic","disp"],["bed","disp"]]}},
  {t:"09:55",ph:1,
   T:{hl:["medroom"],walk:[["room12","med"],["med","room12"]],view:"fp",spot:"roomwide",line:"Wound photos need the unit iPad. It's in the med room with a dead battery. You find a charger, walk back, and take the photo.",item:"Fetch the unit iPad for a wound photo",m:{walk:.4,head:12}},
   F:{hl:["disp"],view:"fp",spot:"roomwide",screen:"next",line:"Before you leave, you add your next steps. The verifier checks them against her chart and the unit's wound protocol and finds one gap: a dietitian referral. You add it and send the plan to Dr. Patel.",item:"Verifier checks your next steps. Dr. Patel approves.",m:{chart:2,head:0},labs:["disp"],flow:[["cam","disp"]]}},
@@ -2459,7 +2488,7 @@ canvas.addEventListener("pointermove",e=>{if(!ST.on)return;
   else{for(const c of ST.street?[CMP.cam.T,CMP.cam.F]:[CMP.cam[sdrag.R.s]]){c.yaw+=dx*.004;c.pitch=Math.max(-1.1,Math.min(.8,c.pitch+dy*.004))}}});
 canvas.addEventListener("pointerup",e=>{if(!ST.on)return;const d=sdrag;sdrag=null;canvas.style.cursor=ST.drop?"crosshair":"";if(!d||d.moved>=6)return;
   if(ST.drop){const R=rayAt(e.clientX,e.clientY);const G=R&&groundAt();if(G&&rgnOf(G.x,G.z)>=0)streetAt(G.x,G.z,faceFor(G.x,G.z));return}
-  const h=thingAt(e.clientX,e.clientY);if(h){openThing(h.id,h.s);return}closeThing();
+  const h=thingAt(e.clientX,e.clientY);if(h){if(h.s==="F"&&THINGS[h.id].hw==="sensor"){closeThing();hwOpen("sensor");return}openThing(h.id,h.s);return}closeThing();
   if(ST.street){const p=floorAt(e.clientX,e.clientY);if(p){const c=CMP.cam.T,r=streetRoute(c.p.x,c.p.z,p.x,p.z);if(r)streetGlide(r)}}});
 canvas.addEventListener("wheel",e=>{if(!ST.on)return;e.preventDefault();const f=Math.exp(e.deltaY*.0012);
   if(CMP.vm==="bird"){const R=rayAt(e.clientX,e.clientY);const G=R&&groundAt();const nk=Math.max(.08,Math.min(1.35,ST.camT.k*f));const r=nk/ST.camT.k;
@@ -2525,7 +2554,7 @@ function showScreen(kind){const el=$("tlScr");if(!kind){el.hidden=true;el.innerH
   const sg=$("tlSign");if(sg)sg.onclick=()=>{beep("ok");sg.disabled=true;sg.textContent=kind==="handoff"?"Jordan ✓ signed 07:12":kind==="plan"?"Sent. Kit is being picked.":"Approved by Dr. Patel · 10:02 ✓";sg.classList.add("done")}}
 
 /* ---------- world ---------- */
-function stSide(F){if(!ST.on)return;const p=F?ST.phase:0,B=CMP.vm==="bird"||!!(ST.fly&&ST.fly.k<.8);pickG.visible=F&&p>=3;
+function stSide(F){if(!ST.on)return;const p=F?ST.phase:0,B=CMP.vm==="bird"||!!(ST.fly&&ST.fly.k<.8);pickG.visible=F&&p>=3;sensGhost.visible=!F&&!!ST.ghost;
   railG.visible=F&&p>=3;dockBots.forEach(r=>r.visible=F&&p>=4);ovPod.visible=F&&CMP.pod&&p>=3;
   roomGlow.forEach((g,i)=>g.visible=F&&B&&ST.glow&&(i===0?p>=1:p>=2));pucks.forEach(o=>o.visible=F&&B&&p>=2);
   avatar.visible=B&&!F&&ST.avT;avatarF.visible=B&&F&&ST.avF;xMarks.forEach(m=>m.g.visible=stLab(m.s.id));hlG.T.visible=!F;hlG.F.visible=F;pulseHL()}
@@ -2547,7 +2576,7 @@ function setProg(i,n){$("tlProg").innerHTML=Array.from({length:n},(_,j)=>`<i cla
 function nextBtn(label,pulse){const b=$("tlNext");b.textContent=label;b.classList.toggle("pulse",!!pulse);b.hidden=false;b.disabled=false;$("tlSw")&&$("tlSw").remove()}
 
 // draw state k instantly (Back, skipping, and the end of every animated step)
-function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;ST.fly=null;streetOff();setStreetHint(false);nowL("");
+function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;ST.fly=null;ST.gate=null;ST.ghost=false;$("tl").classList.remove("sensm");$("tlSensCmp").hidden=true;if(ST.sensZ){ST.sensZ=false;ST.fpZ=1}if(s.a==="home")ST.sensorSeen=false;streetOff();setStreetHint(false);nowL("");
   if(!keepTrails){liftReset(csLift);liftReset(phLift);armRest();gateBeam.material.opacity=.18}$("tlOver").hidden=true;$("tlOver").className="tl-over";document.body.classList.toggle("athome",s.a==="home");closeThing();
   const n=BEATS.length;
   if(!keepTrails){clearTrails();resetProps();CMP.kit=false;
@@ -2567,7 +2596,7 @@ function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;ST.fly=null;stre
     setVMs(v&&v.view==="fp"?"fp":"bird");placeAv("F",spotAt("F",i));if(v&&v.view==="fp")cPlace("F",v.spot);
     if(!keepTrails){buildList("F",i);beatView("F",v)}const li=$("tlItems").querySelector(`li[data-i="${Math.min(i,n-1)}"]`);tlScroll(s.a==="F"?li:$("tlItems").lastElementChild);
     showMets(s.a==="F"?sumM("F",i,9):TOT_F,TOT_T);
-    if(s.a==="F"){setCap(BEATS[i].tF||BEATS[i].t,v.line);setProg(i,n+1);nextBtn("Next →")}
+    if(s.a==="F"){setCap(BEATS[i].tF||BEATS[i].t,v.line);setProg(i,n+1);nextBtn("Next →");if(v.view==="fp"&&v.spot==="roomwide")nowL("<b>Tap the ceiling sensor</b> any time to see it up close")}
     else{setCap("19:05","The rest of the list changes too. The hospital does the walking, the remembering and the chasing. You do the nursing.");setProg(n,n+1);nextBtn("See the difference →",true)}
     return}
   showScreen(null);
@@ -2812,35 +2841,42 @@ const HWDEF={
   build(g){const f=hwPart(g);box(.98,.62,.03,mat.black,0,.4,0,.015,f);const s=new THREE.Mesh(new THREE.PlaneGeometry(.94,.58),new THREE.MeshBasicMaterial({map:dispTex,toneMapped:false}));s.position.set(0,.4,.017);f.add(s);
    box(.06,.025,.01,HM.dark,.4,.06,.0,.005,f);box(.04,.02,.01,HM.red,.4,.06,.01,0,f);box(.08,.05,.02,HM.dark,-.4,.06,0,.005,f);
    return [hwLab(f,[-.2,.55,.02],"Draft note","Each line shows its source: speech, device or missing"),hwLab(f,[.35,.3,.02],"Touch to fix","Change any line before you sign"),hwLab(f,[.4,.06,.01],"Mic mute","Turns the room's microphones off"),hwLab(f,[-.4,.06,.01],"Badge tap","Sign the note with your badge")]}}};
-const HV={r:null,scene:null,cam:null,cur:null,yaw:.7,pitch:.38,dist:1,ex:0,exT:0,lab:true,auto:true,raf:0,c:new THREE.Vector3(),drag:null};
+const HV={r:null,scene:null,cam:null,cur:null,yaw:.7,pitch:.38,dist:1,ex:1,exT:1,lab:true,raf:0,c:new THREE.Vector3(),drag:null,W:0,H:0,lay:null,relay:true,story:false};
 function hwInit(){if(HV.r)return;const c=$("hwC");HV.r=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});HV.r.setPixelRatio(Math.min(2,devicePixelRatio));HV.r.toneMapping=THREE.ACESFilmicToneMapping;HV.r.outputColorSpace=THREE.SRGBColorSpace;
   HV.scene=new THREE.Scene();HV.scene.environment=new THREE.PMREMGenerator(HV.r).fromScene(new RoomEnvironment(HV.r),.04).texture;HV.scene.add(new THREE.HemisphereLight(0xffffff,0x445055,.5));const d=new THREE.DirectionalLight(0xffffff,1.4);d.position.set(2,3,2.5);HV.scene.add(d);
   HV.cam=new THREE.PerspectiveCamera(32,1,.005,60);
-  c.addEventListener("pointerdown",e=>{HV.drag={x:e.clientX,y:e.clientY};HV.auto=false;c.setPointerCapture(e.pointerId)});
+  c.addEventListener("pointerdown",e=>{HV.drag={x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId)});
   c.addEventListener("pointermove",e=>{if(!HV.drag)return;HV.yaw-=(e.clientX-HV.drag.x)*.008;HV.pitch=Math.max(-1.2,Math.min(1.35,HV.pitch+(e.clientY-HV.drag.y)*.006));HV.drag={x:e.clientX,y:e.clientY}});
-  c.addEventListener("pointerup",()=>{HV.drag=null});c.addEventListener("wheel",e=>{e.preventDefault();HV.zoom=Math.max(.35,Math.min(2.2,(HV.zoom||1)*Math.exp(e.deltaY*.0012)))},{passive:false});
+  c.addEventListener("pointerup",()=>{if(HV.drag)HV.relay=true;HV.drag=null});c.addEventListener("wheel",e=>{e.preventDefault();HV.zoom=Math.max(.35,Math.min(2.2,(HV.zoom||1)*Math.exp(e.deltaY*.0012)))},{passive:false});
   $("hwX").onclick=hwClose;$("tlHw").addEventListener("click",e=>{if(e.target.id==="tlHw")hwClose()});
-  $("hwEx").onclick=()=>{HV.exT=HV.exT?0:1;$("hwEx").setAttribute("aria-pressed",!!HV.exT);$("hwEx").textContent=HV.exT?"Put it back together":"Take it apart"};
+  $("hwEx").onclick=()=>{HV.exT=HV.exT?0:1;HV.relay=true;hwExLbl()};$("hwGo").onclick=hwClose;
   $("hwLab").onclick=()=>{HV.lab=!HV.lab;$("hwLab").setAttribute("aria-pressed",HV.lab)}}
-function hwOpen(key){hwInit();const D=HWDEF[key];if(!D)return;if(HV.cur)HV.scene.remove(HV.cur.g);const g=new THREE.Group();const labs=D.build(g).filter(o=>o.userData.lab&&o.userData.lab[0]);HV.scene.add(g);
+function hwExLbl(){$("hwEx").setAttribute("aria-pressed",!HV.exT);$("hwEx").textContent=HV.exT?"Put it back together":"Take it apart"}
+// opens with the parts spread out and every label showing. Nothing moves unless you drag it.
+function hwOpen(key,opt){hwInit();opt=opt||{};const D=HWDEF[key];if(!D)return;if(HV.cur)HV.scene.remove(HV.cur.g);const g=new THREE.Group();const labs=D.build(g).filter(o=>o.userData.lab&&o.userData.lab[0]);HV.scene.add(g);for(const o of g.children)if(o.userData.off)o.position.copy(o.userData.off);g.updateMatrixWorld(true);
   const bb=new THREE.Box3().setFromObject(g),sph=bb.getBoundingSphere(new THREE.Sphere());HV.c.copy(sph.center);HV.dist=sph.radius/Math.sin(16*Math.PI/180)*1.05;
-  HV.cur={g,labs,parts:g.children.filter(o=>o.userData.off)};HV.ex=HV.exT=0;HV.zoom=1;HV.auto=true;HV.yaw=.7;HV.pitch=key==="sensor"?.75:.32;
+  HV.cur={g,labs,parts:g.children.filter(o=>o.userData.off)};HV.ex=HV.exT=1;HV.zoom=1;HV.yaw=key==="sensor"?.5:.7;HV.pitch=key==="sensor"?.62:.32;HV.relay=true;HV.W=HV.H=0;
+  HV.story=!!opt.story;$("hwBox").classList.toggle("hwstory",HV.story);$("hwSt").hidden=!HV.story;$("hwK").textContent=HV.story?"New in this room":"The hardware";
   $("hwN").textContent=D.n;$("hwSz").textContent=D.size;$("hwD").textContent=D.d;$("hwS").innerHTML=D.sp.map(s=>`<li>${s}</li>`).join("");$("hwLike").textContent=D.like;
-  $("hwEx").textContent="Take it apart";$("hwEx").setAttribute("aria-pressed","false");$("tlHw").hidden=false;$("hwLabs").innerHTML=labs.map(o=>`<div class="hwl"><b>${o.userData.lab[0]}</b><small>${o.userData.lab[1]}</small></div>`).join("");
+  hwExLbl();$("tlHw").hidden=false;if(HV.story)setTimeout(()=>$("hwGo").focus({preventScroll:true}),50);$("hwLabs").innerHTML=labs.map(o=>`<div class="hwl"><b>${o.userData.lab[0]}</b><small>${o.userData.lab[1]}</small></div>`).join("");
   cancelAnimationFrame(HV.raf);const v=new THREE.Vector3();let last=performance.now();
-  (function f(now){if($("tlHw").hidden)return;HV.raf=requestAnimationFrame(f);const dt=Math.min(.05,(now-last)/1000);last=now;if(HV.auto)HV.yaw+=dt*.25;
-    const wrap=$("hwV"),W=wrap.clientWidth,H=wrap.clientHeight;if(HV.r.domElement.width!==Math.round(W*HV.r.getPixelRatio())||HV.r.domElement.height!==Math.round(H*HV.r.getPixelRatio()))HV.r.setSize(W,H,false);
-    HV.ex+=(HV.exT-HV.ex)*.1;for(const p of HV.cur.parts)p.position.copy(p.userData.off).multiplyScalar(HV.ex);
+  (function f(now){if($("tlHw").hidden)return;HV.raf=requestAnimationFrame(f);const dt=Math.min(.05,(now-last)/1000);last=now;
+    const wrap=$("hwV"),W=wrap.clientWidth,H=wrap.clientHeight;if(W!==HV.W||H!==HV.H){HV.W=W;HV.H=H;HV.r.setSize(W,H,false);HV.relay=true}
+    HV.ex+=(HV.exT-HV.ex)*Math.min(1,dt*7);if(Math.abs(HV.exT-HV.ex)<.002)HV.ex=HV.exT;for(const p of HV.cur.parts)p.position.copy(p.userData.off).multiplyScalar(HV.ex);
     const dd=HV.dist*HV.zoom;HV.cam.position.set(HV.c.x+dd*Math.cos(HV.pitch)*Math.sin(HV.yaw),HV.c.y+dd*Math.sin(HV.pitch),HV.c.z+dd*Math.cos(HV.pitch)*Math.cos(HV.yaw));HV.cam.lookAt(HV.c);HV.cam.aspect=W/Math.max(1,H);HV.cam.updateProjectionMatrix();HV.r.render(HV.scene,HV.cam);
     hwLabels(W,H,v)})(last)}
+// Labels sit in fixed slots down each side. Sides and order are decided once (on open, after a drag,
+// after taking it apart), never per frame, so nothing jumps around. Only the thin leader lines follow the parts.
 function hwLabels(W,H,v){const els=$("hwLabs").children,svg=$("hwSvg");const show=HV.lab&&W>520;svg.style.display=$("hwLabs").style.display=show?"":"none";if(!show)return;
   const pts=HV.cur.labs.map((o,i)=>{o.getWorldPosition(v);v.project(HV.cam);return {i,x:(v.x*.5+.5)*W,y:(-v.y*.5+.5)*H}});
-  let path="";const lw=Math.min(190,W*.3);
-  for(const side of [0,1]){const S=pts.filter(p=>(p.x>=W/2)===!!side).sort((a,b)=>a.y-b.y);let y=12;
-    for(const p of S){const ly=Math.max(y,Math.min(H-50,p.y-20));y=ly+52;const el=els[p.i];const lx=side?W-lw-8:8;el.style.transform=`translate(${lx}px,${ly}px)`;el.style.width=lw+"px";el.style.textAlign=side?"left":"right";
-      const ex=side?lx-4:lx+lw+4;path+=`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${ex.toFixed(1)} ${(ly+12).toFixed(1)}`;}}
+  const lw=Math.min(200,W*.27);
+  if(HV.relay&&HV.ex===HV.exT&&!HV.drag){HV.relay=false;const byX=[...pts].sort((a,b)=>a.x-b.x),nl=Math.ceil(byX.length/2);HV.lay=[];
+    for(const side of [0,1]){const S=(side?byX.slice(nl):byX.slice(0,nl)).sort((a,b)=>a.y-b.y);const gap=Math.min(70,(H-40)/Math.max(1,S.length)),y0=Math.max(14,(H-gap*S.length)/2);
+      S.forEach((p,j)=>{const ly=y0+j*gap,lx=side?W-lw-10:10,el=els[p.i];HV.lay[p.i]={side,ly,lx};el.style.transform=`translate(${lx}px,${ly}px)`;el.style.width=lw+"px";el.style.textAlign=side?"left":"right"})}}
+  if(!HV.lay)return;let path="";
+  for(const p of pts){const L=HV.lay[p.i];if(!L)continue;const ex=L.side?L.lx-6:L.lx+lw+6;path+=`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${ex.toFixed(1)} ${(L.ly+9).toFixed(1)}`}
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.innerHTML=`<path d="${path}"/>${pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5"/>`).join("")}`}
-function hwClose(){$("tlHw").hidden=true;cancelAnimationFrame(HV.raf)}
+function hwClose(){$("tlHw").hidden=true;cancelAnimationFrame(HV.raf);if(ST.gate){const g=ST.gate;ST.gate=null;g()}}
 
 /* ---------- street view: stand anywhere and look around, like a map's street view ---------- */
 const RGN=[...[0,4.8,9.6,14.4].map(cx=>({x0:cx-2.25,x1:cx+2.25,z0:-2.85,z1:2.85,dx:cx+1.35,hw:.42,zi:2.45,zc:3.6})),{x0:-2.25,x1:18.1,z0:3.15,z1:5.85,corr:true},
@@ -2913,13 +2949,29 @@ async function playF(k){const s=SEQ[k],b=BEATS[s.i],v=b.F,n=BEATS.length,ep=EPOC
     tween1(900,e=>ovPod.scale.setScalar(1+1.2*e));await animPath(ovPod,p.map(q=>new THREE.Vector3(q[0],0,q[1])),5200,TRAIL.future,HT-.17);if(ep!==EPOCH)return;
     if(v.kit){aim({look:[1.6,0,-.6],k:.3});await wait(700);if(ep!==EPOCH)return;await podDrop()}else{CMP.pod=false;nowL("<b>Into the locked drawer</b> in each room. Tag checked ✓");beep("ok");await wait(900)}})():null;
   if(podP)jobs.push(podP);
-  jobs.push((async()=>{if(v.kit&&podP)await podP;if(ep!==EPOCH)return;for(const [a,b2] of walks){await cGo("F",a,b2,legDur(a,b2));if(ep!==EPOCH)return}
-    if(fp&&!stay){if(walks.length)await wait(400);if(ep!==EPOCH)return;await flyIn("F",v.spot,FLY)}})());
-  if(v.flow)jobs.push((async()=>{for(const f of v.flow){await flow(f)}})());
+  const walkP=(async()=>{if(v.kit&&podP)await podP;if(ep!==EPOCH)return;for(const [a,b2] of walks){await cGo("F",a,b2,legDur(a,b2));if(ep!==EPOCH)return}
+    if(fp&&!stay){if(walks.length)await wait(400);if(ep!==EPOCH)return;await flyIn("F",v.spot,FLY)}
+    if(v.sensor&&!ST.sensorSeen&&ep===EPOCH)await sensorMoment(ep,v)})();jobs.push(walkP);
+  if(v.flow)jobs.push((async()=>{if(v.sensor)await walkP;if(ep!==EPOCH)return;for(const f of v.flow){await flow(f)}})());
   if(v.robot){const r=dockBots[0];const go2=pathTo("dock","room12");go2[go2.length-1].set(1.2,0,1.9);jobs.push(animPath(r,go2,4200,TRAIL.future))}
   await Promise.all(jobs);if(ep!==EPOCH)return;await wait(300);if(ep===EPOCH){snap(k,true)}}
 
 const FLY=2800;
+{const r=new THREE.Mesh(new THREE.TorusGeometry(.085,.006,8,48),new THREE.MeshBasicMaterial({color:0x4fd1c5}));r.rotation.x=Math.PI/2;r.position.set(-.1,HT-.021,-1.25);sensorG.add(r)}
+// The first time Jordan is at Maria's bedside, stop and look up: the room sensor, next to the same ceiling today.
+CSPOT.sensorUp={pos:[.5,HT-.95,-.3],look:[-.1,HT-.05,-1.25],av:[.85,-1.2]};
+// on the Today side, a dashed outline marks where the sensor would be: there's nothing there
+const sensGhost=(()=>{const pts=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;pts.push(new THREE.Vector3(-.1+Math.cos(a)*.12,HT-.012,-1.25+Math.sin(a)*.12))}
+  const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineDashedMaterial({color:0xe8875b,dashSize:.025,gapSize:.018}));l.computeLineDistances();l.visible=false;scene.add(l);return l})();
+function zTo(z,ms){const z0=ST.fpZ||1;return tween1(ms,e=>{ST.fpZ=z0+(z-z0)*e})}
+async function sensorMoment(ep,v){ST.sensorSeen=true;ST.sensZ=true;CMP.xray=false;setHL("F",[]);$("tl").classList.add("sensm");
+  nowL("<b>Look up.</b> There's something on this ceiling that isn't there today.");await wait(1200);if(ep!==EPOCH)return;
+  cPlace("T","sensorUp");await Promise.all([flyIn("F","sensorUp",2600),zTo(.5,2600)]);if(ep!==EPOCH)return;await wait(500);if(ep!==EPOCH)return;
+  nowL("<b>Same room, same moment.</b> Today the ceiling is empty. Here, a room sensor sits over the bed.");
+  ST.ghost=true;await wipe(.5,1600);if(ep!==EPOCH)return;$("tlSensCmp").hidden=false;await wait(4200);if(ep!==EPOCH)return;
+  await new Promise(res=>{ST.gate=res;hwOpen("sensor",{story:true})});if(ep!==EPOCH)return;
+  $("tlSensCmp").hidden=true;$("tl").classList.remove("sensm");CMP.xray=true;setHL("F",v.hl);nowL("<b>Recording.</b> The light ring is on, and Maria can say “pause recording” any time.");
+  await wipe(0,1000);if(ep!==EPOCH)return;cPlace("T",v.spot);await Promise.all([flyIn("F",v.spot,2000),zTo(1,2000)]);ST.sensZ=false;ST.ghost=false}
 function legDur(a,b){const p=pathTo(a,b);let L=0;for(let i=1;i<p.length;i++)L+=p[i].distanceTo(p[i-1]);return Math.max(2400,Math.min(6500,L/3.2*1000))}
 function frameWalk(walks,hl){let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;const add=(x,z)=>{x0=Math.min(x0,x);x1=Math.max(x1,x);z0=Math.min(z0,z);z1=Math.max(z1,z)};
   for(const [a,b] of walks)for(const k of [a,b]){const q=P3[k];if(q)add(q[0],q[1]);if(doorX[k]!=null)add(doorX[k],4.5)}
@@ -2936,19 +2988,19 @@ function go(k,animate=true){if(k<0||k>=SEQ.length)return;EPOCH++;ST.busy=false;h
   if(!animate||["home","R","hosp"].includes(SEQ[k].a)){snap(k);return}
   if(ST.k!==k-1)snap(k-1);
   document.body.classList.remove("athome");$("tlOver").hidden=true;play(k)}
-function next(){if(ST.busy){EPOCH++;snap(ST.k);return}if(ST.k<SEQ.length-1)go(ST.k+1)}
+function next(){if(ST.gate){hwClose();return}if(ST.busy){EPOCH++;snap(ST.k);return}if(ST.k<SEQ.length-1)go(ST.k+1)}
 function back(){if(ST.k>0){EPOCH++;hwClose();snap(ST.k-1)}}
 $("tlNext").onclick=next;$("tlBack").onclick=back;
 addEventListener("keydown",e=>{if(!ST.on||e.target.closest&&e.target.closest("input,textarea"))return;
   if(e.key==="Escape"){if(!$("tlHw").hidden){hwClose();return}if(!$("tlPop").hidden){closeThing();return}if(ST.street||ST.drop)streetToggle();return}
-  if(!$("tlHw").hidden)return;
+  if(!$("tlHw").hidden){if(ST.gate&&["ArrowRight","PageDown"].includes(e.key)){e.preventDefault();hwClose()}return}
   const kk=e.key.length===1?e.key.toLowerCase():"";if(ST.street&&kk&&"wasdqe".includes(kk)){SV.keys[kk]=true;e.preventDefault();return}
   if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){if((e.key==="Enter"||e.key===" ")&&e.target.tagName==="BUTTON")return;e.preventDefault();if(SEQ[ST.k].a==="home")go(1);else next()}
   else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();back()}});
 
 addEventListener("keyup",e=>{if(e.key.length===1)SV.keys[e.key.toLowerCase()]=false});
 addEventListener("blur",()=>{SV.keys={}});
-if(location.hash==="#tltest")window.__tl={go,snap,ST,SEQ,CMP,hwOpen,BEATS,aim,floorAt};
+if(location.hash==="#tltest")window.__tl={go,snap,ST,SEQ,CMP,hwOpen,hwClose,HV,BEATS,aim,floorAt};
 function startTale(){EPOCH++;fullOff();hideCard();if(CMP.on)stopCompare();document.body.classList.add("playing","telling");$("tl").hidden=false;
   ST.on=true;CMP.on=true;sensor2.visible=false;robot.visible=false;tote.visible=false;pod.visible=false;cone2.visible=false;drawDisplay(4,2);
   podItems.forEach(b=>ovPod.remove(b));podItems.length=0;CMP.doorT=CMP.door=0;CMP.kit=false;CMP.vm="";doorParts.forEach(o=>o.visible=false);snap(0)}
