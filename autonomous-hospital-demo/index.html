@@ -723,6 +723,14 @@ body.telling #vig{box-shadow:none!important}
 @media (max-width:760px){.tl-senscmp{top:24%}.tl.sensm .tl-vb{opacity:0}.tl-senscmp>div{max-width:44vw;font-size:12px;padding:8px 10px}.hwst .cap li{grid-template-columns:90px 1fr}}
 .tl-list{transition:opacity .5s}.tl.sensm .tl-list{opacity:0;pointer-events:none}
 .hwbox.hwstory #hwD{display:none}.hwst .cap{background:none;border:0;padding:0}
+
+.tl-sensbtn{position:absolute;left:12px;top:calc(112px + env(safe-area-inset-top,0px));z-index:15;display:flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:12px 20px 12px 14px;background:#e5484d;color:#fff;font:800 15px var(--f-body);letter-spacing:.01em;cursor:pointer;box-shadow:0 6px 18px rgba(229,72,77,.45);animation:sensPulse 1.6s ease-out infinite}
+.tl-sensbtn[hidden]{display:none}
+.tl-sensbtn i{width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 4px #e5484d,0 0 0 2px #fff}
+.tl-sensbtn:hover{background:#f0575c;transform:translateY(-1px)}
+@keyframes sensPulse{0%{box-shadow:0 6px 18px rgba(229,72,77,.45),0 0 0 0 rgba(229,72,77,.7)}70%{box-shadow:0 6px 18px rgba(229,72,77,.45),0 0 0 16px rgba(229,72,77,0)}100%{box-shadow:0 6px 18px rgba(229,72,77,.45),0 0 0 0 rgba(229,72,77,0)}}
+.tl.sensm .tl-sensbtn,.tl[data-act="home"] .tl-sensbtn{display:none}
+@media (max-width:760px){.tl-sensbtn{top:calc(150px + env(safe-area-inset-top,0px));font-size:13px;padding:9px 14px 9px 10px}}
 </style>
 
 <div id="app">
@@ -779,6 +787,7 @@ body.telling #vig{box-shadow:none!important}
     <p class="tl-nowl" id="tlNowL" hidden></p>
     <div class="tl-nav"><button type="button" class="tl-back" id="tlBack" aria-label="Back">←</button><span class="tl-prog" id="tlProg"></span><button type="button" class="tl-next" id="tlNext">Next →</button></div>
   </div>
+  <button type="button" class="tl-sensbtn" id="tlSensBtn" hidden><i aria-hidden="true"></i>See the room sensor up close</button>
   <div class="tl-senscmp" id="tlSensCmp" hidden><div class="t"><b>Today</b>An empty ceiling. Nothing in the room is writing this down.</div><div class="f"><b>Autonomous Hospital</b>A room sensor over every bed. It sees, hears and documents.</div></div>
   <div class="tl-tag t" id="tlTagT">Today</div><div class="tl-tag f" id="tlTagF">Autonomous Hospital</div>
   <div class="tl-scrw" id="tlScr" hidden></div>
@@ -860,6 +869,9 @@ body.telling #vig{box-shadow:none!important}
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+// story clock: runs faster when Next is pressed mid-step, so the nurse finishes her walk instead of jumping
+const VC={t:performance.now(),last:performance.now(),rate:1};
+function vnow(){const n=performance.now();VC.t+=(n-VC.last)*VC.rate;VC.last=n;return VC.t}
 
 /* ================= story data ================= */
 const H = ["Today","First pilot","Connected hospital","Autonomous"];
@@ -1337,8 +1349,8 @@ function trailSeg(a,b,matT,y=.02){const dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,
 const P3={room12:[.7,1.6],room14:[10.3,1.6],supply:[9.75,6.7],med:[5.8,9.3],station:[1.2,8.4],west:[18.6,4.5]};
 const doorX={room12:1.35,room14:10.95,supply:9.6+.1,med:5.6,station:.6,west:18.6};
 function pathTo(a,b){const A=P3[a],B=P3[b],ax=doorX[a],bx=doorX[b];return [A,[ax,a.startsWith("room")?3:6],[ax,4.5+(Math.random()-.5)*.6],[bx,4.5+(Math.random()-.5)*.6],[bx,b.startsWith("room")?3:b==="west"?4.5:6],B].map(p=>new THREE.Vector3(p[0],0,p[1]))}
-function animPath(obj,pts,dur,matT,yLift=0){return new Promise(res0=>{const ep=EPOCH,res=v=>{if(ep===EPOCH)res0(v)};const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const d=pts[i].distanceTo(pts[i-1]);segs.push(d);tot+=d}const t0=performance.now();let last=pts[0].clone();
-  (function step(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/dur);let d=k*tot,i=0;while(i<segs.length-1&&d>segs[i]){d-=segs[i];i++}const f=segs[i]?d/segs[i]:1;const p=pts[i].clone().lerp(pts[i+1],f);obj.position.set(p.x,yLift||obj.position.y,p.z);if(matT){trailSeg(last,p,matT,yLift?yLift-.1:.02);last=p.clone()}const dir=pts[i+1].clone().sub(pts[i]);if(dir.lengthSq()>0)obj.rotation.y=Math.atan2(dir.x,dir.z);if(k<1)requestAnimationFrame(step);else res()})(t0)})}
+function animPath(obj,pts,dur,matT,yLift=0){return new Promise(res0=>{const ep=EPOCH,res=v=>{if(ep===EPOCH)res0(v)};const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const d=pts[i].distanceTo(pts[i-1]);segs.push(d);tot+=d}const t0=vnow();let last=pts[0].clone();
+  (function step(now){now=vnow();if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/dur);let d=k*tot,i=0;while(i<segs.length-1&&d>segs[i]){d-=segs[i];i++}const f=segs[i]?d/segs[i]:1;const p=pts[i].clone().lerp(pts[i+1],f);obj.position.set(p.x,yLift||obj.position.y,p.z);if(matT){trailSeg(last,p,matT,yLift?yLift-.1:.02);last=p.clone()}const dir=pts[i+1].clone().sub(pts[i]);if(dir.lengthSq()>0)obj.rotation.y=Math.atan2(dir.x,dir.z);if(k<1)requestAnimationFrame(step);else res()})(t0)})}
 // corridor + service ceiling with light panels (first person only)
 const uCeil=new THREE.Mesh(new THREE.PlaneGeometry(21,8.2),M({color:0xf1f2f0,roughness:.95,side:THREE.DoubleSide}));uCeil.rotation.x=Math.PI/2;uCeil.position.set(7.8,HT,7.05);scene.add(uCeil);OV.ceil.push(uCeil);
 for(let x=-1;x<18;x+=2.6){const lp=box(1.1,.02,.5,M({color:0xffffff,emissive:0xfff6ea,emissiveIntensity:1.5}),x,HT-.01,4.5,0);scene.add(lp);OV.ceil.push(lp);const pl=new THREE.PointLight(0xfff4e6,.9,6,1.6);pl.position.set(x,HT-.3,4.5);scene.add(pl)}
@@ -1720,7 +1732,7 @@ function renderMem(){$("memPop").innerHTML=`<h3>In your head right now</h3>${G.m
 let actx=null,muted=false;
 function beep(kind){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const pat={page:[[1320,.09],[0,.05],[1320,.09],[0,.05],[1320,.09]],call:[[880,.25],[0,.1],[660,.3]],ring:[[440,.4],[480,.4]],ok:[[660,.08],[990,.12]],bad:[[220,.25]]}[kind]||[[600,.1]];let t=actx.currentTime;for(const [f,d] of pat){if(f){const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d+.02)}t+=d}}catch(e){}}
 /* ui helpers */
-const wait=ms=>{const ep=EPOCH;return new Promise(r=>setTimeout(()=>{if(ep===EPOCH)r()},matchMedia("(prefers-reduced-motion: reduce)").matches?Math.min(ms,300):ms))}
+const wait=ms=>{const ep=EPOCH;if(matchMedia("(prefers-reduced-motion: reduce)").matches)ms=Math.min(ms,300);if(!ST.on)return new Promise(r=>setTimeout(()=>{if(ep===EPOCH)r()},ms));const t0=vnow();return new Promise(r=>{(function f(){if(ep!==EPOCH)return;if(vnow()-t0>=ms)r();else requestAnimationFrame(f)})()})}
 function card(o){
   const el=$("gcard");el.hidden=false;
   el.innerHTML=`${o.who?`<div class="who">${o.who}</div>`:""}${o.title?`<h2>${o.title}</h2>`:""}${o.say?`<p class="say ${o.warn?"warn":""}">${o.say}</p>`:""}${o.body||""}<div class="gacts ${o.seq?"seq":""}">${(o.acts||[]).map((a,i)=>`<button type="button" data-i="${i}" class="${a.primary?"primary":""} ${a.done?"done":""}" ${a.disabled?"disabled":""}>${a.label}${a.cost?`<span class="cost">${a.cost}</span>`:""}</button>`).join("")}</div>`;
@@ -2010,8 +2022,8 @@ const CMP={on:false,vm:"bird",div:.5,run:0,door:0,doorT:0,kit:false,pod:false,
   st:{T:{clock:0,trips:0,calls:0,intr:0,head:0},F:{clock:0,trips:0,calls:0,intr:0,head:0}}};
 function camAt(s,pos,look){const c=CMP.cam[s];c.p.set(...pos);const d=new THREE.Vector3(...look).sub(c.p);c.yaw=Math.atan2(-d.x,-d.z);c.pitch=Math.atan2(d.y,Math.hypot(d.x,d.z))}
 function camWalk(s,pts,dur){const c=CMP.cam[s];return new Promise(res0=>{const ep=EPOCH,res=v=>{if(ep===EPOCH)res0(v)};const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const d=pts[i].distanceTo(pts[i-1]);segs.push(d);tot+=d}
-  const t0=performance.now();let pt=t0;{const d0=pts[1].clone().sub(pts[0]);c.yaw=Math.atan2(-d0.x,-d0.z);c.pitch=-.06}
-  (function st(now){if(ep!==EPOCH)return;const dt=Math.min(.1,(now-pt)/1000);pt=now;const k=Math.min(1,(now-t0)/dur);let d=ease(k)*tot,i=0;while(i<segs.length-1&&d>segs[i]){d-=segs[i];i++}
+  const t0=vnow();let pt=t0;{const d0=pts[1].clone().sub(pts[0]);c.yaw=Math.atan2(-d0.x,-d0.z);c.pitch=-.06}
+  (function st(now){now=vnow();if(ep!==EPOCH)return;const dt=Math.min(.1,(now-pt)/1000);pt=now;const k=Math.min(1,(now-t0)/dur);let d=ease(k)*tot,i=0;while(i<segs.length-1&&d>segs[i]){d-=segs[i];i++}
    const f=segs[i]?d/segs[i]:1;const p=pts[i].clone().lerp(pts[i+1],f);c.p.set(p.x,1.6+Math.sin(now/140)*.012,p.z);
    let ah=pts[Math.min(i+1,pts.length-1)];if(segs[i]&&d>segs[i]-.6&&pts[i+2])ah=pts[i+2];const dx=ah.x-p.x,dz=ah.z-p.z;
    if(dx*dx+dz*dz>.0004){let dy=Math.atan2(-dx,-dz)-c.yaw;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;c.yaw+=dy*(1-Math.exp(-dt*7))}c.pitch+=(-.06-c.pitch)*.1;
@@ -2124,9 +2136,9 @@ brainG.add(new THREE.Mesh(new THREE.SphereGeometry(.22,16,12),new THREE.MeshBasi
 for(const id of ["room","rail","cs","dock"]){const a=SP.brain,b=SP[id];const geo=new THREE.BufferGeometry().setFromPoints([a,b]);xrayG.add(new THREE.Line(geo,new THREE.LineDashedMaterial({color:0x4fd1c5,dashSize:.25,gapSize:.18,transparent:true,opacity:.55})).computeLineDistances())}
 const sensEls=SENS.map(s=>{const e=document.createElement("div");e.className="slab"+(s.brain?" brain":"");e.innerHTML=`<i></i><b>${s.t}</b><span>${s.d}</span>`;$("app").appendChild(e);return {e,s,v:SP[s.id]}});
 function flow(ids,label,col=0xbff5ee){const pts=ids.map(i=>SP[i].clone());const m=new THREE.Mesh(new THREE.SphereGeometry(CMP.vm==="bird"?.2:.06,12,8),new THREE.MeshBasicMaterial({color:col}));xrayG.add(m);
-  const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const d=pts[i].distanceTo(pts[i-1]);segs.push(d);tot+=d}const dur=900+tot*90,t0=performance.now();
+  const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const d=pts[i].distanceTo(pts[i-1]);segs.push(d);tot+=d}const dur=900+tot*90,t0=vnow();
   if(label)cPacket(label);
-  return new Promise(res=>{(function st(now){const k=Math.min(1,(now-t0)/dur);let d=ease(k)*tot,i=0;while(i<segs.length-1&&d>segs[i]){d-=segs[i];i++}m.position.copy(pts[i]).lerp(pts[i+1],segs[i]?d/segs[i]:1);
+  return new Promise(res=>{(function st(now){now=vnow();const k=Math.min(1,(now-t0)/dur);let d=ease(k)*tot,i=0;while(i<segs.length-1&&d>segs[i]){d-=segs[i];i++}m.position.copy(pts[i]).lerp(pts[i+1],segs[i]?d/segs[i]:1);
     if(k<1)requestAnimationFrame(st);else{xrayG.remove(m);res()}})(t0)})}
 function cPacket(txt){const el=$("cPkt");el.insertAdjacentHTML("beforeend",`<div class="pkt">${txt}</div>`);const all=el.querySelectorAll(".pkt");if(all.length>3)all[0].remove()}
 function projSens(cam,x0,y0,ww,rh){const bird=CMP.vm==="bird";
@@ -2427,7 +2439,7 @@ $("tlMets").innerHTML=METS.map(([k,l])=>`<div class="tl-met"><small>${l}</small>
 let metNow={walk:0,chart:0,intr:0,head:0};
 function showMets(o,ghost){for(const [k,,f] of METS){const b=$("tlM_"+k);b.textContent=f(o[k]);b.classList.toggle("hot",!ghost&&((k==="head"&&o.head>=9)||(k==="chart"&&o.chart>=60)||(k==="intr"&&o.intr>=15)||(k==="walk"&&o.walk>=2.5)));
   $("tlG_"+k).textContent=ghost?"today "+f(k==="head"?ghost.peak:ghost[k]):""}metNow={...o}}
-function tweenMets(to,ghost,ms){const from={...metNow},ep=EPOCH,t0=performance.now();return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms),o={};for(const [key] of METS)o[key]=key==="head"?(k<.5?from.head:to.head):from[key]+(to[key]-from[key])*k;showMets(o,ghost);if(k<1)requestAnimationFrame(f);else res()})(t0)})}
+function tweenMets(to,ghost,ms){const from={...metNow},ep=EPOCH,t0=vnow();return new Promise(res=>{(function f(now){now=vnow();if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms),o={};for(const [key] of METS)o[key]=key==="head"?(k<.5?from.head:to.head):from[key]+(to[key]-from[key])*k;showMets(o,ghost);if(k<1)requestAnimationFrame(f);else res()})(t0)})}
 
 /* ---------- the list ---------- */
 function itemHTML(time,T,F,state){return `<time>${time}</time><span class="tx">${state==="fx"?`<s>${T}</s><b>${F}</b>`:T}</span>`}
@@ -2566,7 +2578,7 @@ function clearTrails(){while(trailG.children.length)trailG.remove(trailG.childre
 function resetProps(){podItems.forEach(b=>ovPod.remove(b));podItems.length=0;CMP.pod=false;dockBots.forEach((r,k)=>{r.position.set(15.2,0,k?9.4:8);r.rotation.y=-Math.PI/2});callOn=false}
 function setVMs(m){if(CMP.vm!==m||overviewOn!==(m==="bird"))cVM(m);$("tl").dataset.vm=m}
 function setDiv(v){CMP.div=v;$("tl").classList.toggle("split",v>.02&&v<.98)}
-function wipe(to,ms){const from=CMP.div,ep=EPOCH,t0=performance.now();return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms);setDiv(from+(to-from)*ease(k));if(k<1)requestAnimationFrame(f);else{setDiv(to);res()}})(t0)})}
+function wipe(to,ms){const from=CMP.div,ep=EPOCH,t0=vnow();return new Promise(res=>{(function f(now){now=vnow();if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms);setDiv(from+(to-from)*ease(k));if(k<1)requestAnimationFrame(f);else{setDiv(to);res()}})(t0)})}
 function beatView(side,v){setHL(side,v&&v.hl);const f=frameFor(v&&v.hl);ST.home=f;aim(f);showScreen(v&&v.screen)}
 
 /* ---------- caption + nav ---------- */
@@ -2576,7 +2588,8 @@ function setProg(i,n){$("tlProg").innerHTML=Array.from({length:n},(_,j)=>`<i cla
 function nextBtn(label,pulse){const b=$("tlNext");b.textContent=label;b.classList.toggle("pulse",!!pulse);b.hidden=false;b.disabled=false;$("tlSw")&&$("tlSw").remove()}
 
 // draw state k instantly (Back, skipping, and the end of every animated step)
-function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;ST.fly=null;ST.gate=null;ST.ghost=false;$("tl").classList.remove("sensm");$("tlSensCmp").hidden=true;if(ST.sensZ){ST.sensZ=false;ST.fpZ=1}if(s.a==="home")ST.sensorSeen=false;streetOff();setStreetHint(false);nowL("");
+function sensBtn(on){$("tlSensBtn").hidden=!on}
+function snap(k,keepTrails){const s=SEQ[k];sensBtn(s.a==="F"||s.a==="Fmore");ST.k=k;ST.busy=false;ST.queue=false;VC.rate=1;ST.fly=null;ST.gate=null;ST.ghost=false;$("tl").classList.remove("sensm");$("tlSensCmp").hidden=true;if(ST.sensZ){ST.sensZ=false;ST.fpZ=1}if(s.a==="home")ST.sensorSeen=false;streetOff();setStreetHint(false);nowL("");
   if(!keepTrails){liftReset(csLift);liftReset(phLift);armRest();gateBeam.material.opacity=.18}$("tlOver").hidden=true;$("tlOver").className="tl-over";document.body.classList.toggle("athome",s.a==="home");closeThing();
   const n=BEATS.length;
   if(!keepTrails){clearTrails();resetProps();CMP.kit=false;
@@ -2596,7 +2609,7 @@ function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;ST.fly=null;ST.g
     setVMs(v&&v.view==="fp"?"fp":"bird");placeAv("F",spotAt("F",i));if(v&&v.view==="fp")cPlace("F",v.spot);
     if(!keepTrails){buildList("F",i);beatView("F",v)}const li=$("tlItems").querySelector(`li[data-i="${Math.min(i,n-1)}"]`);tlScroll(s.a==="F"?li:$("tlItems").lastElementChild);
     showMets(s.a==="F"?sumM("F",i,9):TOT_F,TOT_T);
-    if(s.a==="F"){setCap(BEATS[i].tF||BEATS[i].t,v.line);setProg(i,n+1);nextBtn("Next →");if(v.view==="fp"&&v.spot==="roomwide")nowL("<b>Tap the ceiling sensor</b> any time to see it up close")}
+    if(s.a==="F"){setCap(BEATS[i].tF||BEATS[i].t,v.line);setProg(i,n+1);nextBtn("Next →");if(v.view==="fp"&&v.spot==="roomwide")nowL("<b>Tap the red button</b> or the ceiling sensor any time to see it up close")}
     else{setCap("19:05","The rest of the list changes too. The hospital does the walking, the remembering and the chasing. You do the nursing.");setProg(n,n+1);nextBtn("See the difference →",true)}
     return}
   showScreen(null);
@@ -2705,10 +2718,10 @@ box(.12,.05,2.1,mat.steel,16.8,HT-.03,7.45,.01,railC);box(.12,.05,3.9,mat.steel,
 box(.28,.012,.34,mat.black,2.2,2.205,-1.35,0,railG);
 function armRest(){sceneArm.t.set(.2,1.35,.45);armIK(sceneArm,sceneArm.t)}armRest();
 const toLocal=(A,p)=>new THREE.Vector3(p.x-A.root.position.x,p.y,p.z-A.root.position.z);
-function armTo(A,P,ms,arc=0,carry){const from=A.t.clone(),to=P.clone(),ep=EPOCH,t0=performance.now();
-  return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms),e=ease(k);A.t.lerpVectors(from,to,e);A.t.y+=Math.sin(Math.PI*e)*arc;armIK(A,A.t);
+function armTo(A,P,ms,arc=0,carry){const from=A.t.clone(),to=P.clone(),ep=EPOCH,t0=vnow();
+  return new Promise(res=>{(function f(now){now=vnow();if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms),e=ease(k);A.t.lerpVectors(from,to,e);A.t.y+=Math.sin(Math.PI*e)*arc;armIK(A,A.t);
     if(carry){A.tip.getWorldPosition(carry.position);carry.position.y-=.05}if(k<1)requestAnimationFrame(f);else res()})(t0)})}
-function tween1(ms,fn){const ep=EPOCH,t0=performance.now();return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms);fn(ease(k),k);if(k<1)requestAnimationFrame(f);else res()})(t0)})}
+function tween1(ms,fn){const ep=EPOCH,t0=vnow();return new Promise(res=>{(function f(now){now=vnow();if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms);fn(ease(k),k);if(k<1)requestAnimationFrame(f);else res()})(t0)})}
 function nowL(t){const e=$("tlNowL");if(!e)return;e.innerHTML=t||"";e.hidden=!t;if(t){e.classList.remove("tlpop");void e.offsetWidth;e.classList.add("tlpop")}}
 // the overnight pick for Maria's kit: arm → scan gate → tote → lift → rail
 const KIT_PICK=[["Silicone foam border",1,1,0xcdeeea],["Saline 100 mL",2,2,0xeaf6ff],["Gauze 4 × 4",1,3,0xf6f7f5]];
@@ -2935,8 +2948,9 @@ async function play(k){const s=SEQ[k],n=BEATS.length;ST.k=k;ST.busy=true;const e
   else if(s.a==="Fmore"){setCap("19:05","The rest of the list changes too.");setProg(n,n+1);beatView("F",null);const lis=[...$("tlItems").querySelectorAll("li.more")];
     for(let j=0;j<lis.length;j++){flipItem(lis[j],MORE[j][1]);await wait(300);if(ep!==EPOCH)return}}
   else if(s.a==="sum"){setAct("sum");showScreen(null);setHL("F",[]);aim(frameFor([]));await wipe(.5,1400);if(ep!==EPOCH)return}
-  if(ep===EPOCH)snap(k,true)}
-async function playF(k){const s=SEQ[k],b=BEATS[s.i],v=b.F,n=BEATS.length,ep=EPOCH;ST.busy=true;
+  if(ep===EPOCH)stepDone(k)}
+function stepDone(k){const q=ST.queue;snap(k,true);if(q&&k<SEQ.length-1)go(k+1)}
+async function playF(k){const s=SEQ[k],b=BEATS[s.i],v=b.F,n=BEATS.length,ep=EPOCH;ST.busy=true;sensBtn(true);
   setAct("F");setCap(b.tF||b.t,v.line);setProg(s.i,n+1);nextBtn("Next →");ST.labs=v.labs||["brain"];CMP.xray=true;
   const fp=v.view==="fp",walks=v.walk||[],stay=fp&&!walks.length&&CMP.vm==="fp";
   if(stay)cPlace("F",v.spot);else{if(CMP.vm==="fp")dip();setVMs("bird")}beatView("F",v);if(fp&&walks.length)aim(frameWalk(walks,v.hl));
@@ -2954,7 +2968,7 @@ async function playF(k){const s=SEQ[k],b=BEATS[s.i],v=b.F,n=BEATS.length,ep=EPOC
     if(v.sensor&&!ST.sensorSeen&&ep===EPOCH)await sensorMoment(ep,v)})();jobs.push(walkP);
   if(v.flow)jobs.push((async()=>{if(v.sensor)await walkP;if(ep!==EPOCH)return;for(const f of v.flow){await flow(f)}})());
   if(v.robot){const r=dockBots[0];const go2=pathTo("dock","room12");go2[go2.length-1].set(1.2,0,1.9);jobs.push(animPath(r,go2,4200,TRAIL.future))}
-  await Promise.all(jobs);if(ep!==EPOCH)return;await wait(300);if(ep===EPOCH){snap(k,true)}}
+  await Promise.all(jobs);if(ep!==EPOCH)return;await wait(300);if(ep===EPOCH)stepDone(k)}
 
 const FLY=2800;
 {const r=new THREE.Mesh(new THREE.TorusGeometry(.085,.006,8,48),new THREE.MeshBasicMaterial({color:0x4fd1c5}));r.rotation.x=Math.PI/2;r.position.set(-.1,HT-.021,-1.25);sensorG.add(r)}
@@ -2969,10 +2983,10 @@ async function sensorMoment(ep,v){ST.sensorSeen=true;ST.sensZ=true;CMP.xray=fals
   cPlace("T","sensorUp");await Promise.all([flyIn("F","sensorUp",2600),zTo(.5,2600)]);if(ep!==EPOCH)return;await wait(500);if(ep!==EPOCH)return;
   nowL("<b>Same room, same moment.</b> Today the ceiling is empty. Here, a room sensor sits over the bed.");
   ST.ghost=true;await wipe(.5,1600);if(ep!==EPOCH)return;$("tlSensCmp").hidden=false;await wait(4200);if(ep!==EPOCH)return;
-  await new Promise(res=>{ST.gate=res;hwOpen("sensor",{story:true})});if(ep!==EPOCH)return;
+  ST.queue=false;VC.rate=1;nextBtn("Next →");await new Promise(res=>{ST.gate=res;hwOpen("sensor",{story:true})});if(ep!==EPOCH)return;
   $("tlSensCmp").hidden=true;$("tl").classList.remove("sensm");CMP.xray=true;setHL("F",v.hl);nowL("<b>Recording.</b> The light ring is on, and Maria can say “pause recording” any time.");
   await wipe(0,1000);if(ep!==EPOCH)return;cPlace("T",v.spot);await Promise.all([flyIn("F",v.spot,2000),zTo(1,2000)]);ST.sensZ=false;ST.ghost=false}
-function legDur(a,b){const p=pathTo(a,b);let L=0;for(let i=1;i<p.length;i++)L+=p[i].distanceTo(p[i-1]);return Math.max(2400,Math.min(6500,L/3.2*1000))}
+function legDur(a,b){const p=pathTo(a,b);let L=0;for(let i=1;i<p.length;i++)L+=p[i].distanceTo(p[i-1]);return Math.max(1300,Math.min(3400,L/6.5*1000))}
 function frameWalk(walks,hl){let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;const add=(x,z)=>{x0=Math.min(x0,x);x1=Math.max(x1,x);z0=Math.min(z0,z);z1=Math.max(z1,z)};
   for(const [a,b] of walks)for(const k of [a,b]){const q=P3[k];if(q)add(q[0],q[1]);if(doorX[k]!=null)add(doorX[k],4.5)}
   for(const id of hl||[]){const B=THINGS[id]&&THINGS[id].b;if(B){add(B[0]-B[3]/2,B[2]-B[5]/2);add(B[0]+B[3]/2,B[2]+B[5]/2)}}
@@ -2988,9 +3002,10 @@ function go(k,animate=true){if(k<0||k>=SEQ.length)return;EPOCH++;ST.busy=false;h
   if(!animate||["home","R","hosp"].includes(SEQ[k].a)){snap(k);return}
   if(ST.k!==k-1)snap(k-1);
   document.body.classList.remove("athome");$("tlOver").hidden=true;play(k)}
-function next(){if(ST.gate){hwClose();return}if(ST.busy){EPOCH++;snap(ST.k);return}if(ST.k<SEQ.length-1)go(ST.k+1)}
+// Next mid-step never teleports: it speeds the step up so the nurse finishes where she was going, then moves on
+function next(){if(ST.gate){hwClose();return}if(ST.busy){if(!ST.queue){ST.queue=true;VC.rate=4;const b=$("tlNext");b.textContent="Finishing…";b.classList.remove("pulse")}else VC.rate=Math.min(16,VC.rate*2);return}if(ST.k<SEQ.length-1)go(ST.k+1)}
 function back(){if(ST.k>0){EPOCH++;hwClose();snap(ST.k-1)}}
-$("tlNext").onclick=next;$("tlBack").onclick=back;
+$("tlNext").onclick=next;$("tlSensBtn").onclick=()=>{closeThing();hwOpen("sensor")};$("tlBack").onclick=back;
 addEventListener("keydown",e=>{if(!ST.on||e.target.closest&&e.target.closest("input,textarea"))return;
   if(e.key==="Escape"){if(!$("tlHw").hidden){hwClose();return}if(!$("tlPop").hidden){closeThing();return}if(ST.street||ST.drop)streetToggle();return}
   if(!$("tlHw").hidden){if(ST.gate&&["ArrowRight","PageDown"].includes(e.key)){e.preventDefault();hwClose()}return}
@@ -3000,7 +3015,7 @@ addEventListener("keydown",e=>{if(!ST.on||e.target.closest&&e.target.closest("in
 
 addEventListener("keyup",e=>{if(e.key.length===1)SV.keys[e.key.toLowerCase()]=false});
 addEventListener("blur",()=>{SV.keys={}});
-if(location.hash==="#tltest")window.__tl={go,snap,ST,SEQ,CMP,hwOpen,hwClose,HV,BEATS,aim,floorAt};
+if(location.hash==="#tltest")window.__tl={go,snap,next,ST,SEQ,CMP,hwOpen,hwClose,HV,BEATS,aim,floorAt,VC,av:()=>[avatar.position.x,avatar.position.z].map(v=>+v.toFixed(2))};
 function startTale(){EPOCH++;fullOff();hideCard();if(CMP.on)stopCompare();document.body.classList.add("playing","telling");$("tl").hidden=false;
   ST.on=true;CMP.on=true;sensor2.visible=false;robot.visible=false;tote.visible=false;pod.visible=false;cone2.visible=false;drawDisplay(4,2);
   podItems.forEach(b=>ovPod.remove(b));podItems.length=0;CMP.doorT=CMP.door=0;CMP.kit=false;CMP.vm="";doorParts.forEach(o=>o.visible=false);snap(0)}
