@@ -6,7 +6,7 @@ A presenter-led, single-file 3D demo (Three.js from a CDN, no build step).
 2. **Autonomous Hospital:** the same day replayed with the verifier layer, the new handoff and the five admin metrics.
 3. **Roadmap:** Pilot, then steps 2, 3 and 4.
 
-Use → / Space to advance, ← to go back, scroll to zoom, and click anything for an explanation.
+Use → / Space to advance, ← to go back, scroll to zoom, and click anything for an explanation. Future-side devices have a **See the hardware** button with a 3D close-up you can turn and take apart. **Street view** (top right) lets you drop in anywhere and walk around: click the floor to walk, drag to look, W A S D to move, Esc for the map.
 
 Fictional nurse and patients. Numbers are illustrative; clinicians make every clinical call.
 

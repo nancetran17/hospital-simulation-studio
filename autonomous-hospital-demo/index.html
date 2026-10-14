@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A Day on 4B</title>
 </head><body>
-
+<title>A Day on 4B</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -602,8 +602,39 @@ body.telling #vig{box-shadow:none!important}
 /* highlights, zoom, popups, screens */
 .tl-hlab{position:absolute;left:0;top:0;z-index:3;display:none;font:700 11.5px var(--f-body);padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;border:0}
 .tl-hlab.t{background:#ef7d4a;color:#24120a}.tl-hlab.f{background:#4fd1c5;color:#06201d}
-.tl-fit{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:calc(min(330px,30vw) + 24px);border:1px solid var(--line);background:rgba(14,22,26,.8);color:var(--ink);border-radius:10px;padding:8px 12px;font:600 13px var(--f-body);cursor:pointer}
-.tl[data-act="home"] .tl-fit,.tl[data-act="hosp"] .tl-fit{display:none}
+.tl-vb{position:absolute;top:calc(82px + env(safe-area-inset-top,0px));right:calc(min(330px,30vw) + 24px);display:flex;gap:6px}
+.tl-fit,.tl-sv{border:1px solid var(--line);background:rgba(14,22,26,.8);color:var(--ink);border-radius:10px;padding:8px 12px;font:600 13px var(--f-body);cursor:pointer}
+.tl-sv[aria-pressed="true"],.tl.drop .tl-sv{background:#4fd1c5;color:#06201d;border-color:#4fd1c5}
+.tl[data-act="home"] .tl-vb,.tl[data-act="hosp"] .tl-vb{display:none}
+.tl-svhint{position:absolute;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:7;background:rgba(14,22,26,.9);border:1px solid #4fd1c5;color:var(--ink);font:500 13px var(--f-body);padding:8px 14px;border-radius:999px;white-space:nowrap;pointer-events:none}
+.tl-svhint kbd{font:600 11px var(--f-mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin:0 1px;background:rgba(255,255,255,.08)}
+.tl.street .tl-scrw,.tl.drop .tl-scrw,.tl.street .tl-over{display:none}.tl.street .tl-list{opacity:.35}.tl.street .tl-list:hover{opacity:1}
+.tl-dip{position:absolute;inset:0;z-index:4;background:#0b1316;opacity:0;pointer-events:none}
+.tl-dip.on{animation:tldip .6s ease}
+@keyframes tldip{0%{opacity:0}40%{opacity:.85}100%{opacity:0}}
+.tl-nowl{margin:2px 0 0;font:500 13px var(--f-body);color:#bff5ee}.tl-nowl b{color:#4fd1c5;font-weight:700;margin-right:4px}
+.tl-pop .acts{display:flex;flex-wrap:wrap;gap:6px}
+.tl-pop .acts .hwb{background:#4fd1c5;color:#06201d;border-color:#4fd1c5}
+.tl-hw{position:absolute;inset:0;z-index:20;background:rgba(5,10,12,.66);display:grid;place-items:center;padding:16px}
+.tl-hw[hidden]{display:none}
+.hwbox{position:relative;width:min(1180px,100%);height:min(720px,100%);display:grid;grid-template-columns:1fr minmax(260px,330px);overflow:hidden;border-top:3px solid var(--f)}
+.hwbox .x{position:absolute;right:10px;top:6px;z-index:3;border:0;background:none;color:var(--muted);font-size:26px;cursor:pointer}
+.hwv{position:relative;min-height:0;background:radial-gradient(ellipse at 50% 45%,#24363d 0%,#101a1e 70%)}
+.hwv canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
+.hwv svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;fill:#4fd1c5;stroke:#4fd1c5;stroke-width:1.2}
+#hwLabs{position:absolute;inset:0;pointer-events:none}
+.hwl{position:absolute;left:0;top:0;display:grid;gap:1px;line-height:1.25}
+.hwl b{font:700 13px var(--f-body);color:#e9f7f5}.hwl small{font-size:11.5px;color:#a9bfc2}
+.hwhint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted)}
+.hwt{padding:20px 18px 16px;display:flex;flex-direction:column;gap:8px;overflow:auto}
+.hwt .k{font:700 11px var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--f)}
+.hwt h3{font-size:22px;margin:0}.hwt small{color:var(--muted);font-size:12.5px}
+.hwt p{margin:0;font-size:14.5px;line-height:1.5}.hwt ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:13.5px;line-height:1.4}
+.hwt .like{font-size:13px;color:#bff5ee;border-left:3px solid var(--f);padding-left:10px}
+.hwacts{display:flex;gap:6px;margin-top:auto;padding-top:8px}
+.hwacts button{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:8px;padding:8px 12px;font:600 13px var(--f-body);cursor:pointer}
+.hwacts button[aria-pressed="true"]{border-color:#4fd1c5;color:#4fd1c5}
+@media (max-width:760px){.hwbox{grid-template-columns:1fr;grid-template-rows:minmax(240px,45%) 1fr}.tl-svhint{white-space:normal;width:calc(100% - 32px);text-align:center;border-radius:12px}}
 .tl-tip{position:absolute;left:0;top:0;z-index:8;pointer-events:none;background:rgba(14,22,26,.92);color:var(--ink);font:600 12px var(--f-body);padding:4px 8px;border-radius:6px;border:1px solid var(--line)}
 .tl-pop{position:absolute;z-index:8;right:calc(min(330px,30vw) + 24px);top:calc(108px + env(safe-area-inset-top,0px));width:min(340px,calc(100% - 24px));padding:14px 16px;display:grid;gap:8px;max-height:calc(100% - 200px);overflow:auto;border-top:3px solid var(--t)}
 .tl-pop.f{border-top-color:var(--f)}
@@ -668,7 +699,7 @@ body.telling #vig{box-shadow:none!important}
 .fine2{font-size:12px!important;color:var(--muted)!important}
 .tl-hm{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.04);border-radius:8px;padding:7px 10px}.tl-hm b{color:var(--f)}
 @media (max-width:760px){
- .tl-fit{top:auto;right:12px;bottom:calc(176px + 26vh + 18px);padding:6px 10px;font-size:12px}
+ .tl-vb{top:auto;right:12px;bottom:calc(176px + 26vh + 18px)}.tl-fit,.tl-sv{padding:6px 10px;font-size:12px}
  .tl-scrw{left:8px;right:8px;width:auto;top:calc(100px + env(safe-area-inset-top,0px));max-height:calc(100% - 100px - 176px - 26vh)}
  .tl-pop{top:calc(100px + env(safe-area-inset-top,0px));max-height:50%}
  .hg{grid-template-columns:repeat(2,1fr)}.hd{grid-template-columns:1fr}
@@ -728,12 +759,21 @@ body.telling #vig{box-shadow:none!important}
   <div class="tl-cap glass" id="tlCap">
     <div class="tl-when"><b id="tlTime">07:00</b><small id="tlAct">Today</small></div>
     <p class="tl-line" id="tlLine"></p>
+    <p class="tl-nowl" id="tlNowL" hidden></p>
     <div class="tl-nav"><button type="button" class="tl-back" id="tlBack" aria-label="Back">←</button><span class="tl-prog" id="tlProg"></span><button type="button" class="tl-next" id="tlNext">Next →</button></div>
   </div>
   <div class="tl-tag t" id="tlTagT">Today</div><div class="tl-tag f" id="tlTagF">Autonomous Hospital</div>
   <div class="tl-scrw" id="tlScr" hidden></div>
   <div class="tl-pop glass" id="tlPop" hidden></div><div class="tl-tip" id="tlTip" hidden></div>
-  <button type="button" class="tl-fit" id="tlFit" title="Reset the view">⤢ Reset view</button>
+  <div class="tl-vb"><button type="button" class="tl-sv" id="tlStreet" aria-pressed="false" title="Stand anywhere and look around">🚶 Street view</button><button type="button" class="tl-fit" id="tlFit" title="Reset the view">⤢ Reset view</button></div>
+  <div class="tl-svhint" id="tlSvHint" hidden></div>
+  <div class="tl-dip" id="tlDip"></div>
+  <div class="tl-hw" id="tlHw" hidden><div class="hwbox glass" role="dialog" aria-modal="true" aria-labelledby="hwN">
+    <button type="button" class="x" id="hwX" aria-label="Close">×</button>
+    <div class="hwv" id="hwV"><canvas id="hwC"></canvas><svg id="hwSvg" aria-hidden="true"></svg><div id="hwLabs"></div><small class="hwhint">Drag to turn it · scroll to zoom</small></div>
+    <div class="hwt"><div class="k">The hardware</div><h3 id="hwN"></h3><small id="hwSz"></small><p id="hwD"></p><ul id="hwS"></ul><p class="like" id="hwLike"></p>
+      <div class="hwacts"><button type="button" id="hwEx" aria-pressed="false">Take it apart</button><button type="button" id="hwLab" aria-pressed="true">Labels</button></div></div>
+  </div></div>
   <div class="tl-over" id="tlOver" hidden></div>
   <div class="tl-fine">Fictional nurse and patients. Illustrative numbers; the pilot measures the real ones. Clinicians make every clinical call.</div>
 </div>
@@ -1962,7 +2002,7 @@ function cTick(s,to,ms){return new Promise(res0=>{const ep=EPOCH,res=v=>{if(ep==
 function cCap(s,kind,txt){const el=$("cCapF");const caps=el.querySelectorAll(".cap");if(caps.length>=4)caps[0].remove();el.insertAdjacentHTML("beforeend",`<div class="cap"><span class="src ${kind}">${kind}</span>${txt}</div>`)}
 function chk(id){if(id!==CMP.run)throw "stale"}
 
-function setSide(s){const F=s==="F",B=CMP.vm==="bird";
+function setSide(s){const F=s==="F",B=CMP.vm==="bird"||!!(ST.on&&ST.fly&&ST.fly.k<.8);
   todayStuff.visible=!F;callLight.visible=!F;avatar.visible=B&&!F;avatarF.visible=B&&F;
   sensorG.visible=F;cone.visible=F&&CMP.xray;xrayG.visible=F&&CMP.xray;disp.visible=F;railG.visible=F;ledStrip.visible=badgeLed.visible=F;kitG.visible=F&&CMP.kit;ovPod.visible=F&&CMP.pod;dockBots.forEach(r=>r.visible=F);stSide(F);
   for(const c of trailG.children)c.visible=(c.material===TRAIL.future)===F;
@@ -1976,7 +2016,7 @@ function cmpRender(){const w=canvas.clientWidth,hh=canvas.clientHeight,vert=!ST.
     if(CMP.vm==="bird"&&ST.on){const k=Math.max(1,.62/a)**.5;stBird(camF2,k);camF2.fov=Math.min(82,2*Math.atan(Math.tan(CBIRD.hf/2)/a)*180/Math.PI)}
     else if(CMP.vm==="bird"){const k=Math.max(1,.62/a)**.5;camF2.position.set(CBIRD.look[0]+(CBIRD.pos[0]-CBIRD.look[0])*k,CBIRD.look[1]+(CBIRD.pos[1]-CBIRD.look[1])*k,CBIRD.look[2]+(CBIRD.pos[2]-CBIRD.look[2])*k);camF2.lookAt(...CBIRD.look);
       camF2.fov=Math.min(82,2*Math.atan(Math.tan(CBIRD.hf/2)/a)*180/Math.PI)}
-    else{const c=CMP.cam[s];camF2.position.copy(c.p);camF2.rotation.set(c.pitch,c.yaw,0,"YXZ");camF2.fov=(a<.8?78:66)*(ST.on?(ST.fpZ||1):1)}
+    else{const c=CMP.cam[s];camF2.position.copy(c.p);camF2.rotation.set(c.pitch,c.yaw,0,"YXZ");camF2.fov=(a<.8?78:66)*(ST.on?(ST.fpZ||1):1);if(ST.on&&ST.fly&&ST.fly.s===s)flyBlend(camF2)}
     camF2.aspect=a;camF2.updateProjectionMatrix();
     if(ww>=2&&rh>=2){setSide(s);renderer.setViewport(x0,hh-y0-rh,ww,rh);renderer.setScissor(x0,hh-y0-rh,ww,rh);renderer.render(scene,camF2)}
     if(s==="F")projSens(camF2,x0,y0,ww,rh);if(ST.on)stStore(s,camF2,x0,y0,ww,rh);
@@ -2276,10 +2316,10 @@ const BEATS=[
   F:{hl:["station"],screen:"plan",line:"Before you go in, you open Maria's plan in the verifier. It checks the plan against her chart, her labs and her bed sensor. It catches the adhesive allergy and suggests a silicone dressing. You approve the change.",item:"Check Maria's plan in the verifier. One problem caught.",m:{chart:3,head:1},labs:["room","brain"],flow:[["room","brain","station"]]}},
  {t:"08:00",ph:3,
   T:{hl:["medroom","room14"],walk:[["station","med"],["med","room14"]],line:"08:00 meds for five patients. Pull from the Pyxis, scan, give. Then back to the med room for the insulin you couldn't pull early.",item:"Med pass, with two trips to the med room",beep:"page",m:{walk:.9,intr:3,head:8}},
-  F:{hl:["rail","room14"],walk:[["station","room14"]],line:"Scheduled meds came up from pharmacy on the rail and are waiting in each room's locked drawer. You scan the patient, scan the med and give it.",item:"Give meds that are already in the room",m:{walk:.3,intr:1,head:1},labs:["rail","brain"],pod:[[6.2,8.4],[6.2,4.5],[10.95,4.5],[10.95,-1.35]]}},
+  F:{hl:["rail","room14"],walk:[["station","room14"]],line:"Scheduled meds came up from pharmacy on the rail overnight and are waiting in each room's locked drawer. You scan the patient, scan the med and give it.",item:"Give meds that are already in the room",m:{walk:.3,intr:1,head:1},labs:["rail","brain"],pod:[[6.2,8.4],[6.2,4.5],[10.95,4.5],[10.95,-1.35]]}},
  {t:"09:10",ph:1,
   T:{hl:["supplyroom"],walk:[["room14","supply"]],line:"Time for Maria's dressing. You stop at the supply room for a silicone border. The bin is empty.",item:"Supply room for the right dressing. Bin's empty.",beep:"bad",m:{walk:.4,intr:1,head:9}},
-  F:{hl:["wall","dock","rail"],walk:[["room14","room12"]],line:"Maria's kit was picked overnight from her plan: silicone border, not the foam. It rode the rail into her supply wall, and the wall checked every item's tag.",item:"Maria's kit is already in her room",m:{walk:.1,head:1},labs:["cs","rail","brain"],pod:[[16.8,6.4],[16.8,4.5],[1.9,4.5],[1.9,-1.35]],kit:true}},
+  F:{hl:["wall","dock","rail"],walk:[["room14","room12"]],line:"Overnight, a robot arm in central supply picked Maria's kit from her plan: silicone border, not the foam. Every item was scanned on its way into her tote. The tote rode the rail into her supply wall, which checked each tag again.",item:"Maria's kit is already in her room",m:{walk:.1,head:1},labs:["cs","rail","brain"],pod:[[16.8,8.45],[16.8,4.5],[1.9,4.5],[1.9,-1.35]],kit:true}},
  {t:"09:25",ph:1,
   T:{hl:["supplyroom"],line:"You call 5 West and central supply to borrow one. On hold for twelve minutes. Pharmacy pages you about another patient's insulin while you wait.",item:"Call around to borrow one dressing",beep:"ring",m:{intr:3,head:9}},
   F:{hl:["room14"],walk:[["room12","room14"]],line:"No calls to make. You use those fifteen minutes to get Mr. Chen up to the chair, like PT asked.",item:"Get Mr. Chen up to the chair, like PT asked",m:{walk:.1,head:1},labs:["brain"]}},
@@ -2316,7 +2356,7 @@ const MORE_T={walk:.5,intr:8};
 const PH=[
  {k:"Pilot",n:"Pilot: wound care",f:.25,where:"A few rooms on 4B · the wound dressing change, start to finish",on:"Ceiling camera and mics in each pilot room. The verifier checks the plan before care and your next steps after. The supply team stocks the room's supply wall from the plan. The wound note drafts itself for you to check.",you:"No chart digging, no supply hunt, nothing to memorize. The wound note goes from 30 minutes of typing to a 1-minute check."},
  {k:"Step 2",n:"The whole unit",f:.6,where:"Every room on 4B · handoff, admissions, vitals, requests",on:"Every room senses. The handoff board, admission drafts, vitals trends and patient requests go to the right person.",you:"Most of your charting becomes reading and signing. Handoff happens on the board, not on a brain sheet."},
- {k:"Step 3",n:"The connected hospital",f:.85,where:"Pharmacy, central supply, lab and transport join in",on:"A ceiling rail links pharmacy and central supply to every room. Discharges are lined up when the order lands.",you:"Far fewer trips, no phone tag, and discharges that leave on time."},
+ {k:"Step 3",n:"The connected hospital",f:.85,where:"Pharmacy, central supply, lab and transport join in",on:"A ceiling rail links pharmacy and central supply to every room. A robot arm picks each patient's kit and a scan gate checks every item. Discharges are lined up when the order lands.",you:"Far fewer trips, no phone tag, and discharges that leave on time."},
  {k:"Step 4",n:"Autonomous Hospital",f:1,where:"The hospital moves things so nurses don't have to",on:"Robots take the errands: blankets, water, wheelchairs, restocking.",you:"Your day becomes the one you just watched."}];
 
 /* ---------- the five numbers hospital leaders watch, for unit 4B over one month (32 beds, 30 days) ---------- */
@@ -2391,7 +2431,7 @@ function frameFor(ids){if(!ids||!ids.length)return {look:[...CBIRD.look],k:1};le
   for(const id of ids){const b=THINGS[id]&&THINGS[id].b;if(!b)continue;x0=Math.min(x0,b[0]-b[3]/2);x1=Math.max(x1,b[0]+b[3]/2);z0=Math.min(z0,b[2]-b[5]/2);z1=Math.max(z1,b[2]+b[5]/2)}
   if(x0>x1)return {look:[...CBIRD.look],k:1};const ext=Math.max(x1-x0,(z1-z0)*1.3);return {look:[(x0+x1)/2,0,(z0+z1)/2],k:Math.max(.42,Math.min(1,ext/15+.32))}}
 function aim(c,instant){ST.camT={look:[...c.look],k:c.k};if(instant)ST.cam={look:[...c.look],k:c.k}}
-function stCamTick(){const c=ST.cam,t=ST.camT;for(let i=0;i<3;i++)c.look[i]+=(t.look[i]-c.look[i])*.08;c.k+=(t.k-c.k)*.08}
+function stCamTick(){streetTick();const now=performance.now(),dt=Math.min(.25,(now-(ST.ct||now))/1000);ST.ct=now;const a=1-Math.exp(-dt*5);const c=ST.cam,t=ST.camT;for(let i=0;i<3;i++)c.look[i]+=(t.look[i]-c.look[i])*a;c.k+=(t.k-c.k)*a}
 function stBird(cam,k){const L=ST.cam.look,z=ST.cam.k*k;cam.position.set(L[0]+OFF.x*z,L[1]+OFF.y*z,L[2]+OFF.z*z);cam.lookAt(L[0],L[1],L[2])}
 function stStore(s,cam,x0,y0,ww,rh){ST.pc[s].copy(cam);ST.rg[s]=[x0,y0,ww,rh];
   for(const l of hlLabs){if(l.side!==s)continue;tmpV.copy(l.v).project(cam);const lx=x0+(tmpV.x*.5+.5)*ww,ly=y0+(-tmpV.y*.5+.5)*rh;
@@ -2401,25 +2441,33 @@ const stRay=new THREE.Raycaster(),stNdc=new THREE.Vector2();
 function rayAt(cx,cy){const R=regionAt(cx,cy);if(!R)return null;stNdc.set(((R.x-R.g[0])/R.g[2])*2-1,-((R.y-R.g[1])/R.g[3])*2+1);stRay.setFromCamera(stNdc,ST.pc[R.s]);return R}
 function groundAt(){const p=new THREE.Vector3();return stRay.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),p)?p:null}
 function thingExists(id,s){const T=THINGS[id];if(!T.s.includes(s))return false;if(s==="F"&&T.p&&ST.phase<T.p)return false;if(id==="brain"&&!(CMP.xray))return false;return true}
-function thingAt(cx,cy){const R=rayAt(cx,cy);if(!R)return null;let best=null,bv=1e9;const box3=new THREE.Box3(),p=new THREE.Vector3();
-  for(const [id,T] of Object.entries(THINGS)){if(!thingExists(id,R.s))continue;const [x,y,z,sx,sy,sz]=T.b;const pad=CMP.vm==="bird"?.15:.03;box3.min.set(x-sx/2-pad,y-sy/2-pad,z-sz/2-pad);box3.max.set(x+sx/2+pad,y+sy/2+pad,z+sz/2+pad);
-    if(stRay.ray.intersectBox(box3,p)){const v=sx*sy*sz;if(v<bv){bv=v;best=id}}}return best?{id:best,s:R.s}:null}
+const BIGT=["room12","room13","room14","room15","station","medroom","supplyroom","dock"];
+function thingAt(cx,cy){const R=rayAt(cx,cy);if(!R)return null;let best=null,bv=1e9,bd=0;const box3=new THREE.Box3(),p=new THREE.Vector3();
+  for(const [id,T] of Object.entries(THINGS)){if(!thingExists(id,R.s)||(ST.street&&BIGT.includes(id)))continue;const [x,y,z,sx,sy,sz]=T.b;const pad=CMP.vm==="bird"?.15:.03;box3.min.set(x-sx/2-pad,y-sy/2-pad,z-sz/2-pad);box3.max.set(x+sx/2+pad,y+sy/2+pad,z+sz/2+pad);
+    if(stRay.ray.intersectBox(box3,p)){const v=sx*sy*sz;if(v<bv){bv=v;best=id;bd=p.distanceTo(stRay.ray.origin)}}}
+  if(best&&ST.street){const h=sceneHit();if(h&&h.distance<bd-.35)return null}return best?{id:best,s:R.s,d:bd}:null}
 let sdrag=null;
 canvas.addEventListener("pointerdown",e=>{if(!ST.on)return;sdrag={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,moved:0,R:regionAt(e.clientX,e.clientY)};canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener("pointermove",e=>{if(!ST.on)return;
+  if(!sdrag&&(ST.drop||ST.street)){const now=performance.now();if(now-(SV.hov||0)>50){SV.hov=now;let g=null;if(ST.drop){const R=rayAt(e.clientX,e.clientY);g=R&&groundAt();if(g&&rgnOf(g.x,g.z)<0)g=null}else if(!thingAt(e.clientX,e.clientY))g=floorAt(e.clientX,e.clientY);
+    ringS.visible=!!g;if(g)ringS.position.set(g.x,.03,g.z);if(ST.drop){canvas.style.cursor=g?"crosshair":"not-allowed";return}}}
   if(!sdrag){const h=thingAt(e.clientX,e.clientY);canvas.style.cursor=h?"pointer":"grab";const tip=$("tlTip");if(h){tip.hidden=false;tip.textContent=THINGS[h.id].n;const r=$("app").getBoundingClientRect();tip.style.transform=`translate(${e.clientX-r.left+14}px,${e.clientY-r.top+14}px)`}else tip.hidden=true;return}
   const dx=e.clientX-sdrag.lx,dy=e.clientY-sdrag.ly;sdrag.lx=e.clientX;sdrag.ly=e.clientY;sdrag.moved+=Math.abs(dx)+Math.abs(dy);if(sdrag.moved<5||!sdrag.R)return;$("tlTip").hidden=true;canvas.style.cursor="grabbing";
   if(CMP.vm==="bird"){const c=ST.pc[sdrag.R.s];const dist=c.position.distanceTo(new THREE.Vector3(...ST.cam.look));const s=2*Math.tan(c.fov*Math.PI/360)*dist/sdrag.R.g[3];
     const f=new THREE.Vector3(OFF.x,0,OFF.z).normalize().negate(),rt=new THREE.Vector3(-f.z,0,f.x);
     for(const L of [ST.cam.look,ST.camT.look]){L[0]+=-rt.x*dx*s+f.x*dy*s*1.5;L[2]+=-rt.z*dx*s+f.z*dy*s*1.5}}
-  else{const c=CMP.cam[sdrag.R.s];c.yaw+=dx*.004;c.pitch=Math.max(-1.1,Math.min(.8,c.pitch+dy*.004))}});
-canvas.addEventListener("pointerup",e=>{if(!ST.on)return;const d=sdrag;sdrag=null;canvas.style.cursor="";if(d&&d.moved<6){const h=thingAt(e.clientX,e.clientY);if(h)openThing(h.id,h.s);else closeThing()}});
+  else{for(const c of ST.street?[CMP.cam.T,CMP.cam.F]:[CMP.cam[sdrag.R.s]]){c.yaw+=dx*.004;c.pitch=Math.max(-1.1,Math.min(.8,c.pitch+dy*.004))}}});
+canvas.addEventListener("pointerup",e=>{if(!ST.on)return;const d=sdrag;sdrag=null;canvas.style.cursor=ST.drop?"crosshair":"";if(!d||d.moved>=6)return;
+  if(ST.drop){const R=rayAt(e.clientX,e.clientY);const G=R&&groundAt();if(G&&rgnOf(G.x,G.z)>=0)streetAt(G.x,G.z,faceFor(G.x,G.z));return}
+  const h=thingAt(e.clientX,e.clientY);if(h){openThing(h.id,h.s);return}closeThing();
+  if(ST.street){const p=floorAt(e.clientX,e.clientY);if(p){const c=CMP.cam.T,r=streetRoute(c.p.x,c.p.z,p.x,p.z);if(r)streetGlide(r)}}});
 canvas.addEventListener("wheel",e=>{if(!ST.on)return;e.preventDefault();const f=Math.exp(e.deltaY*.0012);
-  if(CMP.vm==="bird"){const R=rayAt(e.clientX,e.clientY);const G=R&&groundAt();const nk=Math.max(.16,Math.min(1.35,ST.camT.k*f));const r=nk/ST.camT.k;
+  if(CMP.vm==="bird"){const R=rayAt(e.clientX,e.clientY);const G=R&&groundAt();const nk=Math.max(.08,Math.min(1.35,ST.camT.k*f));const r=nk/ST.camT.k;
     if(G){for(const L of [ST.camT.look]){L[0]=G.x+(L[0]-G.x)*r;L[2]=G.z+(L[2]-G.z)*r}}ST.camT.k=nk}
   else ST.fpZ=Math.max(.45,Math.min(1.2,(ST.fpZ||1)*f))},{passive:false});
 canvas.addEventListener("dblclick",e=>{if(!ST.on||CMP.vm!=="bird")return;const R=rayAt(e.clientX,e.clientY);const G=R&&groundAt();if(G)aim({look:[G.x,0,G.z],k:Math.max(.2,ST.camT.k*.5)})});
-$("tlFit").onclick=()=>{aim(ST.home||frameFor([]));ST.fpZ=1;const s=SEQ[ST.k];if(CMP.vm==="fp"){const v=s.a==="T"?BEATS[s.i].T:s.a==="F"?BEATS[s.i].F:null;if(v&&v.spot)cPlace(s.a,v.spot)}};
+$("tlStreet").onclick=streetToggle;
+$("tlFit").onclick=()=>{if(ST.street){streetToggle();return}if(ST.drop){ST.drop=false;streetUI();setStreetHint(false)}aim(ST.home||frameFor([]));ST.fpZ=1;const s=SEQ[ST.k];if(CMP.vm==="fp"){const v=s.a==="T"?BEATS[s.i].T:s.a==="F"?BEATS[s.i].F:null;if(v&&v.spot)cPlace(s.a,v.spot)}};
 
 /* ---------- click anything: what is it? ---------- */
 function openThing(id,side){const T=THINGS[id];const p=$("tlPop");const fut=side==="F";const txt=fut?T.f:T.t;const other=fut?T.t:T.f;
@@ -2427,7 +2475,8 @@ function openThing(id,side){const T=THINGS[id];const p=$("tlPop");const fut=side
   p.innerHTML=`<button type="button" class="x" aria-label="Close">×</button><div class="k">${fut?"Autonomous Hospital":"Today"}</div><h3>${T.n}</h3>
    <svg viewBox="0 0 240 140" class="dr" aria-hidden="true">${DRAW[T.d]||""}</svg><p>${txt||T.f}</p>
    ${other&&txt?`<p class="o"><b>${fut?"Today":"In the Autonomous Hospital"}:</b> ${other}</p>`:""}
-   <div class="acts">${CMP.vm==="bird"?`<button type="button" id="tlZoom">Zoom in here</button>`:""}</div>`;
+   <div class="acts">${fut&&T.hw?`<button type="button" class="hwb" id="tlHwB">See the hardware ▸</button>`:""}${CMP.vm==="bird"?`<button type="button" id="tlZoom">Zoom in here</button>`:""}</div>`;
+  const hb=$("tlHwB");if(hb)hb.onclick=()=>hwOpen(T.hw);
   p.querySelector(".x").onclick=closeThing;const z=$("tlZoom");if(z)z.onclick=()=>{const b=T.b;aim({look:[b[0],0,b[2]],k:Math.max(.18,Math.min(.6,Math.max(b[3],b[5])/12+.14))})}}
 function closeThing(){$("tlPop").hidden=true}
 
@@ -2476,7 +2525,7 @@ function showScreen(kind){const el=$("tlScr");if(!kind){el.hidden=true;el.innerH
   const sg=$("tlSign");if(sg)sg.onclick=()=>{beep("ok");sg.disabled=true;sg.textContent=kind==="handoff"?"Jordan ✓ signed 07:12":kind==="plan"?"Sent. Kit is being picked.":"Approved by Dr. Patel · 10:02 ✓";sg.classList.add("done")}}
 
 /* ---------- world ---------- */
-function stSide(F){if(!ST.on)return;const p=F?ST.phase:0,B=CMP.vm==="bird";
+function stSide(F){if(!ST.on)return;const p=F?ST.phase:0,B=CMP.vm==="bird"||!!(ST.fly&&ST.fly.k<.8);pickG.visible=F&&p>=3;
   railG.visible=F&&p>=3;dockBots.forEach(r=>r.visible=F&&p>=4);ovPod.visible=F&&CMP.pod&&p>=3;
   roomGlow.forEach((g,i)=>g.visible=F&&B&&ST.glow&&(i===0?p>=1:p>=2));pucks.forEach(o=>o.visible=F&&B&&p>=2);
   avatar.visible=B&&!F&&ST.avT;avatarF.visible=B&&F&&ST.avF;xMarks.forEach(m=>m.g.visible=stLab(m.s.id));hlG.T.visible=!F;hlG.F.visible=F;pulseHL()}
@@ -2486,7 +2535,7 @@ function spotAt(side,i){let at="station";for(let j=0;j<=i&&j<BEATS.length;j++){c
 function drawTrails(side,upto){const mat=side==="T"?TRAIL.today:TRAIL.future;for(let j=0;j<=upto&&j<BEATS.length;j++){const w=BEATS[j][side].walk;if(!w)continue;for(const [a,b] of w){const p=pathTo(a,b);if(b==="room12")p[p.length-1].set(.85,0,-1.2);for(let q=1;q<p.length;q++)trailSeg(p[q-1],p[q],mat)}}}
 function clearTrails(){while(trailG.children.length)trailG.remove(trailG.children[0])}
 function resetProps(){podItems.forEach(b=>ovPod.remove(b));podItems.length=0;CMP.pod=false;dockBots.forEach((r,k)=>{r.position.set(15.2,0,k?9.4:8);r.rotation.y=-Math.PI/2});callOn=false}
-function setVMs(m){if(CMP.vm!==m)cVM(m);$("tl").dataset.vm=m}
+function setVMs(m){if(CMP.vm!==m||overviewOn!==(m==="bird"))cVM(m);$("tl").dataset.vm=m}
 function setDiv(v){CMP.div=v;$("tl").classList.toggle("split",v>.02&&v<.98)}
 function wipe(to,ms){const from=CMP.div,ep=EPOCH,t0=performance.now();return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms);setDiv(from+(to-from)*ease(k));if(k<1)requestAnimationFrame(f);else{setDiv(to);res()}})(t0)})}
 function beatView(side,v){setHL(side,v&&v.hl);const f=frameFor(v&&v.hl);ST.home=f;aim(f);showScreen(v&&v.screen)}
@@ -2498,7 +2547,8 @@ function setProg(i,n){$("tlProg").innerHTML=Array.from({length:n},(_,j)=>`<i cla
 function nextBtn(label,pulse){const b=$("tlNext");b.textContent=label;b.classList.toggle("pulse",!!pulse);b.hidden=false;b.disabled=false;$("tlSw")&&$("tlSw").remove()}
 
 // draw state k instantly (Back, skipping, and the end of every animated step)
-function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;$("tlOver").hidden=true;$("tlOver").className="tl-over";document.body.classList.toggle("athome",s.a==="home");closeThing();
+function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;ST.fly=null;streetOff();setStreetHint(false);nowL("");
+  if(!keepTrails){liftReset(csLift);liftReset(phLift);armRest();gateBeam.material.opacity=.18}$("tlOver").hidden=true;$("tlOver").className="tl-over";document.body.classList.toggle("athome",s.a==="home");closeThing();
   const n=BEATS.length;
   if(!keepTrails){clearTrails();resetProps();CMP.kit=false;
     if(s.a==="T")drawTrails("T",s.i);else if(s.a!=="home")drawTrails("T",n);
@@ -2524,7 +2574,7 @@ function snap(k,keepTrails){const s=SEQ[k];ST.k=k;ST.busy=false;$("tlOver").hidd
   if(s.a==="sum"){setAct("sum");setVMs("bird");setDiv(.5);setHL("T",[]);setHL("F",[]);aim(frameFor([]),!keepTrails);placeAv("T","west");placeAv("F","west");sumCard();return}
   if(s.a==="hosp"){setAct("hosp");setVMs("bird");setDiv(0);setHL("F",["room12","room13","room14","room15"]);aim(frameFor([]),!keepTrails);hospCard();return}
   if(s.a==="R"){const p=s.i+1;setAct("R");setDiv(0);setVMs("bird");ST.phase=p;CMP.xray=true;ST.labs=["room","brain","rail","cs","dock"];placeAv("F","station");setHL("T",[]);
-    setHL("F",p===1?["room12"]:p===2?["room12","room13","room14","room15"]:p===3?["rail","dock","medroom"]:["robots"]);aim(frameFor([]),!keepTrails);
+    setHL("F",p===1?["room12"]:p===2?["room12","room13","room14","room15"]:p===3?["rail","picker","lift","phlift"]:["robots"]);aim(frameFor([]),!keepTrails);
     if(!keepTrails){clearTrails();drawTrails("F",n)}
     buildList("R",0,p);showMets(phaseTot(p),TOT_T);roadCard(s.i);return}
 }
@@ -2568,17 +2618,277 @@ function roadCard(i){const o=$("tlOver");o.hidden=false;o.className="tl-over bot
   o.querySelectorAll(".tl-steps button").forEach(b=>b.onclick=()=>go(SEQ.findIndex(s=>s.a==="R"&&s.i===+b.dataset.j),false));
   $("tlRBack").onclick=()=>back();$("tlRNext").onclick=()=>i<PH.length-1?go(ST.k+1):go(0,false)}
 
+/* ---------- central supply: how a kit gets from a shelf into the tote, and up to the rail ---------- */
+// the old placeholder cabinet in central supply is replaced by real shelves, an arm, a scan gate and a lift
+unitG.children.forEach(o=>{if(Math.abs(o.position.x-16.8)<.01&&Math.abs(o.position.y-1.2)<.01&&Math.abs(o.position.z-7.2)<.01)o.visible=false});
+const csG=new THREE.Group();scene.add(csG); // shelves exist in both worlds
+const RACK={x0:15.4,x1:18.0,z:10.45,ys:[.3,.75,1.2,1.65]};
+for(const y of RACK.ys)box(RACK.x1-RACK.x0,.03,.5,mat.steel,(RACK.x0+RACK.x1)/2,y,RACK.z,0,csG);
+for(const x of [RACK.x0,RACK.x1])for(const z of [RACK.z-.24,RACK.z+.24])cyl(.015,1.85,mat.steel,x,.92,z,csG,6);
+const BIN=[],binCol=[0x2f78b7,0x3f8f5a,0xc9a227,0xb8483e,0x6e7c84,0x8a6bb8];
+RACK.ys.forEach((y,r)=>{for(let k=0;k<6;k++){const x=RACK.x0+.22+k*.43;box(.36,.16,.4,M({color:binCol[(k+r)%6],roughness:.6}),x,y+.1,RACK.z,.02,csG);BIN.push({x,y:y+.2,z:RACK.z-.02,r,k})}});
+const HM={white:M({color:0xf2f4f3,roughness:.35}),matte:M({color:0xe2e7e6,roughness:.75}),dark:M({color:0x1e272b,roughness:.5}),glass:M({color:0x0b1418,roughness:.08,metalness:.4}),
+  lens:M({color:0x16324a,roughness:.05,metalness:.6}),steel:mat.steel,teal:mat.led,red:M({color:0x6a1414,emissive:0x5a0a0a,roughness:.3}),pcb:M({color:0x1f6b3a,roughness:.6}),
+  chip:M({color:0x222829,roughness:.4}),orange:M({color:0xe8a87c,roughness:.9}),cup:M({color:0x2b2f31,roughness:.9}),blue:M({color:0x2f78b7,roughness:.55}),blueD:M({color:0x245f92,roughness:.55}),
+  arm:M({color:0xf0f2f1,roughness:.3}),joint:M({color:0x3a4a50,roughness:.4}),
+  beam:new THREE.MeshBasicMaterial({color:0x4fd1c5,transparent:true,opacity:.18,depthWrite:false,side:THREE.DoubleSide}),
+  curtain:new THREE.MeshBasicMaterial({color:0xff5a4a,transparent:true,opacity:.12,depthWrite:false,side:THREE.DoubleSide})};
+// a six-joint arm with a suction cup. Used in the unit and in the hardware viewer.
+const ARM={L1:.75,L2:.7,SH:.8,TIP:.21};
+function makeArm(parent){const A={root:new THREE.Group()};parent.add(A.root);
+  cyl(.2,.04,HM.joint,0,.02,0,A.root,24);cyl(.15,.6,HM.joint,0,.32,0,A.root,24);
+  A.yaw=new THREE.Group();A.yaw.position.y=.62;A.root.add(A.yaw);cyl(.14,.12,HM.arm,0,.06,0,A.yaw,24);
+  A.sh=new THREE.Group();A.sh.position.y=.18;A.yaw.add(A.sh);cyl(.09,.22,HM.joint,0,0,0,A.sh,20).rotation.z=Math.PI/2;box(.11,.11,ARM.L1,HM.arm,0,0,ARM.L1/2,.04,A.sh);
+  A.el=new THREE.Group();A.el.position.z=ARM.L1;A.sh.add(A.el);cyl(.075,.18,HM.joint,0,0,0,A.el,20).rotation.z=Math.PI/2;box(.09,.09,ARM.L2,HM.arm,0,0,ARM.L2/2,.035,A.el);
+  A.wr=new THREE.Group();A.wr.position.z=ARM.L2;A.el.add(A.wr);cyl(.05,.1,HM.joint,0,-.03,0,A.wr,16);
+  A.cam=box(.05,.035,.045,HM.dark,.06,-.04,0,.01,A.wr);const ln=cyl(.012,.01,HM.lens,.06,-.06,0,A.wr,12);ln.rotation.x=0;
+  cyl(.012,.1,HM.steel,0,-.12,0,A.wr,10);const cup=new THREE.Mesh(new THREE.CylinderGeometry(.036,.02,.035,16),HM.cup);cup.position.y=-.19;A.wr.add(cup);A.cup=cup;
+  A.tip=new THREE.Object3D();A.tip.position.y=-.215;A.wr.add(A.tip);A.t=new THREE.Vector3(0,1.4,.6);armIK(A,A.t);return A}
+function armIK(A,P){const dx=P.x,dz=P.z,r=Math.max(.05,Math.hypot(dx,dz));A.yaw.rotation.y=Math.atan2(dx,dz);
+  const h=P.y+ARM.TIP-ARM.SH;let d=Math.hypot(r,h);d=Math.min(ARM.L1+ARM.L2-.002,Math.max(Math.abs(ARM.L1-ARM.L2)+.02,d));
+  const phi=Math.atan2(h,r),al=Math.acos((ARM.L1**2+d*d-ARM.L2**2)/(2*ARM.L1*d)),be=Math.acos((ARM.L1**2+ARM.L2**2-d*d)/(2*ARM.L1*ARM.L2)),a1=phi+al;
+  A.sh.rotation.x=-a1;A.el.rotation.x=Math.PI-be;A.wr.rotation.x=a1-(Math.PI-be)}
+// the tote lift: carries a tote from the arm up to the ceiling rail
+function makeLift(parent,x,z,big){const L={g:new THREE.Group()};L.g.position.set(x,0,z);parent.add(L.g);
+  for(const dx of [-.22,.22]){box(.05,HT,.05,HM.steel,dx,HT/2,-.24,.01,L.g)}box(.5,.05,.08,HM.steel,0,HT-.06,-.24,.01,L.g);
+  L.plat=new THREE.Group();L.plat.position.y=.88;L.g.add(L.plat);box(.46,.03,.34,HM.joint,0,0,0,.01,L.plat);box(.46,.08,.04,HM.joint,0,.02,-.2,.01,L.plat);
+  L.tote=new THREE.Group();L.tote.position.y=.015;L.plat.add(L.tote);const w=big?.36:.28,dd=big?.28:.22,hh=.16;
+  box(w,.012,dd,HM.blue,0,.006,0,0,L.tote);box(w,hh,.012,HM.blue,0,hh/2,dd/2,0,L.tote);box(w,hh,.012,HM.blue,0,hh/2,-dd/2,0,L.tote);box(.012,hh,dd,HM.blue,w/2,hh/2,0,0,L.tote);box(.012,hh,dd,HM.blue,-w/2,hh/2,0,0,L.tote);
+  L.lid=new THREE.Group();L.lid.position.set(0,hh,-dd/2);L.tote.add(L.lid);box(w+.01,.012,dd+.01,HM.blueD,0,0,dd/2,0,L.lid);L.lid.rotation.x=-1.9;
+  L.items=new THREE.Group();L.tote.add(L.items);L.w=w;L.dd=dd;return L}
+function liftReset(L){L.plat.position.y=.88;L.tote.visible=true;L.lid.rotation.x=-1.9;while(L.items.children.length)L.items.remove(L.items.children[0])}
+const pickG=new THREE.Group();scene.add(pickG);pickG.visible=false;
+const sceneArm=makeArm(pickG);sceneArm.root.position.set(16.7,0,9.55);
+// scan gate on a small table
+const GATE={x:17.48,y:1.13,z:9.1};
+box(.62,.8,.5,HM.matte,GATE.x,.4,GATE.z,.02,pickG);box(.42,.015,.34,HM.dark,GATE.x,.81,GATE.z,0,pickG);
+for(const dx of [-.22,.22])box(.04,.62,.04,HM.steel,GATE.x+dx,1.12,GATE.z,.01,pickG);box(.48,.05,.12,HM.joint,GATE.x,1.45,GATE.z,.01,pickG);
+for(const dx of [-.13,.13])box(.05,.04,.05,HM.dark,GATE.x+dx,1.41,GATE.z,.01,pickG);
+const gateBeam=new THREE.Mesh(new THREE.PlaneGeometry(.4,.56),HM.beam.clone());gateBeam.position.set(GATE.x,1.12,GATE.z);pickG.add(gateBeam);
+box(.3,.25,.3,HM.red,GATE.x+.05,.13,GATE.z+.42,.02,pickG); // reject bin
+// light curtain around the arm
+for(const [x,z] of [[15.85,8.9],[17.85,8.9]]){box(.05,1.8,.05,HM.joint,x,.9,z,.01,pickG)}
+const lightCur=new THREE.Mesh(new THREE.PlaneGeometry(2,1.7),HM.curtain);lightCur.position.set(16.85,.9,8.9);pickG.add(lightCur);lightCur.visible=false;
+const csLift=makeLift(pickG,16.8,8.45,true);
+const phLift=makeLift(pickG,6.2,8.4,false);
+// rail spurs that reach the two lifts, and the drop-in hatch on top of Maria's supply wall
+box(.12,.05,2.1,mat.steel,16.8,HT-.03,7.45,.01,railC);box(.12,.05,3.9,mat.steel,6.2,HT-.03,6.45,.01,railC);
+box(.28,.012,.34,mat.black,2.2,2.205,-1.35,0,railG);
+function armRest(){sceneArm.t.set(.2,1.35,.45);armIK(sceneArm,sceneArm.t)}armRest();
+const toLocal=(A,p)=>new THREE.Vector3(p.x-A.root.position.x,p.y,p.z-A.root.position.z);
+function armTo(A,P,ms,arc=0,carry){const from=A.t.clone(),to=P.clone(),ep=EPOCH,t0=performance.now();
+  return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms),e=ease(k);A.t.lerpVectors(from,to,e);A.t.y+=Math.sin(Math.PI*e)*arc;armIK(A,A.t);
+    if(carry){A.tip.getWorldPosition(carry.position);carry.position.y-=.05}if(k<1)requestAnimationFrame(f);else res()})(t0)})}
+function tween1(ms,fn){const ep=EPOCH,t0=performance.now();return new Promise(res=>{(function f(now){if(ep!==EPOCH)return;const k=Math.min(1,(now-t0)/ms);fn(ease(k),k);if(k<1)requestAnimationFrame(f);else res()})(t0)})}
+function nowL(t){const e=$("tlNowL");if(!e)return;e.innerHTML=t||"";e.hidden=!t;if(t){e.classList.remove("tlpop");void e.offsetWidth;e.classList.add("tlpop")}}
+// the overnight pick for Maria's kit: arm → scan gate → tote → lift → rail
+const KIT_PICK=[["Silicone foam border",1,1,0xcdeeea],["Saline 100 mL",2,2,0xeaf6ff],["Gauze 4 × 4",1,3,0xf6f7f5]];
+async function pickKit(){const ep=EPOCH,A=sceneArm,L=csLift;liftReset(L);L.tote.visible=true;
+  for(const [name,row,col,c] of KIT_PICK){const b=BIN.find(q=>q.r===row&&q.k===col+1)||BIN[0];
+    nowL(`<b>Picking</b> ${name}`);await armTo(A,toLocal(A,new THREE.Vector3(b.x,b.y+.25,b.z)),650,.15);if(ep!==EPOCH)return;
+    await armTo(A,toLocal(A,new THREE.Vector3(b.x,b.y,b.z)),320);if(ep!==EPOCH)return;
+    const it=box(.13,.04,.1,M({color:c,roughness:.5}),0,0,0,.01,scene);A.tip.getWorldPosition(it.position);it.position.y-=.05;
+    await armTo(A,toLocal(A,new THREE.Vector3(GATE.x,GATE.y+.05,GATE.z)),780,.12,it);if(ep!==EPOCH){scene.remove(it);return}
+    nowL(`<b>Scan</b> ${name} · barcode ✓ lot ✓ expiry ✓ tag ✓`);gateBeam.material.color.set(0x7fd68b);gateBeam.material.opacity=.5;beep("ok");await wait(520);gateBeam.material.color.set(0x4fd1c5);gateBeam.material.opacity=.18;if(ep!==EPOCH){scene.remove(it);return}
+    const n=L.items.children.length,tp=new THREE.Vector3();L.tote.localToWorld(tp.set(-.09+(n%2)*.18,.25,(n>1?.06:-.06)));
+    nowL(`<b>Into Maria's tote</b> ${name}`);await armTo(A,toLocal(A,tp),650,.1,it);if(ep!==EPOCH){scene.remove(it);return}
+    scene.remove(it);it.position.set(-.09+(n%2)*.18,.04+.02*(n>>1),(n>1?.06:-.06));L.items.add(it)}
+  armRest();nowL("<b>Tote sealed</b> and sent up to the rail");await tween1(450,e=>{L.lid.rotation.x=-1.9*(1-e)});if(ep!==EPOCH)return;
+  await tween1(1400,e=>{L.plat.position.y=.88+(HT-.5-.88)*e});if(ep!==EPOCH)return;L.tote.visible=false}
+async function phPick(){const ep=EPOCH,L=phLift;liftReset(L);nowL("<b>Pharmacy</b> bags each dose with a barcode. The tote rides the lift up to the rail.");
+  const it=box(.1,.03,.08,M({color:0xf2e6a0,roughness:.5}),0,.03,0,.01,L.items);L.lid.rotation.x=0;await tween1(1300,e=>{L.plat.position.y=.88+(HT-.5-.88)*e});if(ep!==EPOCH)return;L.tote.visible=false}
+async function podDrop(){const ep=EPOCH;nowL("<b>Into her supply wall</b> through the hatch on top. The wall reads every tag again ✓");
+  const y0=ovPod.position.y;await tween1(700,e=>{ovPod.position.y=y0-.32*e});if(ep!==EPOCH)return;CMP.pod=false;CMP.kit=true;CMP.doorT=0;beep("ok");ledLight.intensity=2;await wait(500);ledLight.intensity=0;ovPod.position.y=y0}
+
+/* ---------- new things to click ---------- */
+Object.assign(THINGS,{
+ picker:{n:"Kit-picking robot",b:[16.7,.95,9.55,1.4,1.9,1.3],s:"F",p:3,d:"picker",hw:"picker",t:"",
+  f:"A robot arm in central supply. Overnight it reads each patient's plan, pulls every item from its bin with a suction cup, and drops it in that patient's tote. People still restock the bins and handle anything odd-shaped."},
+ scanner:{n:"Scan gate",b:[GATE.x,.9,GATE.z,.65,1.2,.55],s:"F",p:3,d:"scanner",hw:"scanner",t:"",
+  f:"Every item stops here on its way to the tote. Cameras read the barcode, lot and expiry date, and a tag reader confirms it. Wrong item, expired, or something the patient is allergic to? It drops in the red bin for a person to check."},
+ lift:{n:"Tote lift",b:[16.8,1.4,8.45,.6,2.8,.6],s:"F",p:3,d:"lift",hw:"lift",t:"",
+  f:"Takes the sealed tote from the arm up to the ceiling rail, where a pod picks it up. The lid is sealed, so the supply wall knows if it was opened on the way."},
+ phlift:{n:"Pharmacy lift",b:[6.2,1.4,8.4,.6,2.8,.6],s:"F",p:3,d:"lift",hw:"lift",t:"",
+  f:"Pharmacy packs each scheduled dose with a barcode. This lift sends the tote up to the rail, and the rail takes it to the locked drawer in the patient's room."},
+ rack:{n:"Supply shelves",b:[16.7,1.0,10.45,2.7,1.9,.6],s:"TF",d:"supply",
+  t:"Shelves of bins in central supply. When you call, a tech picks the order by hand and walks it up.",
+  f:"Same shelves. People restock them from the loading dock. The robot arm picks from them, one patient's kit at a time."}});
+THINGS.dock.f="Overnight, a robot arm picks each patient's kit from the shelves. A scan gate checks every item, and a lift sends the sealed tote up to the rail. Delivery robots wait here for errands.";
+THINGS.wall.f="Opens with your badge. Totes drop in from the rail through a hatch on top. Tag readers in the walls know every item inside and check it against the plan before you open it.";
+THINGS.medroom.f="The cabinet stays for PRNs and controlled meds. Scheduled doses come from pharmacy in a sealed tote: up the pharmacy lift, along the rail, into a locked drawer in each patient's room.";
+THINGS.rail.f="A small track along the ceiling. Pods carry sealed totes from the lifts in central supply and pharmacy into the top of each room's supply wall. Nobody carries them, and nothing moves without being scanned.";
+Object.assign(THINGS.cam,{hw:"sensor"});Object.assign(THINGS.mic,{hw:"sensor"});Object.assign(THINGS.disp,{hw:"display"});Object.assign(THINGS.bed,{hw:"bedmat"});
+Object.assign(THINGS.wall,{hw:"wall"});Object.assign(THINGS.rail,{hw:"pod"});Object.assign(THINGS.robots,{hw:"robot"});
+THINGS.cam.n="Room sensor (camera)";THINGS.mic.n="Room sensor (microphones)";
+DRAW.picker=`<path d="M60 120h50M85 120V96"/><path d="M85 96l40-46 50 22" stroke-width="6"/><path d="M175 72v22"/><rect x="166" y="94" width="18" height="8" rx="3" class="fl"/><rect x="150" y="108" width="50" height="18" rx="3"/><text x="120" y="138">arm · suction cup · bin</text>`;
+DRAW.scanner=`<path d="M70 110V40h100v70"/><path d="M80 48l20 30M160 48l-20 30" stroke-dasharray="4 4"/><rect x="106" y="72" width="28" height="18" rx="3" class="fl"/><path d="M60 110h120"/><text x="120" y="135">barcode ✓ lot ✓ expiry ✓ tag ✓</text>`;
+DRAW.lift=`<path d="M90 10v116M150 10v116"/><rect x="96" y="60" width="48" height="26" rx="3" class="fl"/><path d="M120 54V24M112 32l8-8 8 8"/><path d="M60 10h120"/><text x="120" y="138">sealed tote · up to the rail</text>`;
+
+/* ---------- hardware viewer: what the thing actually looks like ---------- */
+function hwPart(g,off){const p=new THREE.Group();g.add(p);p.userData.off=new THREE.Vector3(...(off||[0,0,0]));return p}
+function hwLab(part,pos,t,s){const o=new THREE.Object3D();o.position.set(...pos);part.add(o);o.userData.lab=[t,s];return o}
+const HWDEF={
+ sensor:{n:"Room sensor",size:"About 18 cm across · mounts on the ceiling above the bed",
+  d:"One small puck per room. It's an AI note-taker with eyes: it listens like the apps that write up a meeting, and it watches the bed so it can measure, photograph and log turns.",
+  sp:["Video and sound are turned into facts inside the device. Only those facts go to the chart.","Nothing is recorded in the bathroom or the hallway. The camera only covers the bed area.","Light ring is on whenever it's recording. Anyone can say “pause recording”.","Wipes down like any ceiling fixture. One cable for power and network."],
+  like:"Like Granola or other AI note-takers, plus a camera that only looks at the bed.",
+  build(g){const base=hwPart(g),face=hwPart(g,[0,.1,0]),optics=hwPart(g,[0,.15,0]),board=hwPart(g,[0,.05,0]),mount=hwPart(g,[0,-.06,0]);
+   cyl(.09,.032,HM.white,0,.016,0,base,48);cyl(.06,.012,HM.matte,0,-.006,0,mount,32);cyl(.004,.14,HM.dark,0,-.08,0,mount,8);
+   cyl(.07,.003,HM.pcb,0,.03,0,board,32);box(.026,.006,.026,HM.chip,0,.035,0,0,board);box(.012,.004,.02,HM.chip,.035,.034,.01,0,board);
+   cyl(.086,.005,HM.glass,0,.036,0,face,48);const ring=new THREE.Mesh(new THREE.TorusGeometry(.083,.0028,8,64),HM.teal);ring.rotation.x=Math.PI/2;ring.position.y=.038;face.add(ring);
+   for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2;cyl(.0035,.003,HM.dark,Math.cos(a)*.07,.0395,Math.sin(a)*.07,face,10)}
+   for(let i=0;i<6;i++){const a=i*Math.PI/3+.3;cyl(.003,.003,HM.red,Math.cos(a)*.052,.0395,Math.sin(a)*.052,face,8)}
+   box(.03,.004,.012,HM.matte,0,.041,.063,.002,face);
+   cyl(.018,.016,HM.dark,0,.046,0,optics,24);const lens=new THREE.Mesh(new THREE.SphereGeometry(.013,24,12,0,Math.PI*2,0,Math.PI/2),HM.lens);lens.position.y=.054;optics.add(lens);
+   box(.012,.004,.012,HM.red,.034,.041,0,0,optics);cyl(.008,.006,HM.lens,-.034,.042,0,optics,16);
+   return [hwLab(optics,[0,.066,0],"Wide camera","Sees the bed and your hands, not the door or the bathroom"),hwLab(optics,[.034,.045,0],"Depth sensor","Measures the wound in 3D, checked against the paper ruler"),
+    hwLab(face,[.05,.04,.05],"4 microphones","Hear what's said and who said it"),hwLab(face,[-.083,.04,0],"Light ring","On whenever it's recording"),hwLab(face,[0,.043,.063],"Privacy shutter","Slide it shut, or say “pause recording”"),
+    hwLab(face,[.052*Math.cos(.3+Math.PI),.04,.052*Math.sin(.3+Math.PI)],"Infrared lights","Sees at night without turning a light on"),hwLab(board,[.035,.036,.01],"Computer inside","Turns video and sound into facts, right in the room"),hwLab(mount,[0,-.14,0],"One cable","Power and network, like a Wi-Fi access point")]}},
+ bedmat:{n:"Bed pressure sensor",size:"A thin mat, the size of the mattress · goes under it",
+  d:"A mat of tiny pressure cells under the regular mattress. It knows which way Maria is lying and where the pressure is, so turns get logged without anyone writing them down.",
+  sp:["Maria can't feel it. Her normal mattress goes on top.","Logs each turn and which side to the chart.","Nudges your phone if she hasn't moved in 2 hours.","Wipes clean like the rest of the bed."],like:"Pressure-mapping mats are already used in wound clinics and some ICUs.",
+  build(g){const deck=hwPart(g),matp=hwPart(g,[0,.14,0]),top=hwPart(g,[0,.42,0]);box(.98,.06,2.0,HM.matte,0,-.03,0,.02,deck);
+   box(.9,.012,1.9,HM.dark,0,.006,0,.004,matp);const hot=(x,z)=>Math.max(0,1-Math.hypot(x/.25,(z-.05)/.3))*1+Math.max(0,1-Math.hypot(x/.3,(z+.6)/.22))*.6+Math.max(0,1-Math.hypot((Math.abs(x)-.1)/.06,(z-.82)/.08))*.8;
+   for(let i=0;i<8;i++)for(let j=0;j<16;j++){const x=-.39+i*.111,z=-.88+j*.117,h=Math.min(1,hot(x,z));const c=new THREE.Color().setHSL(.5-.5*h,.75,.25+.25*h);box(.095,.004,.1,M({color:c,roughness:.6,emissive:c,emissiveIntensity:.25}),x,.014,z,0,matp)}
+   box(.14,.05,.09,HM.white,.5,.02,.9,.01,matp);cyl(.004,.3,HM.dark,.6,.02,.9,matp,6).rotation.z=Math.PI/2;
+   const mm=HM.white.clone();mm.transparent=true;mm.opacity=.3;box(.9,.14,1.9,mm,0,.08,0,.04,top);
+   return [hwLab(matp,[0,.02,.05],"Pressure cells","128 tiny scales. The warm spots are where she's pressing"),hwLab(matp,[.5,.05,.9],"Controller","Logs each turn to the chart"),hwLab(top,[0,.16,-.6],"Her normal mattress","Goes on top. Nothing for her to feel")]}},
+ wall:{n:"Supply wall",size:"1.9 m tall · built into the wall by the door",
+  d:"A cabinet that knows what's inside it. The tote drops in from the ceiling rail, and every item has a tag, so the wall can check the kit against Maria's plan before you open the door.",
+  sp:["Opens with your badge and logs who took what.","Scheduled meds wait in a locked drawer.","Shelf lights show the item you need next.","If something's missing or wrong, you hear about it before you walk in."],like:"Like the smart cabinets many ORs and cath labs already use, which read RFID tags to know what's inside.",
+  build(g){const body=hwPart(g),doors=hwPart(g,[0,0,.45]),hatch=hwPart(g,[0,.3,0]),stock=hwPart(g),drawer=hwPart(g,[0,0,.25]);
+   box(1.15,1.9,.03,HM.matte,0,.95,-.17,.01,body);box(.03,1.9,.36,HM.matte,-.57,.95,0,.01,body);box(.03,1.9,.36,HM.matte,.57,.95,0,.01,body);box(1.15,.03,.36,HM.matte,0,1.89,0,.01,body);box(1.15,.03,.36,HM.matte,0,.01,0,.01,body);
+   for(const y of [.62,.95,1.28,1.6])box(1.1,.015,.32,HM.white,0,y,0,0,body);for(const x of [-.55,.55])box(.01,1.4,.28,HM.teal,x*.98,1.15,0,0,body);
+   box(.4,.04,.3,mat.black,0,1.92,0,.01,hatch);box(.36,.01,.26,HM.dark,0,1.945,0,0,hatch);box(1.1,.02,.02,HM.teal,0,1.86,.16,0,body);
+   [[-.3,.7,.3,0xcdeeea],[.05,.7,.25,0xeaf6ff],[.32,.7,.18,0xf6f7f5],[-.25,1.03,.3,0xd7c7f0],[.15,1.03,.35,0xcdeeea]].forEach(([x,y,w,c])=>box(w,.14,.22,M({color:c,roughness:.5}),x,y+.08,0,.02,stock));
+   const gm=mat.glass.clone();gm.opacity=.25;box(.56,1.25,.02,gm,-.285,1.2,.185,.01,doors);box(.56,1.25,.02,gm,.285,1.2,.185,.01,doors);box(.02,.2,.02,HM.steel,-.03,1.2,.2,.005,doors);box(.02,.2,.02,HM.steel,.03,1.2,.2,.005,doors);
+   box(1.1,.38,.34,HM.white,0,.25,0,.01,drawer);box(.12,.03,.02,HM.dark,0,.32,.175,.005,drawer);box(.05,.02,.01,HM.teal,.2,.32,.175,0,drawer);
+   box(.1,.16,.03,HM.dark,.68,1.2,.15,.01,body);box(.06,.015,.005,HM.teal,.68,1.25,.167,0,body);
+   return [hwLab(hatch,[0,1.95,0],"Drop-in hatch","The tote comes down from the ceiling rail here"),hwLab(body,[-.56,1.4,0],"Tag readers","In the side walls. Know every item inside"),hwLab(body,[.68,1.2,.17],"Badge reader","Opens for Maria's nurse and logs who took what"),
+    hwLab(drawer,[0,.32,.18],"Locked med drawer","Scheduled doses from pharmacy wait here"),hwLab(body,[0,1.86,.17],"Shelf lights","Light up the item you need next"),hwLab(doors,[.285,1.5,.19],"Glass doors","See the kit before you open it")]}},
+ pod:{n:"Rail pod",size:"About the size of a shoebox · rides above the ceiling",
+  d:"A small carrier on a ceiling track. It picks up a sealed tote at the lift in central supply or pharmacy and lowers it into the top of a patient's supply wall.",
+  sp:["Moves about walking speed. Quiet enough for a patient room.","Only opens at the right room's wall.","Reads the tote's tag at every stop.","If it stops, it reports where and the tote stays sealed."],like:"Like the overhead carriers that move parts around car factories, sized for a tote.",
+  build(g){const rail=hwPart(g),car=hwPart(g,[0,.12,0]),pd=hwPart(g),tote=hwPart(g,[0,-.28,0]);
+   box(1.3,.04,.1,HM.steel,0,.5,0,.01,rail);box(1.3,.12,.02,HM.steel,0,.44,0,0,rail);box(1.3,.03,.08,HM.steel,0,.38,0,.01,rail);
+   box(.3,.06,.16,HM.joint,0,.42,0,.02,car);for(const x of [-.1,.1])for(const z of [-.06,.06]){const w=cyl(.025,.02,HM.dark,x,.415,z,car,16);w.rotation.x=Math.PI/2}box(.1,.06,.06,HM.dark,.2,.42,0,.01,car);
+   box(.02,.12,.02,HM.steel,-.1,.33,0,0,pd);box(.02,.12,.02,HM.steel,.1,.33,0,0,pd);box(.34,.2,.42,HM.white,0,.17,0,.05,pd);box(.34,.015,.42,HM.teal,0,.275,0,0,pd);box(.05,.03,.02,HM.dark,.12,.2,.215,.005,pd);
+   box(.28,.12,.34,HM.blue,0,.1,0,.02,tote);box(.29,.015,.35,HM.blueD,0,.165,0,.005,tote);box(.06,.03,.005,HM.white,0,.11,.172,0,tote);
+   return [hwLab(rail,[-.55,.5,0],"Ceiling track","Above the corridor ceiling, into each room's supply wall"),hwLab(car,[.2,.45,0],"Drive","Small electric motor, about walking speed"),hwLab(pd,[0,.28,0],"Pod","Sealed while it travels. Light shows its status"),
+    hwLab(pd,[.12,.2,.22],"Tag reader","Checks the tote at every stop"),hwLab(tote,[0,.11,.175],"Tote","Lowers into the supply wall. Cleaned between patients")]}},
+ picker:{n:"Kit-picking robot",size:"Arm reach about 1.4 m · lives in central supply",
+  d:"Overnight it reads each patient's plan and picks the kit, one item at a time, from the same shelves your supply techs use. Every item goes through the scan gate before it goes in the tote.",
+  sp:["Picks boxes, pouches and packets without crushing them.","Works behind a light curtain. It stops if a person reaches in.","People restock the shelves and handle anything odd-shaped.","Each tote is for one patient, labelled with their room."],like:"Big hospital pharmacies already use robots to fill prescriptions, and online grocers use arms like this to pack orders.",
+  build(g){const base=hwPart(g),arm=hwPart(g),shelf=hwPart(g),cur=hwPart(g);const A=makeArm(arm);A.root.position.set(0,0,0);A.t.set(.15,1.18,.85);armIK(A,A.t);
+   box(1.4,.03,.5,HM.steel,0,1.0,1.05,0,shelf);box(1.4,.03,.5,HM.steel,0,1.45,1.05,0,shelf);for(let k=0;k<3;k++)box(.36,.16,.4,M({color:binCol[k],roughness:.6}),-.45+k*.45,1.1,1.05,.02,shelf);
+   for(const x of [-.7,.7])box(.04,1.8,.04,HM.joint,x,.9,-.5,.01,cur);const bm=new THREE.MeshBasicMaterial({color:0xff5a4a,transparent:true,opacity:.55});for(let y=.2;y<1.75;y+=.15)box(1.36,.006,.006,bm,0,y,-.5,0,cur);
+   const on=(obj,t,d)=>{const o=new THREE.Object3D();obj.add(o);o.userData.lab=[t,d];return o};
+   return [hwLab(shelf,[-.45,1.2,.85],"Supply bins","The same shelves techs restock"),on(A.cup,"Suction cup","Gentle grip for boxes, pouches and packets"),on(A.cam,"Wrist camera","Finds the right item and checks it's the right one"),on(A.el,"Six-joint arm","Reaches every bin on these shelves"),hwLab(cur,[.7,1.4,-.5],"Light curtain","Stops the arm if a person reaches in")]}},
+ scanner:{n:"Scan gate",size:"A tabletop arch, 40 cm wide",
+  d:"The checkpoint between the shelf and the tote. Nothing gets into a patient's kit without passing here.",
+  sp:["Cameras read the barcode, lot number and expiry date.","A tag reader confirms the item without needing to see it.","Checks against the patient's plan and allergy list.","Anything that fails drops in the red bin for a person to check."],like:"The same idea as the scan tunnels in parcel warehouses that read every label on a moving box.",
+  build(g){const t=hwPart(g),arch=hwPart(g,[0,.2,0]),pad=hwPart(g),rej=hwPart(g,[0,0,.2]);box(.7,.06,.5,HM.matte,0,.03,0,.02,t);box(.42,.012,.34,HM.dark,0,.066,0,0,pad);box(.3,.006,.2,HM.teal,0,.074,0,0,pad);
+   for(const x of [-.22,.22])box(.04,.6,.04,HM.steel,x,.36,0,.01,arch);box(.5,.05,.12,HM.joint,0,.68,0,.01,arch);for(const x of [-.13,.13])box(.05,.04,.05,HM.dark,x,.64,0,.01,arch);for(const x of [-.2,.2])box(.03,.05,.05,HM.dark,x,.4,0,.005,arch);
+   const bm=new THREE.Mesh(new THREE.PlaneGeometry(.4,.52),HM.beam);bm.position.set(0,.36,0);arch.add(bm);box(.13,.04,.1,M({color:0xcdeeea,roughness:.5}),0,.33,0,.01,arch);
+   box(.3,.22,.3,HM.red,.1,-.11,.4,.02,rej);
+   return [hwLab(arch,[-.13,.62,0],"Barcode cameras","Read the barcode, lot and expiry from above and the sides"),hwLab(pad,[.1,.075,.1],"Tag reader","Confirms the item without needing to see it"),hwLab(rej,[.1,.0,.4],"Reject bin","Wrong, expired or allergy-flagged items go here")]}},
+ lift:{n:"Tote lift",size:"Floor to ceiling · next to the arm and in pharmacy",
+  d:"A simple elevator for one tote. The arm (or pharmacy) loads it, the lid seals, and it rises to meet a pod on the ceiling rail.",
+  sp:["The lid seals, so the wall knows if the tote was opened on the way.","One tote per patient, labelled with their room.","Same lift in pharmacy for scheduled doses."],like:"Like the lifts that feed overhead conveyors in warehouses and airport baggage halls.",
+  build(g){const p=hwPart(g);const L=makeLift(p,0,0,true);L.plat.position.y=1.2;L.lid.rotation.x=-.6;box(.6,.04,.12,HM.steel,0,HT-.03,0,.01,p);
+   const it=box(.13,.04,.1,M({color:0xcdeeea,roughness:.5}),-.08,.04,0,.01,L.items);
+   return [(()=>{const o=new THREE.Object3D();L.tote.add(o);o.position.set(.18,.08,.14);o.userData.lab=["Tote","One patient's kit, labelled with their room"];return o})(),
+    (()=>{const o=new THREE.Object3D();L.lid.add(o);o.position.set(0,0,.2);o.userData.lab=["Sealed lid","The wall knows if it was opened on the way"];return o})(),hwLab(p,[.22,2.2,-.24],"Lift column","Carries the tote up to the rail"),hwLab(p,[0,HT-.03,0],"Rail","A pod picks the tote up here")]}},
+ robot:{n:"Delivery robot",size:"About knee height · waits at the dock in central supply",
+  d:"Takes the errands that pull nurses away from patients: a warm blanket, water, a wheelchair for discharge, restocking. It's sent when a patient asks out loud or the plan needs something.",
+  sp:["Drives itself and uses the elevators.","Locked bin opens for the right room.","Slows down and steers around people.","Charges itself at the dock."],like:"Many hospitals already run delivery robots for linens, meals and lab samples.",
+  build(g){const b=hwPart(g),bin=hwPart(g,[0,.35,0]),top=hwPart(g,[0,.2,0]);box(.5,.5,.5,HM.white,0,.31,0,.12,b);box(.54,.06,.54,HM.dark,0,.05,0,.03,b);for(const x of [-.2,.2])for(const z of [-.2,.2]){const w=cyl(.05,.04,HM.dark,x,.05,z,b,16);w.rotation.z=Math.PI/2}
+   box(.3,.16,.02,mat.black,0,.42,.255,.02,b);box(.2,.025,.01,HM.teal,0,.42,.27,0,b);box(.54,.05,.04,HM.joint,0,.12,.27,.01,b);
+   box(.4,.06,.4,HM.matte,0,.6,0,.03,bin);box(.36,.12,.3,HM.orange,0,.7,0,.05,bin);cyl(.06,.06,HM.dark,0,.84,-.12,top,24);
+   return [hwLab(b,[0,.44,.27],"Screen","Shows which room it's for"),hwLab(bin,[0,.75,0],"Locked bin","Opens for the right room"),hwLab(top,[0,.88,-.12],"Laser scanner","Sees people, doors and hallways"),hwLab(b,[0,.12,.29],"Soft bumper","Stops if it touches anything")]}},
+ display:{n:"Room display",size:"24-inch touch screen · on the wall facing the bed",
+  d:"Shows the draft note filling in while you work. Every line says where it came from, so you can see what the camera, mics, bed and monitor recorded.",
+  sp:["Tap any line to fix it before you sign.","Tap your badge to sign.","Mute button for the room's microphones.","Interpreters can join on it by video."],like:"Like the screen in an exam room, but it writes the note while you work.",
+  build(g){const f=hwPart(g);box(.98,.62,.03,mat.black,0,.4,0,.015,f);const s=new THREE.Mesh(new THREE.PlaneGeometry(.94,.58),new THREE.MeshBasicMaterial({map:dispTex,toneMapped:false}));s.position.set(0,.4,.017);f.add(s);
+   box(.06,.025,.01,HM.dark,.4,.06,.0,.005,f);box(.04,.02,.01,HM.red,.4,.06,.01,0,f);box(.08,.05,.02,HM.dark,-.4,.06,0,.005,f);
+   return [hwLab(f,[-.2,.55,.02],"Draft note","Each line shows its source: speech, device or missing"),hwLab(f,[.35,.3,.02],"Touch to fix","Change any line before you sign"),hwLab(f,[.4,.06,.01],"Mic mute","Turns the room's microphones off"),hwLab(f,[-.4,.06,.01],"Badge tap","Sign the note with your badge")]}}};
+const HV={r:null,scene:null,cam:null,cur:null,yaw:.7,pitch:.38,dist:1,ex:0,exT:0,lab:true,auto:true,raf:0,c:new THREE.Vector3(),drag:null};
+function hwInit(){if(HV.r)return;const c=$("hwC");HV.r=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});HV.r.setPixelRatio(Math.min(2,devicePixelRatio));HV.r.toneMapping=THREE.ACESFilmicToneMapping;HV.r.outputColorSpace=THREE.SRGBColorSpace;
+  HV.scene=new THREE.Scene();HV.scene.environment=new THREE.PMREMGenerator(HV.r).fromScene(new RoomEnvironment(HV.r),.04).texture;HV.scene.add(new THREE.HemisphereLight(0xffffff,0x445055,.5));const d=new THREE.DirectionalLight(0xffffff,1.4);d.position.set(2,3,2.5);HV.scene.add(d);
+  HV.cam=new THREE.PerspectiveCamera(32,1,.005,60);
+  c.addEventListener("pointerdown",e=>{HV.drag={x:e.clientX,y:e.clientY};HV.auto=false;c.setPointerCapture(e.pointerId)});
+  c.addEventListener("pointermove",e=>{if(!HV.drag)return;HV.yaw-=(e.clientX-HV.drag.x)*.008;HV.pitch=Math.max(-1.2,Math.min(1.35,HV.pitch+(e.clientY-HV.drag.y)*.006));HV.drag={x:e.clientX,y:e.clientY}});
+  c.addEventListener("pointerup",()=>{HV.drag=null});c.addEventListener("wheel",e=>{e.preventDefault();HV.zoom=Math.max(.35,Math.min(2.2,(HV.zoom||1)*Math.exp(e.deltaY*.0012)))},{passive:false});
+  $("hwX").onclick=hwClose;$("tlHw").addEventListener("click",e=>{if(e.target.id==="tlHw")hwClose()});
+  $("hwEx").onclick=()=>{HV.exT=HV.exT?0:1;$("hwEx").setAttribute("aria-pressed",!!HV.exT);$("hwEx").textContent=HV.exT?"Put it back together":"Take it apart"};
+  $("hwLab").onclick=()=>{HV.lab=!HV.lab;$("hwLab").setAttribute("aria-pressed",HV.lab)}}
+function hwOpen(key){hwInit();const D=HWDEF[key];if(!D)return;if(HV.cur)HV.scene.remove(HV.cur.g);const g=new THREE.Group();const labs=D.build(g).filter(o=>o.userData.lab&&o.userData.lab[0]);HV.scene.add(g);
+  const bb=new THREE.Box3().setFromObject(g),sph=bb.getBoundingSphere(new THREE.Sphere());HV.c.copy(sph.center);HV.dist=sph.radius/Math.sin(16*Math.PI/180)*1.05;
+  HV.cur={g,labs,parts:g.children.filter(o=>o.userData.off)};HV.ex=HV.exT=0;HV.zoom=1;HV.auto=true;HV.yaw=.7;HV.pitch=key==="sensor"?.75:.32;
+  $("hwN").textContent=D.n;$("hwSz").textContent=D.size;$("hwD").textContent=D.d;$("hwS").innerHTML=D.sp.map(s=>`<li>${s}</li>`).join("");$("hwLike").textContent=D.like;
+  $("hwEx").textContent="Take it apart";$("hwEx").setAttribute("aria-pressed","false");$("tlHw").hidden=false;$("hwLabs").innerHTML=labs.map(o=>`<div class="hwl"><b>${o.userData.lab[0]}</b><small>${o.userData.lab[1]}</small></div>`).join("");
+  cancelAnimationFrame(HV.raf);const v=new THREE.Vector3();let last=performance.now();
+  (function f(now){if($("tlHw").hidden)return;HV.raf=requestAnimationFrame(f);const dt=Math.min(.05,(now-last)/1000);last=now;if(HV.auto)HV.yaw+=dt*.25;
+    const wrap=$("hwV"),W=wrap.clientWidth,H=wrap.clientHeight;if(HV.r.domElement.width!==Math.round(W*HV.r.getPixelRatio())||HV.r.domElement.height!==Math.round(H*HV.r.getPixelRatio()))HV.r.setSize(W,H,false);
+    HV.ex+=(HV.exT-HV.ex)*.1;for(const p of HV.cur.parts)p.position.copy(p.userData.off).multiplyScalar(HV.ex);
+    const dd=HV.dist*HV.zoom;HV.cam.position.set(HV.c.x+dd*Math.cos(HV.pitch)*Math.sin(HV.yaw),HV.c.y+dd*Math.sin(HV.pitch),HV.c.z+dd*Math.cos(HV.pitch)*Math.cos(HV.yaw));HV.cam.lookAt(HV.c);HV.cam.aspect=W/Math.max(1,H);HV.cam.updateProjectionMatrix();HV.r.render(HV.scene,HV.cam);
+    hwLabels(W,H,v)})(last)}
+function hwLabels(W,H,v){const els=$("hwLabs").children,svg=$("hwSvg");const show=HV.lab&&W>520;svg.style.display=$("hwLabs").style.display=show?"":"none";if(!show)return;
+  const pts=HV.cur.labs.map((o,i)=>{o.getWorldPosition(v);v.project(HV.cam);return {i,x:(v.x*.5+.5)*W,y:(-v.y*.5+.5)*H}});
+  let path="";const lw=Math.min(190,W*.3);
+  for(const side of [0,1]){const S=pts.filter(p=>(p.x>=W/2)===!!side).sort((a,b)=>a.y-b.y);let y=12;
+    for(const p of S){const ly=Math.max(y,Math.min(H-50,p.y-20));y=ly+52;const el=els[p.i];const lx=side?W-lw-8:8;el.style.transform=`translate(${lx}px,${ly}px)`;el.style.width=lw+"px";el.style.textAlign=side?"left":"right";
+      const ex=side?lx-4:lx+lw+4;path+=`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${ex.toFixed(1)} ${(ly+12).toFixed(1)}`;}}
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.innerHTML=`<path d="${path}"/>${pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5"/>`).join("")}`}
+function hwClose(){$("tlHw").hidden=true;cancelAnimationFrame(HV.raf)}
+
+/* ---------- street view: stand anywhere and look around, like a map's street view ---------- */
+const RGN=[...[0,4.8,9.6,14.4].map(cx=>({x0:cx-2.25,x1:cx+2.25,z0:-2.85,z1:2.85,dx:cx+1.35,hw:.42,zi:2.45,zc:3.6})),{x0:-2.25,x1:18.1,z0:3.15,z1:5.85,corr:true},
+  ...[[-2.25,3.45,.6,.85],[3.75,7.85,5.8,.85],[8.15,12.85,10.5,.95],[13.15,18.1,15.25,1.1]].map(([x0,x1,dx,hw])=>({x0,x1,z0:6.15,z1:10.85,dx,hw,zi:6.5,zc:5.4}))];
+const rgnOf=(x,z)=>RGN.findIndex(r=>x>=r.x0&&x<=r.x1&&z>=r.z0&&z<=r.z1);
+function canStep(x0,z0,x1,z1){const a=rgnOf(x0,z0),b=rgnOf(x1,z1);if(b<0)return false;if(a===b||a<0)return true;const r=RGN[a].corr?RGN[b]:RGN[a];return !r.corr&&RGN[a].corr!==RGN[b].corr&&Math.abs(x1-r.dx)<r.hw}
+function streetRoute(x0,z0,x1,z1){const a=rgnOf(x0,z0),b=rgnOf(x1,z1),pts=[[x0,z0]];if(b<0)return null;
+  if(a!==b&&a>=0){const A=RGN[a],B=RGN[b];if(!A.corr)pts.push([A.dx,A.zi],[A.dx,A.zc]);if(!B.corr)pts.push([B.dx,B.zc],[B.dx,B.zi])}pts.push([x1,z1]);return pts.map(p=>new THREE.Vector3(p[0],0,p[1]))}
+const ringS=new THREE.Mesh(new THREE.RingGeometry(.2,.27,40),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));ringS.rotation.x=-Math.PI/2;ringS.visible=false;scene.add(ringS);
+const SV={keys:{},glide:null,last:0};
+function streetUI(){const b=$("tlStreet");b.textContent=ST.street?"🗺 Map view":ST.drop?"Click the floor…":"🚶 Street view";b.setAttribute("aria-pressed",!!ST.street);$("tl").classList.toggle("street",!!ST.street);$("tl").classList.toggle("drop",!!ST.drop);canvas.style.cursor=ST.drop?"crosshair":""}
+function streetOff(){ST.street=false;ST.drop=false;SV.glide=null;ringS.visible=false;SV.keys={};if($("tlStreet"))streetUI()}
+function streetAt(x,z,yaw){ST.street=true;ST.drop=false;closeThing();if(CMP.vm!=="fp")setVMs("fp");for(const s of ["T","F"]){const c=CMP.cam[s];c.p.set(x,1.6,z);c.yaw=yaw;c.pitch=-.08}ST.fpZ=1;
+  const av=CMP.div>=.5?avatar:avatarF;av.visible=false;streetUI();nowL("");setStreetHint(true)}
+function setStreetHint(on){const h=$("tlSvHint");if(!h)return;h.hidden=!on;h.innerHTML=ST.drop?"Click any spot on the floor to stand there. <kbd>Esc</kbd> to cancel.":"Click the floor to walk there · drag to look around · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to move, <kbd>Q</kbd><kbd>E</kbd> to turn · <kbd>Esc</kbd> for the map"}
+function streetToggle(){if(ST.street){const c=CMP.cam[CMP.div>=.5?"T":"F"];streetOff();setVMs("bird");aim({look:[c.p.x,0,c.p.z],k:.45});setStreetHint(false);return}
+  if(CMP.vm==="fp"){const c=CMP.cam[CMP.div>=.5?"T":"F"];streetAt(c.p.x,c.p.z,c.yaw);return}ST.drop=!ST.drop;streetUI();setStreetHint(ST.drop)}
+function streetGlide(pts){const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const d=pts[i].distanceTo(pts[i-1]);segs.push(d);tot+=d}if(tot<.05)return;
+  SV.glide={pts,segs,tot,t0:performance.now(),dur:Math.max(700,tot/1.9*1000)}}
+// which way to face when you land: rooms face the bed, the corridor looks down the hall, back rooms look at their shelves
+function faceFor(x,z){const r=RGN[rgnOf(x,z)];let tx,tz;if(!r||r.corr){tx=x<8?x+5:x-5;tz=z}else if(r.zi<3){const cx=r.dx-1.35;tx=cx-.35;tz=-1.95}else{tx=x;tz=z+3}
+  if(Math.hypot(tx-x,tz-z)<.5){tx=x;tz=z-3}return Math.atan2(-(tx-x),-(tz-z))}
+function streetTick(){if(!ST.street)return;const now=performance.now(),dt=Math.min(.2,(now-(SV.last||now))/1000);SV.last=now;
+  const cams=[CMP.cam.T,CMP.cam.F];let c=cams[0];
+  if(SV.glide){const G=SV.glide,k=Math.min(1,(now-G.t0)/G.dur);let d=ease(k)*G.tot,i=0;while(i<G.segs.length-1&&d>G.segs[i]){d-=G.segs[i];i++}const p=G.pts[i].clone().lerp(G.pts[i+1],G.segs[i]?d/G.segs[i]:1);
+    const ah=G.pts[Math.min(i+1,G.pts.length-1)],dx=ah.x-p.x,dz=ah.z-p.z;let want=null;if(dx*dx+dz*dz>.04)want=Math.atan2(-dx,-dz);
+    for(const q of cams){q.p.set(p.x,1.6,p.z);if(want!=null&&G.pts.length>2){let dy=want-q.yaw;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;q.yaw+=dy*(1-Math.exp(-dt*3))}}if(k>=1)SV.glide=null}
+  const K=SV.keys,f=(K.w?1:0)-(K.s?1:0),r=(K.d?1:0)-(K.a?1:0),turn=(K.e?1:0)-(K.q?1:0);
+  if((f||r||turn)&&dt>0){SV.glide=null;const sp=1.6*dt,fx=-Math.sin(c.yaw),fz=-Math.cos(c.yaw),nx=c.p.x+(fx*f-fz*r)*sp,nz=c.p.z+(fz*f+fx*r)*sp;
+    for(const q of cams){q.yaw-=turn*dt*1.4;if(canStep(q.p.x,q.p.z,nx,nz))q.p.set(nx,1.6,nz);else if(canStep(q.p.x,q.p.z,nx,q.p.z))q.p.x=nx;else if(canStep(q.p.x,q.p.z,q.p.x,nz))q.p.z=nz}}}
+function sceneHit(){const hits=stRay.intersectObjects(scene.children,true);for(const h of hits){let o=h.object,ok=true;while(o){if(!o.visible||o===hlG.T||o===hlG.F||o===trailG||o===xrayG||o===ringS){ok=false;break}o=o.parent}
+    const m=h.object.material;if(!ok||!m||(m.transparent&&m.opacity<.6)||h.object.isLine||h.object.isPoints||h.object.isSprite)continue;return h}return null}
+function floorAt(cx,cy){const R=rayAt(cx,cy);if(!R)return null;const h=sceneHit();if(!h||!h.face)return null;const n=h.face.normal.clone().transformDirection(h.object.matrixWorld);if(n.y<.7||h.point.y>.12)return null;
+  return rgnOf(h.point.x,h.point.z)>=0?h.point:null}
+
 /* ---------- animate the step into state k ---------- */
 async function play(k){const s=SEQ[k],n=BEATS.length;ST.k=k;ST.busy=true;const ep=EPOCH;closeThing();
   if(s.a==="T"){const b=BEATS[s.i],v=b.T;setAct("T");setCap(b.t,v.line);setProg(s.i,n+1);nextBtn("Next →");
     const ol=buildList("T",s.i);ol.lastElementChild.classList.add("new");tlScroll(ol.lastElementChild);if(v.beep)beep(v.beep);
-    setVMs(v.view==="fp"?"fp":"bird");beatView("T",v);
-    const dur=2400,to=sumM("T",s.i),walks=v.walk||[];const total=Math.max(1400,walks.length*(v.view==="fp"?dur*1.2:dur));const mt=tweenMets(to,null,total);
-    for(const [a,b2] of walks){await cGo("T",a,b2,dur);if(ep!==EPOCH)return}
+    const fp=v.view==="fp",walks=v.walk||[],stay=fp&&!walks.length&&CMP.vm==="fp";
+    if(stay)cPlace("T",v.spot);else{if(CMP.vm==="fp")dip();setVMs("bird")}beatView("T",v);if(fp&&walks.length)aim(frameWalk(walks,v.hl));
+    const legs=walks.map(([a,b2])=>legDur(a,b2)),to=sumM("T",s.i);const total=Math.max(1400,legs.reduce((a,b2)=>a+b2,0)+(fp&&!stay?FLY:0));const mt=tweenMets(to,null,total);
+    for(let j=0;j<walks.length;j++){await cGo("T",walks[j][0],walks[j][1],legs[j]);if(ep!==EPOCH)return}
+    if(fp&&!stay){if(walks.length)await wait(400);if(ep!==EPOCH)return;await flyIn("T",v.spot,FLY);if(ep!==EPOCH)return}
     await mt}
   else if(s.a==="Tmore"){setCap("…","And the list goes on.");setProg(n,n+1);setVMs("bird");beatView("T",null);const ol=$("tlItems");
     for(let j=0;j<MORE.length;j++){const li=document.createElement("li");li.className="more new";li.innerHTML=itemHTML("",MORE[j][0],"","");ol.appendChild(li);tlScroll(li);setCount("T");
-      showMets({...TOT_T,walk:sumM("T",n-1).walk+MORE_T.walk*(j+1)/MORE.length,intr:sumM("T",n-1).intr+Math.round(MORE_T.intr*(j+1)/MORE.length)});if(j%3===0)beep("page");await wait(380);if(ep!==EPOCH)return}}
+      showMets({...TOT_T,walk:sumM("T",n-1).walk+MORE_T.walk*(j+1)/MORE.length,intr:sumM("T",n-1).intr+Math.round(MORE_T.intr*(j+1)/MORE.length)});if(j%3===0)beep("page");await wait(650);if(ep!==EPOCH)return}}
   else if(s.a==="F"&&s.i===0){const sw=$("tlSw");if(sw){sw.classList.add("on");sw.setAttribute("aria-pressed","true")}beep("ok");await wait(500);if(ep!==EPOCH)return;
     setVMs("bird");placeAv("F","station");ST.phase=4;CMP.xray=true;ST.labs=["room","rail","cs","dock","brain"];setAct("F");setHL("T",[]);setHL("F",["room12","room13","room14","room15","rail","robots"]);aim(frameFor([]));
     setCap("","Autonomous Hospital mode. Every room can see and hear what happens. A care orchestrator reads each patient's plan. A rail and robots move things around.");
@@ -2592,28 +2902,53 @@ async function play(k){const s=SEQ[k],n=BEATS.length;ST.k=k;ST.busy=true;const e
   if(ep===EPOCH)snap(k,true)}
 async function playF(k){const s=SEQ[k],b=BEATS[s.i],v=b.F,n=BEATS.length,ep=EPOCH;ST.busy=true;
   setAct("F");setCap(b.tF||b.t,v.line);setProg(s.i,n+1);nextBtn("Next →");ST.labs=v.labs||["brain"];CMP.xray=true;
-  if(v.view==="fp"){setVMs("fp");cPlace("F",v.spot)}else setVMs("bird");beatView("F",v);
+  const fp=v.view==="fp",walks=v.walk||[],stay=fp&&!walks.length&&CMP.vm==="fp";
+  if(stay)cPlace("F",v.spot);else{if(CMP.vm==="fp")dip();setVMs("bird")}beatView("F",v);if(fp&&walks.length)aim(frameWalk(walks,v.hl));
   const li=$("tlItems").querySelector(`li[data-i="${s.i}"]`);if(li)flipItem(li,v.item);
   const to=sumM("F",s.i,9);const jobs=[tweenMets(to,TOT_T,1800)];
-  for(const [a,b2] of v.walk||[])jobs.push(cGo("F",a,b2,2200));
+  // a kit or a dose doesn't teleport: it's picked, scanned, lifted, carried and dropped in
+  const podP=v.pod?(async()=>{const p=v.pod;
+    if(v.kit){aim({look:[16.75,0,9.1],k:.27});await pickKit()}else{aim({look:[6.3,0,7.6],k:.36});await phPick()}if(ep!==EPOCH)return;
+    CMP.pod=true;ovPod.scale.setScalar(1);ovPod.position.set(p[0][0],HT-.17,p[0][1]);aim(frameFor(v.hl));nowL(v.kit?"<b>On the rail</b> to Maria's room, 4B-12":"<b>On the rail</b> to each patient's room");
+    tween1(900,e=>ovPod.scale.setScalar(1+1.2*e));await animPath(ovPod,p.map(q=>new THREE.Vector3(q[0],0,q[1])),5200,TRAIL.future,HT-.17);if(ep!==EPOCH)return;
+    if(v.kit){aim({look:[1.6,0,-.6],k:.3});await wait(700);if(ep!==EPOCH)return;await podDrop()}else{CMP.pod=false;nowL("<b>Into the locked drawer</b> in each room. Tag checked ✓");beep("ok");await wait(900)}})():null;
+  if(podP)jobs.push(podP);
+  jobs.push((async()=>{if(v.kit&&podP)await podP;if(ep!==EPOCH)return;for(const [a,b2] of walks){await cGo("F",a,b2,legDur(a,b2));if(ep!==EPOCH)return}
+    if(fp&&!stay){if(walks.length)await wait(400);if(ep!==EPOCH)return;await flyIn("F",v.spot,FLY)}})());
   if(v.flow)jobs.push((async()=>{for(const f of v.flow){await flow(f)}})());
-  if(v.pod){CMP.pod=true;ovPod.scale.setScalar(CMP.vm==="bird"?2.2:1);const p=v.pod;ovPod.position.set(p[0][0],HT-.17,p[0][1]);
-    jobs.push(animPath(ovPod,p.map(q=>new THREE.Vector3(q[0],0,q[1])),4200,TRAIL.future,HT-.17).then(()=>{CMP.pod=false;if(v.kit){CMP.kit=true;beep("ok")}}))}
   if(v.robot){const r=dockBots[0];const go2=pathTo("dock","room12");go2[go2.length-1].set(1.2,0,1.9);jobs.push(animPath(r,go2,4200,TRAIL.future))}
   await Promise.all(jobs);if(ep!==EPOCH)return;await wait(300);if(ep===EPOCH){snap(k,true)}}
 
-function go(k,animate=true){if(k<0||k>=SEQ.length)return;EPOCH++;ST.busy=false;
+const FLY=2800;
+function legDur(a,b){const p=pathTo(a,b);let L=0;for(let i=1;i<p.length;i++)L+=p[i].distanceTo(p[i-1]);return Math.max(2400,Math.min(6500,L/3.2*1000))}
+function frameWalk(walks,hl){let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;const add=(x,z)=>{x0=Math.min(x0,x);x1=Math.max(x1,x);z0=Math.min(z0,z);z1=Math.max(z1,z)};
+  for(const [a,b] of walks)for(const k of [a,b]){const q=P3[k];if(q)add(q[0],q[1]);if(doorX[k]!=null)add(doorX[k],4.5)}
+  for(const id of hl||[]){const B=THINGS[id]&&THINGS[id].b;if(B){add(B[0]-B[3]/2,B[2]-B[5]/2);add(B[0]+B[3]/2,B[2]+B[5]/2)}}
+  const ext=Math.max(x1-x0,(z1-z0)*1.3);return {look:[(x0+x1)/2,0,(z0+z1)/2],k:Math.max(.42,Math.min(1,ext/15+.36))}}
+function dip(){const d=$("tlDip");d.classList.remove("on");void d.offsetWidth;d.classList.add("on")}
+// glide from the map view down to the nurse's eye level, slowly enough to follow
+async function flyIn(s,spot,ms){const ep=EPOCH,pc=ST.pc[s];ST.fly={s,p:pc.position.clone(),q:pc.quaternion.clone(),fov:pc.fov,k:0};cPlace(s,spot);
+  CMP.vm="fp";$("tl").dataset.vm="fp";
+  await tween1(ms,(e,k)=>{if(!ST.fly)return;ST.fly.k=k;if(k>.82&&overviewOn){setOverview(false);dip()}});
+  if(ep!==EPOCH)return;ST.fly=null;if(overviewOn)setOverview(false)}
+function flyBlend(cam){const F=ST.fly,k=ease(F.k);const q=F.q.clone().slerp(cam.quaternion,k);cam.position.lerpVectors(F.p,cam.position,k);cam.quaternion.copy(q);cam.fov=F.fov+(cam.fov-F.fov)*k}
+function go(k,animate=true){if(k<0||k>=SEQ.length)return;EPOCH++;ST.busy=false;hwClose();
   if(!animate||["home","R","hosp"].includes(SEQ[k].a)){snap(k);return}
   if(ST.k!==k-1)snap(k-1);
   document.body.classList.remove("athome");$("tlOver").hidden=true;play(k)}
 function next(){if(ST.busy){EPOCH++;snap(ST.k);return}if(ST.k<SEQ.length-1)go(ST.k+1)}
-function back(){if(ST.k>0){EPOCH++;snap(ST.k-1)}}
+function back(){if(ST.k>0){EPOCH++;hwClose();snap(ST.k-1)}}
 $("tlNext").onclick=next;$("tlBack").onclick=back;
 addEventListener("keydown",e=>{if(!ST.on||e.target.closest&&e.target.closest("input,textarea"))return;
-  if(e.key==="Escape"){closeThing();return}
+  if(e.key==="Escape"){if(!$("tlHw").hidden){hwClose();return}if(!$("tlPop").hidden){closeThing();return}if(ST.street||ST.drop)streetToggle();return}
+  if(!$("tlHw").hidden)return;
+  const kk=e.key.length===1?e.key.toLowerCase():"";if(ST.street&&kk&&"wasdqe".includes(kk)){SV.keys[kk]=true;e.preventDefault();return}
   if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){if((e.key==="Enter"||e.key===" ")&&e.target.tagName==="BUTTON")return;e.preventDefault();if(SEQ[ST.k].a==="home")go(1);else next()}
   else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();back()}});
 
+addEventListener("keyup",e=>{if(e.key.length===1)SV.keys[e.key.toLowerCase()]=false});
+addEventListener("blur",()=>{SV.keys={}});
+if(location.hash==="#tltest")window.__tl={go,snap,ST,SEQ,CMP,hwOpen,BEATS,aim,floorAt};
 function startTale(){EPOCH++;fullOff();hideCard();if(CMP.on)stopCompare();document.body.classList.add("playing","telling");$("tl").hidden=false;
   ST.on=true;CMP.on=true;sensor2.visible=false;robot.visible=false;tote.visible=false;pod.visible=false;cone2.visible=false;drawDisplay(4,2);
   podItems.forEach(b=>ovPod.remove(b));podItems.length=0;CMP.doorT=CMP.door=0;CMP.kit=false;CMP.vm="";doorParts.forEach(o=>o.visible=false);snap(0)}
