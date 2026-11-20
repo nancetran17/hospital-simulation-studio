@@ -25,119 +25,109 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #gl.drag{cursor:grabbing}
 
-/* two halves: overlays live inside, clipped so notes never cross the middle */
+/* two halves: overlays live inside, clipped so nothing crosses the middle */
 .half{position:fixed;overflow:hidden;pointer-events:none}
 .half.l{left:0;top:0;width:50%;height:100%}
 .half.r{left:50%;top:0;width:50%;height:100%}
-#divider{position:fixed;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(20,32,44,.08);pointer-events:none}
-@media (orientation:portrait){
-  #divider{right:0;bottom:auto;width:auto;height:2px;margin:-1px 0 0}
-  .tagline small{display:none}
-  .side-head{top:8px;left:8px;right:8px;gap:5px}
-  .tagline{padding:4px 10px 4px 8px;font-size:12px}
-  .stats{flex-wrap:nowrap;gap:4px;width:100%}
-  .stat{flex:1;padding:3px 6px;border-radius:8px}
-  .stat b{font-size:13px}
-  .stat small{font-size:9px;white-space:normal;line-height:1.15}
-  .lab{font-size:9.5px}
-  .note{font-size:11.5px;max-width:180px;padding:5px 8px}
-  .card{padding:10px 12px 10px;bottom:8px;width:calc(100% - 16px)}
-  .col{font-size:12.5px;line-height:1.35}
-  .ctl{margin-top:8px}
-  .col span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .card.open .col span{display:block}
-  .more{display:inline-block!important}
-}
-.more{display:none;border:0;background:none;color:var(--future);font-weight:600;font-size:12px;padding:0;margin-left:auto}
+#divider{position:fixed;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 0 1px rgba(20,32,44,.1);pointer-events:none;z-index:3}
+@media (orientation:portrait){#divider{right:0;bottom:auto;width:auto;height:3px;margin:-1.5px 0 0}}
 
-/* side header: label + counters */
-.side-head{position:absolute;top:12px;left:12px;right:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none}
-.half.l .side-head{padding-top:40px}
-.tagline{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:.01em;background:var(--panel-solid);border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.tagline i{width:10px;height:10px;border-radius:50%}
-.l .tagline i{background:var(--today)} .r .tagline i{background:var(--future)}
-.tagline small{font-weight:500;color:var(--muted);font-size:12px}
-.stats{display:flex;gap:6px;flex-wrap:wrap}
-.stat{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:10px;padding:6px 10px 5px;min-width:74px}
-.stat b{display:block;font-family:var(--mono);font-size:17px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
-.stat small{display:block;font-size:10.5px;color:var(--muted);font-weight:500;white-space:nowrap}
-.stat.bump{animation:bump .5s}
-.l .stat.bump b{color:var(--today)} .r .stat.bump b{color:var(--future)}
-@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
+/* side header: label + clock, then what is happening now */
+.side-head{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;pointer-events:none;max-width:calc(100% - 20px)}
+.r .side-head{left:auto;right:10px;align-items:flex-end}
+.tagline{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;font-weight:700;font-size:14px;background:#fff;border:2px solid;box-shadow:0 1px 3px rgba(0,0,0,.08);white-space:nowrap}
+.l .tagline{border-color:var(--today);color:var(--today)} .r .tagline{border-color:var(--future);color:var(--future)}
+.tagline b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:14px}
+.now{max-width:min(330px,100%,calc(50vw - 160px));background:#fff;border-radius:10px;padding:7px 10px 8px;font-size:13px;line-height:1.35;font-weight:500;box-shadow:0 4px 14px rgba(20,32,44,.12);border-left:4px solid;transition:background .3s}
+.l .now{border-color:var(--today)} .r .now{border-color:var(--future);text-align:left}
+.now .chip{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:999px;margin-bottom:3px}
+.now .chip.waste{background:#fde2dd;color:#c0392b}
+.now .chip.auto{background:var(--future-bg);color:var(--future)}
+.now .chip.same{background:#eef1f4;color:var(--muted)}
+.now.waste{background:#fff4f2}
 
-/* the record panel on each side */
-.rec{position:absolute;width:236px;bottom:14px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;box-shadow:0 4px 18px rgba(20,32,44,.08)}
-.l .rec{left:12px} .r .rec{right:12px}
-.rec h4{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+/* the scoreboard: the two sides' numbers next to each other */
+.score{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:4;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgba(20,32,44,.14);padding:6px 10px 7px;display:grid;grid-template-columns:auto auto auto;column-gap:12px;row-gap:1px;align-items:baseline;font-size:12px}
+.score .h{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.score .h.t{color:var(--today);text-align:right} .score .h.f{color:var(--future)}
+.score .lbl{color:var(--muted);font-weight:500;text-align:center;font-size:11.5px;white-space:nowrap}
+.score b{font-family:var(--mono);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;line-height:1.25}
+.score b.t{color:var(--today);text-align:right} .score b.f{color:var(--future)}
+.score b.bump{animation:bump .6s}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.25)}100%{transform:scale(1)}}
+@media (orientation:portrait){.now{max-width:min(260px,calc(100vw - 150px))}}
+
+/* the record panel on each side (large screens only) */
+.rec{position:absolute;width:230px;bottom:70px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:9px 11px;font-size:11.5px;box-shadow:0 4px 18px rgba(20,32,44,.08)}
+.l .rec{left:10px} .r .rec{right:10px}
+.rec h4{margin:0 0 5px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
 .rec h4 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:600;padding:1px 7px;border-radius:999px;font-size:10.5px}
 .l .rec h4 em{background:var(--today-bg);color:var(--today)} .r .rec h4 em{background:var(--future-bg);color:var(--future)}
-.rec ol{list-style:none;margin:0;padding:0;display:grid;gap:3px}
-.rec li{display:grid;grid-template-columns:40px 1fr;gap:6px;animation:fadein .4s}
-.rec li span{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.rec ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.rec li{display:grid;grid-template-columns:38px 1fr;gap:6px;animation:fadein .4s}
+.rec li span{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
 .rec .empty{color:var(--faint);font-style:italic;display:block}
-.rec .sign{margin-top:8px;padding:6px 8px;border-radius:8px;background:#eaf6ee;color:var(--ok);font-weight:600;display:none}
+.rec .sign{margin-top:6px;padding:5px 8px;border-radius:8px;background:#eaf6ee;color:var(--ok);font-weight:600;display:none}
 .rec .sign.on{display:block;animation:fadein .4s}
+@media (max-width:1279px),(max-height:759px){.rec{display:none}}
 @keyframes fadein{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 
-/* notes pinned to people and places */
-.note{position:absolute;left:0;top:0;max-width:220px;padding:7px 10px;border-radius:10px;font-size:12.5px;line-height:1.35;font-weight:500;background:#fff;border:1px solid var(--line);box-shadow:0 6px 18px rgba(20,32,44,.14);transform:translate(-50%,calc(-100% - 12px));transition:opacity .25s;opacity:0;white-space:normal}
-.note.on{opacity:1}
-.note::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:#fff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
-.l .note{border-left:3px solid var(--today)} .r .note{border-left:3px solid var(--future)}
 .lab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:11px;font-weight:600;color:#4c5966;letter-spacing:.02em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .lab.focus{color:var(--ink);font-size:12px;background:#fff;padding:2px 7px;border-radius:6px;border:1px solid var(--line);text-shadow:none}
-
 /* role tags that follow people */
 .tag{position:absolute;left:0;top:0;padding:2px 7px;border-radius:999px;font-size:10.5px;font-weight:600;white-space:nowrap;background:rgba(255,255,255,.92);border:1px solid var(--line);color:#33404c;display:flex;align-items:center;gap:5px}
 .tag i{width:8px;height:8px;border-radius:50%;flex:none}
 .tag.main{font-size:12.5px;font-weight:700;padding:4px 10px;background:var(--nurse);color:#fff;border-color:var(--nurse);box-shadow:0 3px 10px rgba(224,69,123,.35);z-index:2}
 .tag.main i{background:#fff!important}
 .tag.rail{background:#efeafc;color:#4b34a8;border-color:#cfc4f3}
-/* legend row at the top of the step card */
-.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--muted);padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid var(--line)}
-.legend span{display:flex;align-items:center;gap:5px;white-space:nowrap}
-.legend i{width:9px;height:9px;border-radius:50%;flex:none}
-.legend i.sq{border-radius:2px}
-.legend .me{font-weight:700;color:var(--ink)}
-@media (max-width:760px){.legend{gap:2px 8px;font-size:10px;padding-bottom:6px;margin-bottom:6px}.tag:not(.main):not(.rail){display:none}.tag.main{font-size:10.5px;padding:2px 7px}}
-/* top brand */
-.brand{position:fixed;top:12px;left:12px;z-index:5;display:flex;align-items:center;gap:10px;pointer-events:none}
-.brand b{font-size:14px;font-weight:700}
-.brand small{color:var(--muted);font-weight:500}
-@media (orientation:portrait){.brand{display:none}.half.l .side-head{padding-top:0}}
+body.small .tag:not(.main):not(.rail){display:none}
 
-/* step card */
-.card{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(860px,calc(100% - 24px));background:var(--panel-solid);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 40px rgba(20,32,44,.16);padding:14px 16px 12px;z-index:6}
-.card-top{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
-.card-top .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.card-top h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+/* slim control bar */
+.bar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);width:min(980px,calc(100% - 20px));background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 30px rgba(20,32,44,.16);padding:7px;z-index:6;display:flex;align-items:center;gap:6px}
+.bar[hidden]{display:none}
+.bar .ttl{display:flex;flex-direction:column;min-width:0;padding:0 6px;flex:0 1 auto}
+.bar .ttl small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bar .ttl b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:4px;flex:1;min-width:60px}
+.dots button{flex:1;min-width:0;height:8px;border:0;border-radius:4px;background:#e3e8ec;padding:0;position:relative;overflow:hidden}
+.dots button.done{background:#9aa6b2}
+.dots button[aria-current=true]{background:#cfd6dd}
+.dots button .bar2{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+.btn{height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;padding:0 11px;font-weight:600;font-size:13px;white-space:nowrap;flex:none}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary.ready{animation:pulse 1.6s infinite}
+.btn[aria-pressed=true]{background:#eef1f4}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,32,42,.35)}70%{box-shadow:0 0 0 9px rgba(22,32,42,0)}100%{box-shadow:0 0 0 0 rgba(22,32,42,0)}}
+.btn:disabled{opacity:.4;cursor:default}
+.pop{position:fixed;left:50%;transform:translateX(-50%);bottom:64px;width:min(860px,calc(100% - 20px));background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 40px rgba(20,32,44,.18);padding:12px 14px;z-index:7;font-size:13.5px}
+.pop[hidden]{display:none}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.col{font-size:13.5px;color:#2a3540;padding-left:10px;border-left:3px solid}
+.col{color:#2a3540;padding-left:10px;border-left:3px solid}
 .col.t{border-color:var(--today)} .col.f{border-color:var(--future)}
 .col b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px}
 .col.t b{color:var(--today)} .col.f b{color:var(--future)}
-.ctl{display:flex;align-items:center;gap:8px;margin-top:12px}
-.dots{display:flex;gap:5px;flex:1;min-width:0;overflow:hidden}
-.dots button{flex:1;min-width:0;height:28px;border:0;border-radius:7px;background:#eef1f4;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;position:relative}
-.dots button[aria-current=true]{background:var(--ink);color:#fff}
-.dots button.done{background:#dfe5ea;color:var(--ink)}
-.dots button .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--future);border-radius:0 0 7px 7px}
-.btn{height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;padding:0 12px;font-weight:600;font-size:13px;white-space:nowrap}
-.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-.btn.primary.ready{animation:pulse 1.6s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,32,42,.35)}70%{box-shadow:0 0 0 9px rgba(22,32,42,0)}100%{box-shadow:0 0 0 0 rgba(22,32,42,0)}}
-.btn:disabled{opacity:.4;cursor:default}
-.foot{position:fixed;right:12px;bottom:4px;font-size:10.5px;color:var(--faint);z-index:4;pointer-events:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:#33404c}
+.legend span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend i{width:10px;height:10px;border-radius:50%;flex:none}
+.legend i.sq{border-radius:2px}
+.legend i.ln{width:18px;height:4px;border-radius:2px}
+.legend .me{font-weight:700;color:var(--ink)}
+.foot{position:fixed;right:10px;bottom:1px;font-size:10px;color:var(--faint);z-index:4;pointer-events:none}
+.brand{display:none}
 @media (max-width:760px){
-  .cols{grid-template-columns:1fr;gap:6px}
-  .dots button{font-size:0}
-  .rec{display:none}
-  .stat{min-width:0;padding:4px 7px}
-  .stat b{font-size:14px}
-  .card-top h2{font-size:16px}
+  .cols{grid-template-columns:1fr;gap:8px}
+  .bar .ttl{display:none}
   .foot{display:none}
+  .tagline{font-size:12px;padding:4px 9px}
+  .tagline b{font-size:12px}
+  .now{font-size:11.5px;padding:5px 8px;max-width:230px}
+  .score{font-size:10px;padding:4px 8px;column-gap:8px}
+  .score b{font-size:13px}
+  .score .lbl{font-size:10px}
+  .btn{padding:0 7px;font-size:11.5px}
+  .dots{min-width:36px}
 }
-@media (orientation:landscape) and (max-height:620px){.rec{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* intro and summary sheets */
 .sheet{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(232,236,240,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow:auto}
@@ -174,59 +164,54 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
 <body>
 <canvas id="gl" aria-label="Two copies of the same surgery center floor, side by side. Drag to move the view, scroll to zoom."></canvas>
 <div id="divider"></div>
-<div class="brand"><b>Autonomous Hospital</b><small>One case in OR 2</small></div>
-
 <div class="half l" id="hl">
-  <div class="labs"></div><div class="tags"></div><div class="notes"></div>
-  <div class="side-head">
-    <div class="tagline"><i></i>Today <small>the nurse does it by hand</small></div>
-    <div class="stats">
-      <div class="stat"><b data-k="clock">07:10</b><small>Clock</small></div>
-      <div class="stat"><b data-k="chart">0</b><small>Charting min</small></div>
-      <div class="stat"><b data-k="trips">0</b><small>Trips out of room</small></div>
-      <div class="stat"><b data-k="calls">0</b><small>Phone calls</small></div>
-      <div class="stat"><b data-k="reset">–</b><small>Room reset min</small></div>
-    </div>
-  </div>
+  <div class="labs"></div><div class="tags"></div>
+  <div class="side-head"><div class="tagline">Today <b data-k="clock">07:10</b></div><div class="now" id="nowT"></div></div>
   <div class="rec"><h4>Chart <em>typed by Sam</em></h4><ol></ol><div class="sign">Signed</div></div>
 </div>
 <div class="half r" id="hr">
-  <div class="labs"></div><div class="tags"></div><div class="notes"></div>
-  <div class="side-head">
-    <div class="tagline"><i></i>With the system <small>cameras, software, ceiling rail</small></div>
-    <div class="stats">
-      <div class="stat"><b data-k="clock">07:10</b><small>Clock</small></div>
-      <div class="stat"><b data-k="chart">0</b><small>Charting min</small></div>
-      <div class="stat"><b data-k="trips">0</b><small>Trips out of room</small></div>
-      <div class="stat"><b data-k="calls">0</b><small>Phone calls</small></div>
-      <div class="stat"><b data-k="reset">–</b><small>Room reset min</small></div>
-    </div>
-  </div>
+  <div class="labs"></div><div class="tags"></div>
+  <div class="side-head"><div class="tagline">With the system <b data-k="clock">07:10</b></div><div class="now" id="nowF"></div></div>
   <div class="rec"><h4>Draft record <em>from the cameras</em></h4><ol></ol><div class="sign">Reviewed and signed by Sam</div></div>
 </div>
 
-<div class="card" id="card" hidden>
-  <div class="legend" aria-label="Who's who">
+<div class="score" id="score" hidden>
+  <span class="h t">Today</span><span></span><span class="h f">With system</span>
+  <b class="t" id="sc-t-chart">0</b><span class="lbl">Sam's charting min</span><b class="f" id="sc-f-chart">0</b>
+  <b class="t" id="sc-t-trips">0</b><span class="lbl">Trips out of OR</span><b class="f" id="sc-f-trips">0</b>
+  <b class="t" id="sc-t-calls">0</b><span class="lbl">Phone calls</span><b class="f" id="sc-f-calls">0</b>
+  <b class="t" id="sc-t-walk">0</b><span class="lbl">Meters Sam walked</span><b class="f" id="sc-f-walk">0</b>
+  <b class="t" id="sc-t-reset">–</b><span class="lbl">Room reset min</span><b class="f" id="sc-f-reset">–</b>
+</div>
+
+<div class="pop" id="details" hidden>
+  <div class="cols">
+    <div class="col t"><b>Today</b><span id="txtT"></span></div>
+    <div class="col f"><b>With the system</b><span id="txtF"></span></div>
+  </div>
+</div>
+<div class="pop" id="legendPop" hidden>
+  <div class="legend">
     <span class="me"><i style="background:#e0457b"></i>Sam, circulating nurse</span>
     <span><i style="background:#3f8f5a"></i>Surgeon</span>
     <span><i style="background:#7a62c4"></i>Anesthesia</span>
     <span><i style="background:#3d7fc4"></i>Scrub tech</span>
     <span><i style="background:#7d8590"></i>Cleaning crew</span>
-    <span><i style="background:#c08a3e"></i>Sterile processing</span>
+    <span><i style="background:#c08a3e"></i>Sterile processing tech</span>
     <span><i style="background:#ef6a34"></i>Ceiling camera</span>
     <span><i class="sq" style="background:#6c4fd1"></i>Rail carrier</span>
+    <span><i class="ln" style="background:#d9622b"></i>Sam's path today</span>
+    <span><i class="ln" style="background:#2a66cf"></i>Sam's path with the system</span>
   </div>
-  <div class="card-top"><span class="k" id="stepK">Step 1 of 7</span><h2 id="stepT"></h2><button class="more" id="more">More</button></div>
-  <div class="cols">
-    <div class="col t"><b>Today</b><span id="txtT"></span></div>
-    <div class="col f"><b>With the system</b><span id="txtF"></span></div>
-  </div>
-  <div class="ctl">
-    <button class="btn" id="back" aria-label="Previous step">←</button>
-    <div class="dots" id="dots"></div>
-    <button class="btn" id="play" aria-label="Pause">Pause</button>
-    <button class="btn primary" id="next">Next →</button>
-  </div>
+</div>
+<div class="bar" id="card" hidden>
+  <button class="btn" id="back" aria-label="Previous step">←</button>
+  <div class="ttl"><small id="stepK">Step 1 of 7</small><b id="stepT"></b></div>
+  <div class="dots" id="dots"></div>
+  <button class="btn" id="more" aria-pressed="false">Details</button>
+  <button class="btn" id="whoBtn" aria-pressed="false">Who's who</button>
+  <button class="btn" id="play" aria-label="Pause">Pause</button>
+  <button class="btn primary" id="next">Next →</button>
 </div>
 <div class="foot">Fictional nurse and patient. Times and counts in the animation are illustrative; a pilot measures the real ones.</div>
 
@@ -276,7 +261,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 const OR_MIN_USD = 36;
 const PATIENT_OUT = 9*60+5;
 const STEPS = [
- { title:"Check-in in pre-op", secs:11, cam:{x:18,z:6,zoom:.62},
+ { title:"Check-in in pre-op", secs:11, same:true, cam:{x:18,z:6,zoom:.62},
    clock:{t:[430,445], f:[430,445]},
    txtT:"Sam walks to pre-op and checks the patient's name, consent and surgery site, then types the checklist into the chart.",
    txtF:"The same. Sam still walks over and does the check with the patient. This part stays with people.",
@@ -294,12 +279,12 @@ const STEPS = [
    t:{ moves:[{a:"patient",at:[0,.5],path:[[3.6,-1.2],[29.5,-1.2],[29.5,1],[29.5,6]]},
               {a:"nurse",at:[.02,.5],path:[[5.2,-.4],[28.4,-.4],[28.4,1],[31.6,4.4]]},
               {a:"nurse",at:[.62,.72],path:[[33.6,7],[34.4,9.6]]}],
-       ev:[{at:.5,until:.62,note:"Time-out: name, procedure, side. Everyone agrees.",on:[29.5,6]},
+       ev:[{at:.5,until:.62,h:1,note:"Time-out: name, procedure, side. Everyone agrees.",on:[29.5,6]},
            {at:.7,until:1,note:"Types patient-in time, staff list and time-out into the chart",on:"nurse"},
            {at:.72,to:.98,add:{chart:5},rec:["07:27","Patient in room"]},{at:.85,rec:["07:29","Time-out complete"]}] },
    f:{ moves:[{a:"patient",at:[0,.5],path:[[3.6,-1.2],[29.5,-1.2],[29.5,1],[29.5,6]]},
               {a:"nurse",at:[.02,.5],path:[[5.2,-.4],[28.4,-.4],[28.4,1],[31.6,4.4]]}],
-       ev:[{at:.5,until:.62,note:"Time-out: name, procedure, side. Everyone agrees.",on:[29.5,6]},
+       ev:[{at:.5,until:.62,h:1,note:"Time-out: name, procedure, side. Everyone agrees.",on:[29.5,6]},
            {at:.42,flash:[29.5,2],rec:["07:27","Patient in room"]},
            {at:.62,flash:[29.5,6],rec:["07:29","Time-out, 5 people in room"]},
            {at:.66,until:1,note:"Cameras log patient in and the time-out. Nothing typed.",on:[25.6,2.6]}] } },
@@ -401,7 +386,7 @@ const STEPS = [
               {a:"traynext",at:[.58,.86],path:[[31,15.4],[31,12.8],[25,12.8],[25,11.2],[31.5,8.9]]},
               {a:"nurse",at:[.6,.76],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[20.5,15]]},
               {a:"nurse",at:[.78,.94],path:[[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,9.6],[32.4,8]]}],
-       ev:[{at:.06,until:.3,note:"Room is empty. Waiting for the cleaning crew.",on:[29.5,6]},
+       ev:[{at:.06,until:.3,w:1,note:"Room is empty. Waiting for the cleaning crew.",on:[29.5,6]},
            {at:.42,until:.58,note:"Cleaning crew arrives",on:"crew"},
            {at:.5,add:{calls:1}},{at:.48,until:.6,note:"Calls sterile processing about the next tray",on:"nurse"},
            {at:.7,add:{trips:1}},{at:.66,until:.8,note:"Gets items missing from the next case's setup",on:"nurse"},
@@ -600,7 +585,7 @@ function buildScene(future){
   const fx = new THREE.Group(); g.add(fx);
   // movable actors
   const A = {};
-  A.nurse = person(SCRUB.nurse,"skin"); A.nurse.add(ring(future?"#2a66cf":"#d9622b",.52));
+  A.nurse = person(SCRUB.nurse,"skin"); A.nurse.userData.ring = ring(future?"#2a66cf":"#d9622b",.52); A.nurse.add(A.nurse.userData.ring);
   { const mk=new THREE.Mesh(new THREE.ConeGeometry(.16,.3,4),new THREE.MeshStandardMaterial({color:SCRUB.nurse,emissive:SCRUB.nurse,emissiveIntensity:.4})); mk.rotation.x=Math.PI; mk.position.y=1.62; A.nurse.add(mk); A.nurse.userData.marker=mk; }
   g.add(A.nurse);
   A.surgeon = person(SCRUB.surgeon,"skin2"); A.surgeon.rotation.y=Math.PI/2; g.add(A.surgeon);
@@ -667,7 +652,7 @@ const DIR = new THREE.Vector3(-.22, 1.5, 1).normalize(); // looking from the fro
 function placeCamera(aspect){
   const base = 14 / view.zoom / (aspect>1.3 ? 1.35 : 1); // half-height in meters
   cam.top = base; cam.bottom = -base; cam.left = -base*aspect; cam.right = base*aspect;
-  const t = new THREE.Vector3(view.x,0,view.z + (aspect>1.3 ? -3 : 4)/view.zoom); // keep the focus clear of the step card (or the header on phones)
+  const t = new THREE.Vector3(view.x,0,view.z + (aspect>1.3 ? -2 : 1)/view.zoom); // nudge the focus clear of the header and the control bar
   cam.position.copy(t).addScaledVector(DIR,90); cam.lookAt(t); cam.updateProjectionMatrix();
 }
 
@@ -725,24 +710,73 @@ for(const side of ["t","f"]){
 }
 const RAIL_LABELS = [{x:20,z:12.8,text:"Ceiling rail"},{x:27,z:12,text:"Pass-through"}];
 const railEls = RAIL_LABELS.map(r=>{ const e=document.createElement("div"); e.className="tag rail"; e.textContent=r.text; H.f.querySelector(".labs").appendChild(e); return e; });
-const notePool = { t:[], f:[] };
-function noteEl(side,i){ const pool=notePool[side]; while(pool.length<=i){ const e=document.createElement("div"); e.className="note"; H[side].querySelector(".notes").appendChild(e); pool.push(e);} return pool[i]; }
 
-const statEls = s => Object.fromEntries([...H[s].querySelectorAll("[data-k]")].map(e=>[e.dataset.k,e]));
-const ST = { t:statEls("t"), f:statEls("f") };
-const lastShown = { t:{}, f:{} };
-function setStat(side,k,v){ const e=ST[side][k]; if(lastShown[side][k]===v) return; const bump = lastShown[side][k]!==undefined && k!=="clock" && v!=="–" && playing; lastShown[side][k]=v; e.textContent=v; if(bump){ const p=e.parentElement; p.classList.remove("bump"); void p.offsetWidth; p.classList.add("bump"); } }
+/* ---- scoreboard ---- */
+const SC = {}; ["t","f"].forEach(sd=>["chart","trips","calls","walk","reset"].forEach(k=>SC[sd+k]=$(`#sc-${sd}-${k}`)));
+const CLK = { t:H.t.querySelector("[data-k=clock]"), f:H.f.querySelector("[data-k=clock]") };
+const shown = {};
+function setScore(side,k,v){ const key=side+k; if(shown[key]===v) return; const prev=shown[key]; shown[key]=v; const e=SC[key]; e.textContent=v;
+  if(prev!==undefined && playing && v!=="–" && +v>+prev && k!=="walk" && k!=="reset"){ e.classList.remove("bump"); void e.offsetWidth; e.classList.add("bump"); } }
 const recKey = { t:"", f:"" };
 function setRecords(side, recs, signed){
   const key = recs.map(r=>r.join()).join("|")+signed;
   if(recKey[side]===key) return; recKey[side]=key;
   const ol = H[side].querySelector(".rec ol");
-  ol.innerHTML = recs.length ? recs.slice(-6).map(([t,x])=>`<li><span>${t}</span>${x}</li>`).join("") : `<li class="empty">${side==="t"?"Nothing typed yet":"Nothing captured yet"}</li>`;
+  ol.innerHTML = recs.length ? recs.slice(-5).map(([t,x])=>`<li><span>${t}</span>${x}</li>`).join("") : `<li class="empty">${side==="t"?"Nothing typed yet":"Nothing captured yet"}</li>`;
   H[side].querySelector(".rec .sign").classList.toggle("on", signed);
 }
 
+/* ---- "now" line: the one thing happening on each side ---- */
+const NOW = { t:$("#nowT"), f:$("#nowF") }; const nowKey = { t:"", f:"" };
+function nowFor(side,i,p){
+  const st=STEPS[i], ev=st[side].ev; let cur=null;
+  ev.forEach(e=>{ if(!e.note || p<e.at) return; const u=e.until??1; if(p<u || (u>=1 && p>=1) ) { if(!cur || e.at>=cur.at) cur=e; } });
+  if(!cur) ev.forEach(e=>{ if(e.note && p>=e.at && (!cur || e.at>=cur.at)) cur=e; }); // keep the last thing that happened on screen
+  if(!cur){ const t = side==="t"?st.txtT:st.txtF; return {text:t.split(". ")[0].replace(/\.$/,"")+".", chip:st.same?"same":""}; }
+  const u=cur.until??1; let chip="";
+  if(st.same) chip="same";
+  else if(side==="t"){ if(cur.w || ev.some(e=>e.add && (e.add.trips||e.add.calls||e.add.chart) && e.at>=cur.at-.08 && e.at<=u)) chip="waste"; }
+  else if(!cur.h && (typeof cur.on!=="string" || cur.on==="robot" || cur.on==="crew")) chip="auto";
+  return {text:cur.note, chip};
+}
+const CHIP = {waste:"Time lost", auto:"Done by the system", same:"Same on both sides"};
+function setNow(side,n){ const key=n.text+n.chip; if(nowKey[side]===key) return; nowKey[side]=key;
+  NOW[side].className = "now"+(n.chip==="waste"?" waste":"");
+  NOW[side].innerHTML = (n.chip?`<span class="chip ${n.chip}">${CHIP[n.chip]}</span><br>`:"")+n.text; }
+
+/* ---- Sam's walking trail on the floor ---- */
+function nursePath(side,i,p){
+  const pts=[[HOME.nurse[0],HOME.nurse[1]]];
+  for(let k=0;k<=i;k++){
+    const ms=STEPS[k][side].moves.filter(m=>m.a==="nurse").sort((x,y)=>x.at[0]-y.at[0]);
+    for(const m of ms){
+      if(k<i || p>=m.at[1]){ m.path.forEach(q=>pts.push([q[0],q[1]])); continue; }
+      if(p<m.at[0]) break;
+      const u=(p-m.at[0])/(m.at[1]-m.at[0]); const seg=[pts[pts.length-1],...m.path.map(q=>[q[0],q[1]])];
+      let tot=0; const ls=[]; for(let q=1;q<seg.length;q++){ const l=Math.hypot(seg[q][0]-seg[q-1][0],seg[q][1]-seg[q-1][1]); ls.push(l); tot+=l; }
+      let d=u*tot; for(let q=1;q<seg.length;q++){ if(d>ls[q-1]){ pts.push(seg[q]); d-=ls[q-1]; } else { const f=ls[q-1]?d/ls[q-1]:1; pts.push([seg[q-1][0]+(seg[q][0]-seg[q-1][0])*f, seg[q-1][1]+(seg[q][1]-seg[q-1][1])*f]); break; } }
+      break;
+    }
+  }
+  return pts;
+}
+const pathLen = pts => pts.reduce((a,q,k)=>k?a+Math.hypot(q[0]-pts[k-1][0],q[1]-pts[k-1][1]):0,0);
+for(const side of ["t","f"]){
+  const m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({color:side==="t"?"#e8743b":"#2a66cf",transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));
+  m.renderOrder=2; SIDES[side].scene.add(m); SIDES[side].trail=m; SIDES[side].trailKey="";
+}
+function setTrail(side,pts){
+  const S=SIDES[side]; const last=pts[pts.length-1]; const key=pts.length+":"+last[0].toFixed(2)+","+last[1].toFixed(2);
+  if(S.trailKey===key) return; S.trailKey=key;
+  const w=.28, y=.11, pos=[];
+  for(let k=1;k<pts.length;k++){ const [ax,az]=pts[k-1],[bx,bz]=pts[k]; const dx=bx-ax, dz=bz-az, l=Math.hypot(dx,dz); if(l<1e-4) continue;
+    const nx=-dz/l*w, nz=dx/l*w;
+    pos.push(ax+nx,y,az+nz, ax-nx,y,az-nz, bx+nx,y,bz+nz,  ax-nx,y,az-nz, bx-nx,y,bz-nz, bx+nx,y,bz+nz); }
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3)); S.trail.geometry.dispose(); S.trail.geometry=g;
+}
+
 /* ============================ layout ============================ */
-// Landscape: two halves side by side. Portrait: stacked, above the step card.
+// Landscape: two halves side by side. Portrait: stacked above the control bar, with the scoreboard on the seam.
 let lastL="";
 function layout(){
   const W=innerWidth, Hh=innerHeight, portrait = Hh>W*1.05;
@@ -750,14 +784,14 @@ function layout(){
   let vw, vh;
   if(portrait){ const avail = Hh - (cr ? (Hh-cr.top)+6 : 0); vw=W; vh=Math.max(120,avail/2); }
   else { vw=W/2; vh=Hh; }
-  const key=[W,Hh,portrait,vh,cr&&Math.round(cr.left),cr&&Math.round(cr.height)].join();
+  const key=[W,Hh,portrait,vh].join();
   if(key!==lastL){ lastL=key;
-    const hl=H.t.style, hr=H.f.style, dv=$("#divider").style;
-    if(portrait){ Object.assign(hl,{left:"0",top:"0",width:W+"px",height:vh+"px"}); Object.assign(hr,{left:"0",top:vh+"px",width:W+"px",height:vh+"px"}); Object.assign(dv,{top:vh+"px",left:"0"}); }
-    else { Object.assign(hl,{left:"0",top:"0",width:"50%",height:"100%"}); Object.assign(hr,{left:"50%",top:"0",width:"50%",height:"100%"}); Object.assign(dv,{top:"0",left:"50%"}); }
-    // record panels sit in the bottom outer corners; lift them above the card if it would overlap
-    const lift = cr && cr.left < 262 ? (Hh-cr.top)+10 : 14;
-    document.querySelectorAll(".rec").forEach(r=>r.style.bottom=lift+"px");
+    document.body.classList.toggle("small", W<1100);
+    const hl=H.t.style, hr=H.f.style, dv=$("#divider").style, sc=$("#score").style;
+    if(portrait){ Object.assign(hl,{left:"0",top:"0",width:W+"px",height:vh+"px"}); Object.assign(hr,{left:"0",top:vh+"px",width:W+"px",height:vh+"px"}); Object.assign(dv,{top:vh+"px",left:"0"});
+      Object.assign(sc,{top:(vh-8)+"px",left:"auto",right:"8px",transform:"translateY(-100%)"}); }
+    else { Object.assign(hl,{left:"0",top:"0",width:"50%",height:"100%"}); Object.assign(hr,{left:"50%",top:"0",width:"50%",height:"100%"}); Object.assign(dv,{top:"0",left:"50%"});
+      Object.assign(sc,{top:"10px",left:"50%",right:"auto",transform:"translateX(-50%)"}); }
   }
   return {portrait, vw, vh};
 }
@@ -769,7 +803,6 @@ function project(x,y,z,vw,vh){ v3.set(x,y,z).project(cam); return [(v3.x+1)/2*vw
 function frame(now){
   const dt = Math.min(.1,(now-last)/1000); last=now;
   if(playing && step>=0){ prog = Math.min(1, prog + dt/STEPS[step].secs); if(prog>=1){ playing=false; updateControls(); } }
-  // camera easing
   const k = 1-Math.pow(.02,dt);
   view.x += (view.tx-view.x)*k; view.z += (view.tz-view.z)*k; view.zoom += (view.tzoom-view.zoom)*k;
 
@@ -781,7 +814,6 @@ function frame(now){
   const i = Math.max(step,0), p = step<0?0:prog;
   for(const side of ["t","f"]){
     const S = SIDES[side], st = STEPS[i], d = st[side], base = startState[i][side];
-    // actors
     for(const a in S.A){
       const o = S.A[a]; const r = posAt(side,a,i,p);
       o.position.x = r.pos[0]; o.position.z = r.pos[1]; o.position.y = r.pos[2]||0;
@@ -800,12 +832,19 @@ function frame(now){
       if((e.signL||e.signR) && p>=e.at) signed=true;
     });
     const [c0,c1] = st.clock[side]; const clock = c0+(c1-c0)*p;
-    setStat(side,"clock",hhmm(clock));
-    setStat(side,"chart",String(Math.round(counts.chart)));
-    setStat(side,"trips",String(Math.round(counts.trips)));
-    setStat(side,"calls",String(Math.round(counts.calls)));
-    setStat(side,"reset", (i>=5 && clock>=PATIENT_OUT && p>=.36) || i>5 ? String(Math.round(clock-PATIENT_OUT)) : "–");
+    CLK[side].textContent = hhmm(clock);
+    const pts = step<0 ? [[HOME.nurse[0],HOME.nurse[1]]] : nursePath(side,i,p);
+    setTrail(side,pts);
+    setScore(side,"chart",String(Math.round(counts.chart)));
+    setScore(side,"trips",String(Math.round(counts.trips)));
+    setScore(side,"calls",String(Math.round(counts.calls)));
+    setScore(side,"walk",String(Math.round(pathLen(pts))));
+    setScore(side,"reset", (i>=5 && clock>=PATIENT_OUT && p>=.36) || i>5 ? String(Math.round(clock-PATIENT_OUT)) : "–");
     setRecords(side, step<0?[]:recs, signed);
+    const n = step<0 ? {text:"",chip:""} : nowFor(side,i,p); setNow(side,n);
+    // Sam's ring turns red and pulses while time is being lost
+    const rg=S.A.nurse.userData.ring; const lost = side==="t" && n.chip==="waste";
+    rg.material.color.set(lost?"#e0392b":(side==="t"?"#d9622b":"#2a66cf")); const sc = lost&&!reduced ? 1.25+.35*Math.abs(Math.sin(now/260)) : 1; rg.scale.set(sc,sc,sc);
     // flashes
     let fi=0; S.flashes.forEach(f=>f.visible=false);
     if(step>=0) d.ev.forEach(e=>{ if(!e.flash) return; const age=(p-e.at)*st.secs; if(age>=0 && age<1.6 && fi<S.flashes.length){ const f=S.flashes[fi++]; f.visible=true; f.position.x=e.flash[0]; f.position.z=e.flash[1]; const s=.4+age*1.1; f.scale.set(s,s,s); f.material.opacity=.9*(1-age/1.6); } });
@@ -814,31 +853,17 @@ function frame(now){
     renderer.setViewport(x0,y0,vw,vh); renderer.setScissor(x0,y0,vw,vh);
     renderer.setClearColor(side==="t"?"#e7ebef":"#e5eaf1",1);
     renderer.render(S.scene, cam);
-    // labels
     ROOMS.forEach((r,ri)=>{ const [sx,sy] = project(r.x,.1,r.z,vw,vh); const e=labEls[side][ri]; e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
-    // role tags above heads
     tagEls[side].forEach(([t,e])=>{ const o=S.A[t.a]; const y = t.a==="robot" ? RAIL_Y+.35 : t.a==="patient" ? 1.1 : 2.75;
       const [sx,sy] = project(o.position.x,y,o.position.z,vw,vh); const ax = t.al==="l"?"-92%":t.al==="r"?"-8%":"-50%"; e.style.transform=`translate(${sx}px,${sy}px) translate(${ax},-100%)`; });
     if(side==="f") RAIL_LABELS.forEach((r,ri)=>{ const [sx,sy]=project(r.x,RAIL_Y+.3,r.z,vw,vh); railEls[ri].style.transform=`translate(${sx}px,${sy}px) translate(-50%,-100%)`; });
-    // notes
-    let ni=0;
-    if(step>=0) d.ev.forEach(e=>{
-      if(!e.note) return; const until = e.until ?? 1; const on = p>=e.at && (p<until || (until>=1 && p>=1));
-      const el = noteEl(side,ni++); el.classList.toggle("on",on); if(el.textContent!==e.note) el.textContent=e.note;
-      let x,z,y=1.6; if(typeof e.on==="string"){ const o=S.A[e.on]; x=o.position.x; z=o.position.z; y = e.on==="robot" ? 3.4 : 3.55; } else { [x,z]=e.on; y=.6; }
-      const [sx,sy] = project(x,y,z,vw,vh);
-      const cx = clamp(sx, 120, vw-120);
-      el.style.transform = `translate(${cx}px,${sy}px) translate(-50%,calc(-100% - 12px))`;
-    });
-    for(;ni<notePool[side].length;ni++) notePool[side][ni].classList.remove("on");
   }
-  // step progress bar
-  if(step>=0){ const b=dotEls[step]?.querySelector(".bar"); if(b) b.style.width=(prog*100)+"%"; }
+  if(step>=0){ const b=dotEls[step]?.querySelector(".bar2"); if(b) b.style.width=(prog*100)+"%"; }
   requestAnimationFrame(frame);
 }
 
 /* ============================ controls ============================ */
-const dots = $("#dots"); const dotEls = STEPS.map((s,i)=>{ const b=document.createElement("button"); b.innerHTML=`${i+1}. ${s.title}<span class="bar"></span>`; b.title=s.title; b.onclick=()=>go(i); dots.appendChild(b); return b; });
+const dots = $("#dots"); const dotEls = STEPS.map((s,i)=>{ const b=document.createElement("button"); b.innerHTML=`<span class="bar2"></span>`; b.title=`${i+1}. ${s.title}`; b.setAttribute("aria-label",`Step ${i+1}: ${s.title}`); b.onclick=()=>go(i); dots.appendChild(b); return b; });
 function go(i){
   if(i>=STEPS.length){ showSummary(); return; }
   step = Math.max(0,i); prog = 0; playing = true; last=performance.now();
@@ -846,22 +871,25 @@ function go(i){
   $("#stepK").textContent = `Step ${step+1} of ${STEPS.length}`; $("#stepT").textContent = s.title;
   $("#txtT").textContent = s.txtT; $("#txtF").textContent = s.txtF;
   view.tx = s.cam.x; view.tz = s.cam.z; view.tzoom = s.cam.zoom;
-  dotEls.forEach((b,k)=>{ b.setAttribute("aria-current", k===step); b.classList.toggle("done",k<step); b.querySelector(".bar").style.width = k<step?"0":"0"; });
+  dotEls.forEach((b,k)=>{ b.setAttribute("aria-current", k===step); b.classList.toggle("done",k<step); b.querySelector(".bar2").style.width = k<step?"100%":"0"; });
   updateControls();
 }
 function updateControls(){
   $("#back").disabled = step<=0;
   $("#play").textContent = playing ? "Pause" : (prog>=1 ? "Replay" : "Play");
-  $("#next").textContent = step===STEPS.length-1 ? "See the totals →" : "Next →";
+  $("#next").textContent = step===STEPS.length-1 ? "Totals →" : "Next →";
   $("#next").classList.toggle("ready", !playing && prog>=1);
 }
+function toggle(pop,btn,other,otherBtn){ const open=$(pop).hidden; $(pop).hidden=!open; $(btn).setAttribute("aria-pressed",open); $(other).hidden=true; $(otherBtn).setAttribute("aria-pressed",false); }
 $("#play").onclick = ()=>{ if(prog>=1){ prog=0; } playing=!playing; last=performance.now(); updateControls(); };
 $("#next").onclick = ()=>go(step+1);
-$("#more").onclick = ()=>{ const c=$("#card"); c.classList.toggle("open"); $("#more").textContent = c.classList.contains("open")?"Less":"More"; };
+$("#more").onclick = ()=>toggle("#details","#more","#legendPop","#whoBtn");
+$("#whoBtn").onclick = ()=>toggle("#legendPop","#whoBtn","#details","#more");
 $("#back").onclick = ()=>go(step-1);
-$("#start").onclick = ()=>{ $("#intro").hidden=true; $("#card").hidden=false; go(0); };
-$("#again").onclick = ()=>{ $("#summary").hidden=true; $("#card").hidden=false; go(0); };
-$("#close").onclick = ()=>{ $("#summary").hidden=true; $("#card").hidden=false; view.tx=22; view.tz=15; view.tzoom=.5; };
+function showPlay(on){ $("#card").hidden=!on; $("#score").hidden=!on; if(!on){ $("#details").hidden=true; $("#legendPop").hidden=true; } }
+$("#start").onclick = ()=>{ $("#intro").hidden=true; showPlay(true); go(0); };
+$("#again").onclick = ()=>{ $("#summary").hidden=true; showPlay(true); go(0); };
+$("#close").onclick = ()=>{ $("#summary").hidden=true; showPlay(true); view.tx=22; view.tz=15; view.tzoom=.5; };
 addEventListener("keydown", e=>{
   if(!$("#intro").hidden){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("#start").click(); } return; }
   if(!$("#summary").hidden) return;
@@ -872,12 +900,13 @@ addEventListener("keydown", e=>{
 function showSummary(){
   const T = startState[STEPS.length].t, F = startState[STEPS.length].f;
   const resetT = STEPS.at(-1).clock.t[1]-PATIENT_OUT, resetF = STEPS.at(-1).clock.f[1]-PATIENT_OUT;
-  const rows = [["Minutes Sam spent charting",T.counts.chart,F.counts.chart],["Trips out of the room",T.counts.trips,F.counts.trips],["Phone calls",T.counts.calls,F.counts.calls],["Minutes from patient out to next patient in",resetT,resetF],["Next patient in at",hhmm(STEPS.at(-1).clock.t[1]),hhmm(STEPS.at(-1).clock.f[1])]];
+  const wT = Math.round(pathLen(nursePath("t",STEPS.length-1,1))), wF = Math.round(pathLen(nursePath("f",STEPS.length-1,1)));
+  const rows = [["Minutes Sam spent charting",T.counts.chart,F.counts.chart],["Trips out of the room",T.counts.trips,F.counts.trips],["Phone calls",T.counts.calls,F.counts.calls],["Meters Sam walked",wT,wF],["Minutes from patient out to next patient in",resetT,resetF],["Next patient in at",hhmm(STEPS.at(-1).clock.t[1]),hhmm(STEPS.at(-1).clock.f[1])]];
   $("#sumgrid").innerHTML = `<div class="h"></div><div class="h t">Today</div><div class="h f">With the system</div>` + rows.map(r=>`<div>${r[0]}</div><div class="n">${r[1]}</div><div class="f n">${r[2]}</div>`).join("");
   const saved = T.counts.chart - F.counts.chart, faster = resetT-resetF;
   $("#sumMin").textContent = `${saved} minutes`; $("#sumMinT").textContent = `of charting Sam got back on this one case, time spent with the patient and the team instead`;
   $("#sumUsd").textContent = `~$${(faster*OR_MIN_USD).toLocaleString()}`; $("#sumUsdT").textContent = `of OR time: the room was ready ${faster} minutes sooner, at about $${OR_MIN_USD} per OR minute`;
-  $("#card").hidden = true; $("#summary").hidden = false; playing=false;
+  showPlay(false); $("#summary").hidden = false; playing=false;
 }
 
 /* drag to pan, wheel to zoom (both sides move together) */
