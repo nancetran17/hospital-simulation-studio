@@ -1,14 +1,16 @@
-# A Day on 4B: Autonomous Hospital demo
+# One Case, Two Ways: Autonomous Hospital demo
 
-A presenter-led, single-file 3D demo (Three.js from a CDN, no build step).
+A single-file 3D demo (Three.js from a CDN, no build step). It follows one gallbladder surgery in OR 2 of a four-OR surgery center, from pre-op check-in to the room being ready for the next patient.
 
-1. **Today:** a day in the life of nurse Jordan Lee on unit 4B.
-2. **Autonomous Hospital:** the same day replayed with the verifier layer, the new handoff and the five admin metrics.
-3. **Roadmap:** Pilot, then steps 2, 3 and 4.
+The screen is split down the middle. The left side is how the circulating nurse works today. The right side is the same case with ceiling cameras and software handling the record, the count check and the reset calls, and carriers on a ceiling rail moving instrument trays between sterile processing and the ORs. Every person has a role tag, and Sam, the circulating nurse, is in pink with a marker overhead. Both sides run on the same clock, with live counters for charting minutes, trips out of the room, phone calls and room reset minutes. A summary at the end compares the totals.
 
-Use → / Space to advance, ← to go back, scroll to zoom, and click anything for an explanation. Future-side devices have a **See the hardware** button with a 3D close-up you can turn and take apart. **Street view** (top right) lets you drop in anywhere and walk around: click the floor to walk, drag to look, W A S D to move, Esc for the map.
+Use → / Space to advance, ← to go back, drag to move the view, scroll to zoom. On a phone the two sides stack top and bottom.
 
-Fictional nurse and patients. Numbers are illustrative; clinicians make every clinical call.
+Fictional nurse and patient. Times and counts in the animation are illustrative; the pilot measures the real ones. The story text and numbers live in the `STEPS` list at the top of the script, so they can be edited without touching the 3D code.
+
+## The older ICU demo
+
+The earlier "A Day on 4B" ICU demo is kept at `icu/index.html` (served at `/icu` on the same Vercel site) and on the `icu` branch.
 
 ## Run locally
 
@@ -16,5 +18,4 @@ Open `index.html` in a browser, or serve the folder with any static server.
 
 ## Deploy on Vercel
 
-Import the repo at vercel.com/new, set **Root Directory** to `autonomous-hospital-demo`
-and **Framework Preset** to **Other**. There's no build command; Vercel serves `index.html` as is.
+The Vercel project serves this folder as is (Output Directory `autonomous-hospital-demo`, no build). Merging to `main` updates the live link.
