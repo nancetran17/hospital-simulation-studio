@@ -111,7 +111,19 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
 .sum td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
 .sum td.p{font-weight:700;white-space:nowrap}
 .sum td.f{color:var(--future);font-weight:600}
+.lvls{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 14px}
+.lvls button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--muted)}
+.lvls button.done{color:var(--ink)}
+.lvls button[aria-selected=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.cmp{margin:6px 0 14px}
+.cmp .row{display:grid;grid-template-columns:170px 1fr 90px;gap:10px;align-items:center;margin-bottom:8px;font-size:14px}
+.cmp .tr{height:26px;background:#eef1f4;border-radius:6px;overflow:hidden}
+.cmp .tr i{display:block;height:100%;border-radius:6px}
+.cmp .row b{text-align:right;font-variant-numeric:tabular-nums}
+.say2{font-size:17px;font-weight:600;margin:0 0 12px}
+@media (max-width:620px){.cmp .row{grid-template-columns:1fr 70px}.cmp .tr{grid-column:1/3;grid-row:2}}
 .big{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.big.two{grid-template-columns:repeat(2,1fr)}
 .big div{background:#f3f6f9;border-radius:12px;padding:12px}
 .big b{display:block;font-size:26px;color:var(--future)}
 .big small{font-size:13px;color:#47535f}
@@ -181,11 +193,11 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
 
 <div class="sheet" id="summary" hidden>
   <div class="sheet-in">
-    <h2>Results</h2>
-    <table class="sum" id="sumT"></table>
-    <div class="big" id="big"></div>
-    <div class="go"><button class="btn primary" id="again">Restart</button></div>
-    <div class="fine">Times are estimates. Staff approve every record.</div>
+    <h2 id="lvlH">Results</h2>
+    <div class="lvls" id="lvls" role="tablist"></div>
+    <div id="lvl"></div>
+    <div class="go"><button class="btn primary" id="lvlNext">Next →</button><button class="btn" id="again">Restart</button></div>
+    <div class="fine" id="lvlNote"></div>
   </div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
@@ -829,24 +841,75 @@ addEventListener("keydown", e=>{
   if(e.key==="ArrowLeft"){ e.preventDefault(); go(step-1); }
 });
 
-function showSummary(){
+/* ===================== results: one case up to one year =====================
+   Every number below comes from these assumptions. Edit them here. */
+const ROI = {
+  casesPerDay: 4,        // cases per OR per day (about a 10-hour OR day at 142 min per case)
+  ors: 5,                // ORs on the floor
+  days: 250,             // working days a year
+  orMinUSD: OR_MIN_USD,  // $36 per OR minute (Childers and Maggard)
+  rnHourUSD: 45,         // RN median pay, BLS
+  lossUSD: 5.19e6,       // average hospital loss to nurse turnover a year (NSI, via Becker's)
+  pricePerORMonth: 2500, // Perception Kit plus planning software, per OR per month (our pricing)
+  codingPerCase: 10,     // coding, per case (our pricing)
+};
+const money = v => v>=1e6 ? "$"+(v/1e6).toFixed(2).replace(/\.?0+$/,"")+"M" : "$"+Math.round(v/1000).toLocaleString()+"K";
+const hm = m => { m=Math.round(m); const h=Math.floor(m/60), r=m%60; return h ? (r ? `${h} h ${r} min` : `${h} h`) : `${r} min`; };
+let lvl = 0;
+function levels(){
   const T = startState[STEPS.length].t.time, F = startState[STEPS.length].f.time;
-  const nextT = STEPS.at(-1).clock.t[1], nextF = STEPS.at(-1).clock.f[1], sooner = nextT-nextF;
+  const nextT = STEPS.at(-1).clock.t[1], nextF = STEPS.at(-1).clock.f[1];
+  const room = nextT-nextF;                                   // OR minutes freed per case
+  const typing = Math.round(T.typing-F.typing), out = Math.round(T.walking-F.walking);
+  const nurse = typing + out;                                 // nurse minutes freed per case
+  const perDay = ROI.casesPerDay, floorDay = perDay*ROI.ors, yearCases = floorDay*ROI.days;
+  const roomYear = room*yearCases, nurseYear = nurse*yearCases;
+  const roomUSD = roomYear*ROI.orMinUSD, nurseUSD = nurseYear/60*ROI.rnHourUSD, saved = roomUSD+nurseUSD;
+  const price = ROI.pricePerORMonth*12*ROI.ors + ROI.codingPerCase*yearCases;
   const P = PRODUCTS, row = (ks,t,f)=>`<tr><td class="p">${ks.map(k=>P[k].name).join("<br>")}</td><td>${t}</td><td class="f">${f}</td></tr>`;
-  $("#sumT").innerHTML = `<tr><th>Product</th><th class="t">Today</th><th class="f">With our system</th></tr>`
-    + row(["granola"],"30 min typing","0 min")
-    + row(["arm","rail"],"7 min out of the room for a scope","0 min")
-    + row(["billing"],"Paper sheet, coded days later","Approved in 1 min")
-    + row(["rail"],"5 min carrying the tray","0 min")
-    + row(["clean"],`Next patient ${hhmm(nextT)}`,`Next patient ${hhmm(nextF)}`);
-  $("#big").innerHTML = `<div><b>${Math.round(T.typing-F.typing)} min</b><small>less typing per case</small></div>`
-    + `<div><b>${Math.round(T.walking)} → ${Math.round(F.walking)} min</b><small>out of the room</small></div>`
-    + `<div><b>${sooner} min</b><small>earlier next case. About $${(sooner*OR_MIN_USD).toLocaleString()} of OR time.</small></div>`;
+  const tiles = (r,f)=>`<div class="big two"><div><b>${r}</b><small>sooner the room is ready</small></div><div><b>${f}</b><small>of nurse time back</small></div></div>`;
+  const bars = rows => { const mx=Math.max(...rows.map(r=>r[1])); return `<div class="cmp">`+rows.map(r=>`<div class="row"><span>${r[0]}</span><div class="tr"><i style="width:${r[1]/mx*100}%;background:${r[2]}"></i></div><b>${money(r[1])}</b></div>`).join("")+`</div>`; };
+  return [
+    { k:"One case", h:"One case",
+      html: tiles(`${room} min`,`${nurse} min`) + `<table class="sum"><tr><th>Product</th><th class="t">Today</th><th class="f">With our system</th></tr>`
+        + row(["granola"],"30 min typing","0 min") + row(["arm","rail"],"7 min out of the room for a scope","0 min")
+        + row(["billing"],"Paper sheet, coded days later","Approved in 1 min") + row(["rail"],"5 min carrying the tray","0 min")
+        + row(["clean"],`Next patient ${hhmm(nextT)}`,`Next patient ${hhmm(nextF)}`) + `</table>`,
+      note:`Nurse time: ${typing} min less typing and ${out} min less out of the room. Times are estimates.` },
+    { k:"One day in OR 2", h:"One day in OR 2",
+      html: `<p class="say2">${perDay} cases in one OR.</p>` + tiles(hm(room*perDay), hm(nurse*perDay)),
+      note:`Assumes ${perDay} cases a day in one OR, about a 10-hour day.` },
+    { k:`Whole floor, ${ROI.ors} ORs`, h:`One day, whole floor`,
+      html: `<p class="say2">${floorDay} cases across ${ROI.ors} ORs.</p>` + tiles(hm(room*floorDay), hm(nurse*floorDay)),
+      note:`Assumes ${ROI.ors} ORs, ${perDay} cases each.` },
+    { k:"One year", h:"One year, whole floor",
+      html: `<p class="say2">${yearCases.toLocaleString()} cases.</p><div class="big"><div><b>${Math.round(roomYear/60).toLocaleString()} h</b><small>of OR time, worth ${money(roomUSD)}</small></div><div><b>${Math.round(nurseYear/60).toLocaleString()} h</b><small>of nurse time, worth ${money(nurseUSD)}</small></div><div><b>${money(saved)}</b><small>saved a year</small></div></div>`,
+      note:`${ROI.days} working days. OR time at $${ROI.orMinUSD} a minute (Childers and Maggard). Nurse time at $${ROI.rnHourUSD} an hour (BLS median RN pay). OR savings count only if the freed time is used for more cases or less overtime.` },
+    { k:"Vs. hospital losses", h:"Compared with what hospitals lose",
+      html: bars([["Average hospital loss to nurse turnover, per year",ROI.lossUSD,"#d9622b"],["Our savings on one floor, per year",saved,"#2a66cf"]])
+        + `<p class="say2">One floor saves ${Math.round(saved/ROI.lossUSD*100)}% of what the average hospital loses to nurse turnover each year.</p>`,
+      note:`Turnover loss: $5.19M a year for the average hospital (NSI 2026, via Becker's).` },
+    { k:"Our price", h:"Our price vs. savings",
+      html: bars([["Savings per year",saved,"#2a66cf"],["Our price per year",price,"#3fae67"]])
+        + `<p class="say2">The floor saves about ${Math.round(saved/price)} times what it pays us.</p>`,
+      note:`Price: $${ROI.pricePerORMonth.toLocaleString()} per OR per month for the Perception Kit and planning software, plus $${ROI.codingPerCase} a case for coding. Rails, arm and cleaning robot are sold as equipment plus service and are not priced yet.` },
+  ];
+}
+function showLevel(n){
+  const L = levels(); lvl = clamp(n,0,L.length-1); const v = L[lvl];
+  $("#lvlH").textContent = v.h; $("#lvl").innerHTML = v.html; $("#lvlNote").textContent = v.note;
+  $("#lvls").innerHTML = L.map((x,k)=>`<button role="tab" aria-selected="${k===lvl}" class="${k<lvl?"done":""}" data-k="${k}">${x.k}</button>`).join("");
+  $("#lvls").querySelectorAll("button").forEach(b=>b.onclick=()=>showLevel(+b.dataset.k));
+  $("#lvlNext").textContent = lvl<L.length-1 ? `${L[lvl+1].k} →` : "Back to one case";
+}
+$("#lvlNext").onclick = ()=>showLevel(lvl<levels().length-1 ? lvl+1 : 0);
+function showSummary(){
+  showLevel(0); hideTip();
   showPlay(false); $("#summary").hidden = false; playing=false;
 }
 setChips(-1);
 requestAnimationFrame(frame);
-window.__demo = {go, get step(){return step}, set prog(v){prog=v; playing=false; updateControls();}, showSummary};
+window.__demo = {go, showLevel, get step(){return step}, set prog(v){prog=v; playing=false; updateControls();}, showSummary};
 </script>
 </body>
 </html>
