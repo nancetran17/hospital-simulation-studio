@@ -1,12 +1,12 @@
-# One Case, Two Ways: Autonomous Hospital demo
+# Sam's Day, Two Ways: Autonomous Hospital demo
 
-A single-file 3D demo (Three.js from a CDN, no build step). It follows one gallbladder surgery in OR 2 of a four-OR surgery center, from pre-op check-in to the room being ready for the next patient.
+A single-file 3D demo (Three.js from a CDN, no build step). It follows one surgery in OR 2, from the patient coming in to the room being ready for the next patient, in six moments.
 
-The screen is split down the middle. The left side is how the circulating nurse works today. The right side is the same case with ceiling cameras and software handling the record, the count check and the reset calls, and carriers on a ceiling rail moving instrument trays between sterile processing and the ORs. Every person has a role tag, and Sam, the circulating nurse, is in pink with a marker overhead. Both sides run on the same clock, with live counters for charting minutes, trips out of the room, phone calls and room reset minutes. A summary at the end compares the totals.
+The screen is split down the middle. The left side is Sam, the circulating nurse, working today. The right side is the same surgery with our five products installed: Granola with eyes (cameras and microphones that write the case record), Coding and billing, Ceiling rail boxes, a Robot picking arm, and a Cleaning robot. Each moment shows one or two products at work, with one plain sentence per side, a big callout in the room, and a "Sam's time" bar that splits Sam's minutes into hands-on care, typing, walking out of the room, and waiting. A summary at the end lists what each product changed.
 
-Use → / Space to advance, ← to go back, drag to move the view, scroll to zoom. On a phone the two sides stack top and bottom.
+Use Next or → / Space to advance, ← to go back. On a phone the two sides stack top and bottom.
 
-Fictional nurse and patient. Times and counts in the animation are illustrative; the pilot measures the real ones. The story text and numbers live in the `STEPS` list at the top of the script, so they can be edited without touching the 3D code.
+Fictional nurse and patient. Times are illustrative; a pilot measures the real ones. The products, the story text and the numbers live in `PRODUCTS` and `STEPS` at the top of the script, so they can be edited without touching the 3D code.
 
 ## The older ICU demo
 
