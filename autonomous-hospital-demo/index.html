@@ -874,7 +874,7 @@ function levels(){
   const roomUSD = roomYear*ROI.orMinUSD, nurseUSD = nurseYear/60*ROI.rnHourUSD, saved = roomUSD+nurseUSD;
   const soft = ROI.pricePerORMonth*12*ROI.ors + ROI.codingPerCase*yearCases;
   const hwUp = ROI.hwRail+ROI.hwPass+ROI.hwArm+ROI.hwClean, r = ROI.hwRate, n = ROI.hwYears;
-  const hwYear = hwUp*r/(1-Math.pow(1+r,-n)) + hwUp*ROI.hwServicePct;
+  const hwSvc = hwUp*ROI.hwServicePct, hwYear = hwUp*r/(1-Math.pow(1+r,-n)) + hwSvc;
   const price = soft + hwYear;
   const P = PRODUCTS, row = (ks,t,f)=>`<tr><td class="p">${ks.map(k=>P[k].name).join("<br>")}</td><td>${t}</td><td class="f">${f}</td></tr>`;
   const tiles = (r,f)=>`<div class="big two"><div><b>${r}</b><small>sooner the room is ready</small></div><div><b>${f}</b><small>of nurse time back</small></div></div>`;
@@ -900,9 +900,10 @@ function levels(){
         + `<p class="say2">One floor saves ${Math.round(saved/ROI.lossUSD*100)}% of what the average hospital loses to nurse turnover each year.</p>`,
       note:`Turnover loss: $5.19M a year for the average hospital (NSI 2026, via Becker's).` },
     { k:"Our price", h:"Our price vs. savings",
-      html: bars([["Savings per year",saved,"#2a66cf"],["Software per year",soft,"#3fae67"],["Robots and rails per year",hwYear,"#8e44d6"],["Total price per year",price,"#14202c"]])
-        + `<p class="say2">The floor saves about ${(saved/price).toFixed(1).replace(/\.0$/,"")} times what it pays for everything.</p>`,
-      note:`Price: $${ROI.pricePerORMonth.toLocaleString()} per OR per month for the Perception Kit and planning software, plus $${ROI.codingPerCase} a case for coding. Robots and rails: about ${money(hwUp)} upfront, paid over ${n} years at ${Math.round(r*100)}%, plus ${Math.round(ROI.hwServicePct*100)}% a year for service. Hardware prices are estimates from similar hospital systems.` },
+      html: `<div class="big two"><div><b>$${ROI.pricePerORMonth.toLocaleString()}</b><small>per OR a month for software, plus $${ROI.codingPerCase} a case for coding</small></div><div><b>$${(Math.round(hwYear/12/ROI.ors/100)*100).toLocaleString()}</b><small>per OR a month for the hardware, rent-to-buy over ${n} years, service included</small></div></div>`
+        + bars([["Savings per year",saved,"#2a66cf"],["Software subscription",soft,"#3fae67"],["Hardware, rent-to-buy",hwYear,"#8e44d6"],["Total price per year",price,"#14202c"]])
+        + `<p class="say2">The floor saves about ${(saved/price).toFixed(1).replace(/\.0$/,"")} times what it pays. After ${n} years the hospital owns the hardware, and the price drops to ${money(soft+hwSvc)} a year.</p>`,
+      note:`Software: Perception Kit and planning software. Hardware: rails, pass-throughs, picking arm and 2 cleaning robots, about ${money(hwUp)} if bought outright. The monthly rent pays it off over ${n} years at ${Math.round(r*100)}%, plus ${Math.round(ROI.hwServicePct*100)}% a year for service. After that, service only. Hardware prices are estimates from similar hospital systems.` },
   ];
 }
 function showLevel(n){
