@@ -209,6 +209,9 @@ const PRODUCTS = {
   arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies.", tip:"A robot arm in the supply room. It picks the item off the shelf and puts it in a rail box."},
   clean:  {ic:"🧹", name:"Cleaning robot", c:"#2a66cf", d:"Cleans the room.", tip:"Starts cleaning the floor when the patient leaves. No waiting for the crew."},
 };
+const EXTRA = {
+  sterile:{ic:"🔆", name:"Sterile pass-through", c:"#8e44d6", tip:"A sealed box in the OR wall. It cleans the outside of the item with UV light before it goes into the sterile OR."},
+};
 const TOOLS_T = {
   computer:{ic:"💻", name:"Computer"}, walk:{ic:"🚶", name:"Walking"}, phone:{ic:"📞", name:"Phone"},
   paper:{ic:"📝", name:"Paper charge sheet"}, crew:{ic:"🧹", name:"Cleaning crew"},
@@ -222,7 +225,7 @@ const LEAVE = (x)=>[[x,1.2],[x,-.9],[46,-.9]];
 const ROOM_LOOP = [[26.5,3],[32.5,3],[32.5,9],[26.5,9],[26.5,3]];
 
 const STEPS = [
- { title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:14, zoom:[.42,.8,"cam"],
+ { title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:14, zooms:[[.42,.8,"cam"]],
    clock:{t:[445,465], f:[445,465]},
    sayT:"Sam types the times into the computer.",
    sayF:"The Perception Kit logs it. Sam stays with the patient.",
@@ -237,10 +240,10 @@ const STEPS = [
            {at:.56,until:1,call:"Logged patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
            {at:.56,until:1,call:"With the patient",kind:"good",on:"nurse"}] } },
 
- { title:"Surgeon needs a scope", product:["arm","rail"], toolT:["walk"], secs:18, frame:"core", zoom:[.04,.38,"arm"],
+ { title:"Surgeon needs a scope", product:["arm","rail","sterile"], toolT:["walk"], secs:28, frame:"core", zooms:[[.04,.44,"arm"],[.6,.86,"sterile"]],
    clock:{t:[465,485], f:[465,485]},
    sayT:"Sam leaves the room for 7 min to get it.",
-   sayF:"Robot arm picks it. Rail box brings it. Sam stays.",
+   sayF:"The arm finds it. A rail box brings it through a sterile pass-through. Sam stays.",
    t:{ moves:[{a:"nurse",at:[.15,.45],path:TO_SUPPLY},
               {a:"scope",at:[.5,.56],path:[[20.5,16.1,1.3]]},
               {a:"nurse",at:[.58,.86],path:FROM_SUPPLY},{a:"scope",at:[.58,.86],path:FROM_SUPPLY.map(q=>[q[0],q[1],1.3])}],
@@ -249,20 +252,25 @@ const STEPS = [
            {at:.15,until:.45,call:"Leaves the room",kind:"pain",on:"nurse"},
            {at:.45,until:.58,call:"Searching shelves",kind:"pain",on:"nurse"},
            {at:.58,until:.88,call:"Gone 7 min",kind:"pain",on:"nurse"}] },
-   f:{ moves:[{a:"scope",at:[.22,.3],path:[[24.7,15,1.8]]},
-              {a:"robot",at:[.36,.68],path:[[24,15],[24,12.8],[27,12.8],[27,12.2]]},
-              {a:"scope",at:[.36,.68],path:[[24,15,1.75],[24,12.8,1.75],[27,12.8,1.75],[27,12.2,1.75]]},
-              {a:"scope",at:[.68,.72],path:[[27,11.6,1.15]]},
-              {a:"nurse",at:[.6,.74],path:[[33,6],[33,10],[27.6,11.2]]},
-              {a:"scope",at:[.74,.76],path:[[27.6,11.2,1.3]]},
-              {a:"nurse",at:[.78,.94],path:[[33,10],[33,6],NURSE_BY_PT]},{a:"scope",at:[.78,.94],path:[[33,10,1.3],[33,6,1.3],[NURSE_BY_PT[0],NURSE_BY_PT[1],1.3]]}],
+   f:{ moves:[{a:"robot",at:[.46,.62],path:[[24,15],[24,12.8],[27,12.8],[27,12.65]]},
+              {a:"scope",at:[.785,.79],path:[[27,12.6,1.2]]},
+              {a:"scope",at:[.79,.82],path:[[27,11.5,1.15]]},
+              {a:"nurse",at:[.72,.82],path:[[33,6],[33,10],[27.6,11.2]]},
+              {a:"scope",at:[.83,.85],path:[[27.6,11.2,1.3]]},
+              {a:"nurse",at:[.86,.97],path:[[33,10],[33,6],NURSE_BY_PT]},{a:"scope",at:[.86,.97],path:[[33,10,1.3],[33,6,1.3],[NURSE_BY_PT[0],NURSE_BY_PT[1],1.3]]}],
+       ride:[{a:"scope",at:[.37,.785]}],
+       drop:[[0,0],[.2,0],[.28,1],[.38,1],[.44,0],[.62,0],[.68,.82],[.79,.82],[.85,0]],
+       uv:[.68,.79],
        time:[["hands",20,0,1]],
-       ev:[{at:0,until:.12,call:"“I need a 30° scope.”",kind:"same",on:"surgeon"},
-           {at:.1,until:.36,call:"Picks the scope",kind:"prod",prod:"arm",on:"arm"},
-           {at:.36,until:.7,call:"Brings it to OR 2",kind:"prod",prod:"rail",on:"robot"},
-           {at:.7,until:1,call:"Takes it from the hatch",kind:"good",on:"nurse"}] } },
+       ev:[{at:0,until:.06,call:"“I need a 30° scope.”",kind:"same",on:"surgeon"},
+           {at:.06,until:.28,call:"Searching the shelves",kind:"prod",prod:"arm",on:"arm"},
+           {at:.28,until:.4,call:"Found it",kind:"prod",prod:"arm",on:"arm"},
+           {at:.2,until:.3,call:"Comes down from the ceiling",kind:"prod",prod:"rail",on:"robot"},
+           {at:.4,until:.6,call:"Goes back up to the ceiling rail",kind:"prod",prod:"rail",on:"robot"},
+           {at:.64,until:.8,call:"Cleans it before it goes into OR 2",kind:"prod",prod:"sterile",on:"sterile"},
+           {at:.82,until:1,call:"Sam takes it from the wall",kind:"good",on:"nurse"}] } },
 
- { title:"Surgery", product:["granola"], toolT:["computer"], secs:14, zoom:[.08,.45,"cam"],
+ { title:"Surgery", product:["granola"], toolT:["computer"], secs:14, zooms:[[.08,.45,"cam"]],
    clock:{t:[485,540], f:[485,540]},
    sayT:"Sam types each item opened. 22 min.",
    sayF:"The Perception Kit logs items and counts. Sam helps the team.",
@@ -307,10 +315,11 @@ const STEPS = [
               {a:"nurse",at:[.05,.3],path:[[31.2,1.6]]},{a:"nurse",at:[.4,.55],path:[NURSE_BY_PT]},
               {a:"tech",at:[.1,.16],path:[[31.5,9.4]]},{a:"trayused",at:[.16,.18],path:[[31.5,9.4,1.3]]},
               {a:"tech",at:[.18,.3],path:[[28,11],[27.4,11.3]]},{a:"trayused",at:[.18,.3],path:[[28,11,1.3],[27.4,11.3,1.3]]},
-              {a:"trayused",at:[.3,.38],path:[[27,12.2,1.75]]},
+              {a:"trayused",at:[.3,.36],path:[[27,12.6,1.2]]},
               {a:"tech",at:[.34,.48],path:[[28,11],[30.8,7.6]]},
-              {a:"robot",at:[.4,.8],path:[[27,12.8],[31,12.8],[31,15.4],[33.2,15.4]]},
-              {a:"trayused",at:[.4,.8],path:[[27,12.8,1.75],[31,12.8,1.75],[31,15.4,1.75],[33.2,15.4,1.75]]}],
+              {a:"robot",at:[.44,.78],path:[[27,12.8],[31,12.8],[31,15.4],[33.2,15.4]]}],
+       ride:[{a:"trayused",at:[.37,1.01]}],
+       drop:[[0,0],[.28,0],[.34,.82],[.38,.82],[.44,0],[.78,0],[.86,.9]],
        time:[["hands",7,0,1]],
        ev:[{at:.05,until:.3,call:"With the patient",kind:"good",on:"nurse"},
            {at:.38,until:.85,call:"Takes the tray",kind:"prod",prod:"rail",on:"robot"}] } },
@@ -363,7 +372,7 @@ mat("sheet","#f4f7fa"); mat("blanket","#9fc3e6"); mat("mattress","#e9eef3"); mat
 mat("shelf","#e8ebee"); mat("binB","#7aa7dc"); mat("binG","#86c79a"); mat("binY","#ecc56a"); mat("binR","#e58e7a");
 mat("supplyT","#c7ced5"); mat("supplyF","#3fae67",{emissive:"#23854a",emissiveIntensity:.35});
 mat("robot","#6c4fd1",{roughness:.45}); mat("robotTop","#efeafc"); mat("tray","#b9c3cc",{roughness:.3,metalness:.6}); mat("trayUsed","#a99a8a",{roughness:.4,metalness:.4});
-mat("rail","#4a5562",{roughness:.4,metalness:.5}); mat("station","#ffffff");
+mat("rail","#4a5562",{roughness:.4,metalness:.5}); mat("station","#ffffff"); mat("glass","#cfe6f2",{transparent:true,opacity:.35,roughness:.1}); mat("uv","#9b59e6",{emissive:"#8e44d6",emissiveIntensity:.4}); mat("found","#3fae67",{emissive:"#3fae67",emissiveIntensity:.8}); mat("beam","#ff4d4d",{emissive:"#ff4d4d",emissiveIntensity:.8,transparent:true,opacity:.7});
 mat("arm","#0f8b8d",{roughness:.4,metalness:.3}); mat("armJ","#e9eef2",{roughness:.4}); mat("bot","#2a66cf",{roughness:.45}); mat("botTop","#e6eefc");
 mat("cam","#ef6a34",{emissive:"#ef6a34",emissiveIntensity:.5}); mat("skin","#e2b896"); mat("skin2","#a87554"); mat("skin3","#c9946b");
 mat("hair","#2f2622"); mat("curtain","#cfe0e6",{transparent:true,opacity:.85}); mat("light","#ffffff",{emissive:"#fffbe8",emissiveIntensity:.4});
@@ -379,7 +388,7 @@ function cyl(rt,rb,h,m,x,y,z,seg=24){ const o=new THREE.Mesh(new THREE.CylinderG
 /* ============================ the building ============================ */
 // Plan coordinates in meters. x to the right, z toward the viewer.
 // Pre-op x0-7, top/bottom patient corridors, ORs 1-4, clean core in the middle, sterile processing, recovery x37-44.
-const WALL_H = 1.5, WT = .18, RAIL_Y = 2.75;
+const WALL_H = 1.5, WT = .18, RAIL_Y = 3.1;
 const RAILS = [[[9,12.8],[35,12.8]],[[9,17.2],[35,17.2]],[[9,12.8],[9,17.2]],[[35,12.8],[35,17.2]],[[31,12.8],[31,15.4]],[[31,15.4],[33.2,15.4]],[[24,12.8],[24,15]],[[12,15],[27.6,15]],[[17,12],[17,12.8]],[[27,12],[27,12.8]],[[17,17.2],[17,18]],[[27,17.2],[27,18]]];
 const LOOP = [[9,12.8],[35,12.8],[35,17.2],[9,17.2],[9,12.8]];
 const ROOMS = [
@@ -492,13 +501,19 @@ function buildScene(future){
     // ceiling rail and wall hatches
     RAILS.forEach(([a,b])=>{ const len=Math.hypot(b[0]-a[0],b[1]-a[1]); const horiz=Math.abs(b[1]-a[1])<.01;
       fx.add(box(horiz?len+.2:.2,.16,horiz?.2:len+.2,"rail",(a[0]+b[0])/2,RAIL_Y+.12,(a[1]+b[1])/2));
-      for(let t=0;t<=len;t+=3){ const x=a[0]+(b[0]-a[0])*t/len, z=a[1]+(b[1]-a[1])*t/len; const h=cyl(.03,.03,.9,"rail",x,RAIL_Y+.6,z,6); h.castShadow=false; fx.add(h); } });
-    [[17,12],[27,12],[17,18],[27,18]].forEach(([x,z])=>{ fx.add(box(1.2,.12,.9,"station",x,1.04,z,.03)); });
+      for(let t=0;t<=len;t+=3){ const x=a[0]+(b[0]-a[0])*t/len, z=a[1]+(b[1]-a[1])*t/len; const h=cyl(.035,.035,1.2,"rail",x,RAIL_Y+.75,z,6); h.castShadow=false; fx.add(h); } });
+    [[17,12],[17,18],[27,18]].forEach(([x,z])=>{ fx.add(box(1.2,.12,.9,"station",x,1.04,z,.03)); });
+    // sterile pass-through in the OR 2 wall
+    fx.add(box(1.5,.08,1.3,"station",27,.92,12.35,.02)); fx.add(box(1.5,.9,1.3,"steel",27,.45,12.35,.04));
+    const gl=box(1.5,1.1,1.3,"glass",27,1.5,12.35,.04); gl.castShadow=false; fx.add(gl);
+    C.uv = box(1.3,.05,1.1,"uv",27,2.02,12.35); C.uv.castShadow=false; fx.add(C.uv);
     fx.add(box(1.2,.1,.8,"station",33.2,1.04,15.4,.03));
     // rail box
     A.robot = new THREE.Group();
-    A.robot.add(box(.12,.5,.12,"dark",0,RAIL_Y-.25,0)); A.robot.add(box(.5,.14,.3,"dark",0,RAIL_Y+.02,0,.04));
-    A.robot.add(box(1.0,.5,.7,"robot",0,RAIL_Y-.66,0,.12)); A.robot.add(box(.86,.06,.56,"robotTop",0,RAIL_Y-.39,0,.02));
+A.robot.add(box(.5,.18,.34,"dark",0,RAIL_Y,0,.04)); A.robot.add(box(.3,.1,.3,"dark",0,RAIL_Y-.12,0));
+    const bx = new THREE.Group(); bx.add(box(1.0,.5,.7,"robot",0,0,0,.12)); bx.add(box(.86,.06,.56,"robotTop",0,.27,0,.02)); A.robot.add(bx);
+    const cable = cyl(.025,.025,1,"dark",0,0,0,6); cable.castShadow=false; A.robot.add(cable);
+    A.robot.userData.box = bx; A.robot.userData.cable = cable;
     A.robot.scale.set(1.3,1,1.3); g.add(A.robot);
     // cameras and microphones in OR 2
     const coneMat = C.coneMat = new THREE.MeshBasicMaterial({color:"#ef6a34",transparent:true,opacity:.09,depthWrite:false,side:THREE.DoubleSide});
@@ -512,18 +527,21 @@ function buildScene(future){
     C.bill = box(.8,.5,.06,"bill",34.4,1.2,9.92); C.bill.castShadow=false; fx.add(C.bill);
     // robot picking arm in the supply room
     const ab = new THREE.Group(); g.add(ab);
-    ab.add(cyl(.4,.46,.3,"arm",26.6,.15,14.2)); ab.add(cyl(.24,.24,.24,"armJ",26.6,.42,14.2));
-    const L1=1.3, L2=1.1, SH=new THREE.Vector3(26.6,.55,14.2);
+const track = box(8.2,.06,.3,"rail",23.4,.03,14.0); track.castShadow=false; ab.add(track);
+    const base = new THREE.Group(); ab.add(base); base.add(cyl(.4,.46,.3,"arm",0,.15,0)); base.add(cyl(.24,.24,.24,"armJ",0,.42,0)); base.position.set(26.6,0,14.0);
+    const beam = box(.04,1,.04,"beam",0,0,0); beam.castShadow=false; ab.add(beam); C.beam=beam;
+    const foundM = box(.5,.06,.4,"found",25.9,1.47,14.75); foundM.castShadow=false; foundM.visible=false; ab.add(foundM); C.found=foundM;
+    const L1=1.3, L2=1.1, SH=new THREE.Vector3(26.6,.55,14.0); C.armBase=26.6; C.armEnd=new THREE.Vector3();
     const l1 = new THREE.Mesh(new THREE.BoxGeometry(.24,.24,L1),M.arm), l2 = new THREE.Mesh(new THREE.BoxGeometry(.2,.2,L2),M.arm);
     const j = new THREE.Mesh(new THREE.SphereGeometry(.18,14,10),M.armJ), gp = new THREE.Mesh(new THREE.BoxGeometry(.3,.16,.3),M.armJ);
     [l1,l2,j,gp].forEach(o=>{o.castShadow=true; ab.add(o);});
     const e=new THREE.Vector3(), t=new THREE.Vector3();
-    C.arm = (T)=>{ t.copy(T); const dx=t.x-SH.x, dz=t.z-SH.z, r=Math.hypot(dx,dz), h=t.y-SH.y;
+    C.arm = (T,bx)=>{ C.armBase=bx; SH.x=bx; base.position.x=bx; t.copy(T); const dx=t.x-SH.x, dz=t.z-SH.z, r=Math.hypot(dx,dz), h=t.y-SH.y;
       const d=clamp(Math.hypot(r,h),.3,L1+L2-.02); const a1=Math.atan2(h,r)+Math.acos(clamp((L1*L1+d*d-L2*L2)/(2*L1*d),-1,1));
       const ux=r?dx/r:0, uz=r?dz/r:1; e.set(SH.x+ux*L1*Math.cos(a1), SH.y+L1*Math.sin(a1), SH.z+uz*L1*Math.cos(a1));
       const end = SH.clone().add(new THREE.Vector3(ux*r, h, uz*r).setLength(Math.min(d, Math.hypot(r,h))));
-      l1.position.copy(SH).lerp(e,.5); l1.lookAt(e); l2.position.copy(e).lerp(end,.5); l2.lookAt(end); j.position.copy(e); gp.position.copy(end).y+=.08; };
-    C.arm(ARM_REST);
+      l1.position.copy(SH).lerp(e,.5); l1.lookAt(e); l2.position.copy(e).lerp(end,.5); l2.lookAt(end); j.position.copy(e); gp.position.copy(end).y+=.08; C.armEnd.copy(end); };
+    C.arm(ARM_REST,23);
     // cleaning robot
     A.bot = new THREE.Group(); A.bot.add(cyl(.5,.52,.26,"bot",0,.16,0,32)); A.bot.add(cyl(.4,.4,.04,"botTop",0,.31,0,32));
     A.bot.add(cyl(.1,.1,.1,"glowB",0,.36,0,16)); g.add(A.bot);
@@ -532,26 +550,34 @@ function buildScene(future){
   for(let i=0;i<3;i++){ const r=ring("#ef6a34",1); r.visible=false; g.add(r); flashes.push(r); }
   return {scene, A, C, flashes, future};
 }
-const ARM_REST = new THREE.Vector3(26.7,2.2,14.5), ARM_SHELF = new THREE.Vector3(25.9,1.55,14.75), ARM_POD = new THREE.Vector3(24.7,1.8,15);
-const ARM_KEYS = [[0,ARM_REST],[.08,ARM_REST],[.18,ARM_SHELF],[.22,ARM_SHELF],[.3,ARM_POD],[.34,ARM_POD],[.44,ARM_REST]];
-function armTarget(i,p){
-  if(i!==1) return ARM_REST;
-  for(let k=1;k<ARM_KEYS.length;k++){ const [a,A]=ARM_KEYS[k-1],[b,B]=ARM_KEYS[k]; if(p<=b){ const u=b>a?clamp((p-a)/(b-a)):1; return A.clone().lerp(B,u); } }
-  return ARM_REST;
+const ARM_REST = new THREE.Vector3(23,2.1,14.4);
+const ARM_KEYS = [ // [progress, base x, target x, y, z]
+  [0,23, 23,2.1,14.4],[.05,23, 23,2.1,14.4],[.09,21.4, 21.4,2.1,14.4],
+  [.11,21.4, 20.8,1.55,14.75],[.13,21.4, 22.0,1.55,14.75],[.15,21.4, 22.0,.95,14.75],[.17,21.4, 20.8,.95,14.75],
+  [.21,24.0, 23.4,1.55,14.75],[.23,24.0, 24.6,1.55,14.75],[.25,24.0, 24.6,.95,14.75],
+  [.28,25.6, 25.9,1.55,14.75],[.30,25.6, 25.9,1.55,14.75],[.34,25.6, 27.2,1.62,15],[.37,25.6, 27.2,1.62,15],[.44,23, 23,2.1,14.4]];
+const SEARCH = [.09,.28], HELD = [.30,.37];
+function armPose(i,p){
+  if(i!==1) return [ARM_REST,23];
+  for(let k=1;k<ARM_KEYS.length;k++){ const A=ARM_KEYS[k-1], B=ARM_KEYS[k]; if(p<=B[0]){ const u=ease(B[0]>A[0]?clamp((p-A[0])/(B[0]-A[0])):1);
+    return [new THREE.Vector3(A[2]+(B[2]-A[2])*u, A[3]+(B[3]-A[3])*u, A[4]+(B[4]-A[4])*u), A[1]+(B[1]-A[1])*u]; } }
+  return [ARM_REST,23];
 }
+const DROP = RAIL_Y-.66-1.25; // how far the box lowers at full drop
+function keyAt(keys,p){ if(!keys) return 0; for(let k=1;k<keys.length;k++){ if(p<=keys[k][0]){ const u=ease(clamp((p-keys[k-1][0])/((keys[k][0]-keys[k-1][0])||1))); return keys[k-1][1]+(keys[k][1]-keys[k-1][1])*u; } } return keys.at(-1)[1]; }
 
 const SIDES = { t: buildScene(false), f: buildScene(true) };
 const HOME = { nurse:[27.6,-1.0], patient:[22,-1.2], surgeon:[28.6,7.2], tech:[30.8,7.6], anes:[27.4,5.6], crew:[14,-1.6],
-  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[24.7,15], bot:[24,1.2] };
+  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[27.2,15], bot:[24,1.2] };
 const HOME_F = { scope:[25.9,14.75,1.55] };
 
 /* ============================ camera ============================ */
 const cam = new THREE.OrthographicCamera(-1,1,1,-1,.1,400);
 const DIR = new THREE.Vector3(-.22, 1.5, 1).normalize();
 const TARGET = new THREE.Vector3(28.5,0,8);
-const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2], arm:[24.2,28,13.4,16.3], cam:[29.6,37,-1.6,5.4] };
+const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2], arm:[19.8,28.2,13.3,16.4], cam:[29.6,37,-1.6,5.4], sterile:[24.4,30,10.2,14] };
 const FB = { t:[...FRAMES.core], f:[...FRAMES.core] };
-function frameFor(side,i,p){ if(step<0) return "core"; const s=STEPS[i]; if(side==="f" && s.zoom && p>=s.zoom[0] && p<s.zoom[1]) return s.zoom[2]; return s.frame||"room"; }
+function frameFor(side,i,p){ if(step<0) return "core"; const s=STEPS[i]; if(side==="f" && s.zooms){ const z=s.zooms.find(z=>p>=z[0] && p<z[1]); if(z) return z[2]; } return s.frame||"room"; }
 function placeCamera(fb,vw,vh,top,bot){
   const BOX=[]; for(const x of [fb[0],fb[1]]) for(const z of [fb[2],fb[3]]) for(const y of [0,2.9]) BOX.push(new THREE.Vector3(x,y,z));
   cam.position.copy(TARGET).addScaledVector(DIR,90); cam.lookAt(TARGET); cam.updateMatrixWorld();
@@ -616,14 +642,15 @@ function anchorOf(side,on){
   const S=SIDES[side];
   if(Array.isArray(on)) return on;
   if(on==="cam"||on==="desk") return ANCH[on];
-  if(on==="arm") return [26.6,.5,14.2];
+  if(on==="arm") return [S.C.armBase??26.6,.5,14.0];
+  if(on==="sterile") return [27,2.3,12.35];
   const o=S.A[on]; if(!o) return [0,0,0];
-  const y = on==="robot" ? RAIL_Y+.5 : on==="bot" ? .9 : on==="patient" ? 1.4 : on==="nurse" ? 3.15 : 2.5;
+  const y = on==="robot" ? RAIL_Y+.45 : on==="bot" ? .9 : on==="patient" ? 1.4 : on==="nurse" ? 3.15 : 2.5;
   return [o.position.x,y,o.position.z];
 }
 // product badges: always shown on the right, so you can see where each product is
 const BADGE_DEF = { t:[{k:"computer",on:"desk",ic:"💻",c:"#d9622b"}],
-  f:[{k:"granola",on:"cam"},{k:"rail",on:"robot"},{k:"arm",on:"arm"},{k:"clean",on:"bot"},{k:"billing",on:"desk"}] };
+  f:[{k:"granola",on:"cam"},{k:"rail",on:"robot"},{k:"arm",on:"arm"},{k:"sterile",on:"sterile"},{k:"clean",on:"bot"},{k:"billing",on:"desk"}] };
 const SEEN = new Set(), TOUCH = matchMedia("(hover: none)").matches;
 const TIP = document.createElement("div"); TIP.className="tip"; document.body.appendChild(TIP);
 const HINT = el("hint", TOUCH ? "Tap to see what it does" : "Hover to see what it does", H.f.querySelector(".calls"));
@@ -634,7 +661,7 @@ function showTip(e,P){ TIP.innerHTML=`<b style="color:${P.c}">${P.name}</b>${P.t
   TIP.style.left=x+"px"; TIP.style.top=y+"px"; }
 function hideTip(){ TIP.classList.remove("on"); tipFor=null; }
 for(const side of ["t","f"]) BADGE_DEF[side].forEach(b=>{
-  const P = PRODUCTS[b.k] || {name:"Computer", c:b.c, tip:"Today Sam types the case record here by hand."};
+  const P = PRODUCTS[b.k] || EXTRA[b.k] || {name:"Computer", c:b.c, tip:"Today Sam types the case record here by hand."};
   const e=el("badge",b.ic||P.ic,H[side].querySelector(".labs")); e.style.setProperty("--pc",b.c||P.c);
   e.setAttribute("role","button"); e.tabIndex=0; e.setAttribute("aria-label",P.name+". "+P.tip);
   const open=()=>{ SEEN.add(b.k); showTip(e,P); };
@@ -662,7 +689,7 @@ function buildCalls(i){
   for(const side of ["t","f"]){ CALLS[side].forEach(([,e])=>e.remove()); CALLS[side]=[];
     if(i<0) continue;
     STEPS[i][side].ev.filter(e=>e.call).forEach(ev=>{
-      const P = ev.prod && PRODUCTS[ev.prod];
+      const P = ev.prod && (PRODUCTS[ev.prod] || EXTRA[ev.prod]);
       const e = el("call "+ev.kind, (P?`<small>${P.name}</small>`:"")+ev.call, H[side].querySelector(".calls"));
       if(P) e.style.setProperty("--pc",P.c);
       CALLS[side].push([ev,e]); });
@@ -712,7 +739,15 @@ function frame(now){
       const body = o.userData.body; if(body) body.position.y = .62 + (r.moving&&!reduced ? Math.abs(Math.sin(now/110))*.05 : 0);
     }
     S.A.nurse.userData.marker.position.y = 1.62 + (reduced?0:Math.sin(now/300)*.06);
-    if(S.C.arm) S.C.arm(armTarget(step<0?-1:i,p));
+    if(S.C.arm){ const [T,bx]=armPose(step<0?-1:i,p); S.C.arm(T,bx);
+      const searching = i===1 && step>=0 && p>SEARCH[0] && p<SEARCH[1];
+      S.C.beam.visible = searching; if(searching){ const e=S.C.armEnd; S.C.beam.scale.y=Math.max(.1,e.y-.4); S.C.beam.position.set(e.x,(e.y+.4)/2,e.z); }
+      S.C.found.visible = i===1 && step>=0 && p>=SEARCH[1] && p<HELD[0]+.02;
+      if(i===1 && step>=0 && p>=HELD[0] && p<HELD[1]){ const e=S.C.armEnd; S.A.scope.position.set(e.x,e.y-.05,e.z); } }
+    if(S.A.robot){ const dy = keyAt(step<0?null:d.drop,p)*DROP, u=S.A.robot.userData;
+      u.box.position.y = RAIL_Y-.66-dy; const len=.32+dy; u.cable.scale.y=len; u.cable.position.y=RAIL_Y-.15-len/2;
+      if(step>=0) (d.ride||[]).forEach(r=>{ if(p>=r.at[0] && p<r.at[1]){ const o=S.A[r.a]; o.position.set(S.A.robot.position.x, RAIL_Y-.66-dy+.33, S.A.robot.position.z); } }); }
+    if(S.C.uv){ const on = step>=0 && d.uv && p>=d.uv[0] && p<d.uv[1]; S.C.uv.material.emissiveIntensity = on ? 1.2+.8*Math.abs(Math.sin(now/120)) : .4; }
     if(S.C.coneMat){ const on = (step===0 && p>.3 && p<.85) || (step===2 && p>.08 && p<.9); S.C.coneMat.opacity = on ? .14+.1*Math.abs(Math.sin(now/300)) : .07; M.cam.emissiveIntensity = on ? .6+.5*Math.abs(Math.sin(now/300)) : .5; }
     if(S.C.bill){ const on = step===3 && p>.2; S.C.bill.material.emissiveIntensity = on ? .9+.3*Math.sin(now/200) : .3; }
     // Sam's ring pulses red while time is lost
@@ -737,7 +772,7 @@ function frame(now){
     LABS[side].forEach(([r,e])=>{ const [sx,sy]=project([r.x,.1,r.z],vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
     const placed=[]; let hintAt=null;
     BADGES[side].forEach(([b,e])=>{
-      const a = b.on==="arm"?[27.7,.5,14.2] : b.on==="cam"?[35.1,3.25,.7] : b.on==="bot"?anchorOf(side,"bot").map((v,k)=>k===1?1.5:v) : anchorOf(side,b.on);
+      const a = b.on==="arm"?[(S.C.armBase??26.6)+1.0,.5,14.0] : b.on==="cam"?[35.1,3.25,.7] : b.on==="bot"?anchorOf(side,"bot").map((v,k)=>k===1?1.5:v) : anchorOf(side,b.on);
       const [sx,sy]=project(a,vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`;
       const vis = sy>L.top+14 && sy<vh-L.bot-14 && sx>10 && sx<vw-10; e.style.visibility = vis?"visible":"hidden";
       if(vis) placed.push([sx-20,sy-20,40,40]);
@@ -749,7 +784,7 @@ function frame(now){
       const w=SAM[side].offsetWidth, h=SAM[side].offsetHeight; placed.push([sx-w/2,sy-h,w,h]); }
     CALLS[side].forEach(([ev,e])=>{
       const on = step>=0 && p>=ev.at && p<ev.until; e.classList.toggle("on",on); if(!on) return;
-      let [sx,sy]=project(ev.on==="arm"?[26.6,3.2,14.2]:anchorOf(side,ev.on),vw,vh); const w=e.offsetWidth, h=e.offsetHeight;
+      let [sx,sy]=project(ev.on==="arm"?[S.C.armBase??26.6,3.0,14.0]:anchorOf(side,ev.on),vw,vh); const w=e.offsetWidth, h=e.offsetHeight;
       const dy = ev.on==="nurse" ? 30 : (ev.prod ? 24 : 6);
       let x = clamp(sx-w/2, 8, vw-w-8), y = sy-h-dy;
       y = clamp(y, L.top+4, vh-L.bot-h-4);
