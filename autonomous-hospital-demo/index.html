@@ -14,6 +14,7 @@
   --bg:#e8ecf0; --panel:rgba(255,255,255,.9); --panel-solid:#fff; --line:rgba(20,32,44,.12);
   --ink:#16202a; --muted:#5b6875; --faint:#8a96a2;
   --today:#d9622b; --today-bg:#fbe9df; --future:#2a66cf; --future-bg:#e1ebfb; --ok:#23854a;
+  --nurse:#e0457b;
   --f:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 *{box-sizing:border-box}
@@ -86,6 +87,19 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
 .lab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:11px;font-weight:600;color:#4c5966;letter-spacing:.02em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .lab.focus{color:var(--ink);font-size:12px;background:#fff;padding:2px 7px;border-radius:6px;border:1px solid var(--line);text-shadow:none}
 
+/* role tags that follow people */
+.tag{position:absolute;left:0;top:0;padding:2px 7px;border-radius:999px;font-size:10.5px;font-weight:600;white-space:nowrap;background:rgba(255,255,255,.92);border:1px solid var(--line);color:#33404c;display:flex;align-items:center;gap:5px}
+.tag i{width:8px;height:8px;border-radius:50%;flex:none}
+.tag.main{font-size:12.5px;font-weight:700;padding:4px 10px;background:var(--nurse);color:#fff;border-color:var(--nurse);box-shadow:0 3px 10px rgba(224,69,123,.35);z-index:2}
+.tag.main i{background:#fff!important}
+.tag.rail{background:#efeafc;color:#4b34a8;border-color:#cfc4f3}
+/* legend row at the top of the step card */
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--muted);padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid var(--line)}
+.legend span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.legend i{width:9px;height:9px;border-radius:50%;flex:none}
+.legend i.sq{border-radius:2px}
+.legend .me{font-weight:700;color:var(--ink)}
+@media (max-width:760px){.legend{gap:2px 8px;font-size:10px;padding-bottom:6px;margin-bottom:6px}.tag:not(.main):not(.rail){display:none}.tag.main{font-size:10.5px;padding:2px 7px}}
 /* top brand */
 .brand{position:fixed;top:12px;left:12px;z-index:5;display:flex;align-items:center;gap:10px;pointer-events:none}
 .brand b{font-size:14px;font-weight:700}
@@ -138,7 +152,7 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
 .fact b{display:block;font-size:22px;color:var(--today);letter-spacing:-.01em}
 .fact small{display:block;color:#47535f;font-size:12.5px;line-height:1.35}
 .who{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:13px;color:var(--muted)}
-.who i{width:30px;height:30px;border-radius:50%;background:#2c8f9c;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:700;font-size:12px;flex:none}
+.who i{width:30px;height:30px;border-radius:50%;background:#e0457b;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:700;font-size:12px;flex:none}
 .who b{color:var(--ink)}
 .go{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .go .btn{height:42px;padding:0 18px;font-size:14.5px}
@@ -163,7 +177,7 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
 <div class="brand"><b>Autonomous Hospital</b><small>One case in OR 2</small></div>
 
 <div class="half l" id="hl">
-  <div class="labs"></div><div class="notes"></div>
+  <div class="labs"></div><div class="tags"></div><div class="notes"></div>
   <div class="side-head">
     <div class="tagline"><i></i>Today <small>the nurse does it by hand</small></div>
     <div class="stats">
@@ -177,9 +191,9 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
   <div class="rec"><h4>Chart <em>typed by Sam</em></h4><ol></ol><div class="sign">Signed</div></div>
 </div>
 <div class="half r" id="hr">
-  <div class="labs"></div><div class="notes"></div>
+  <div class="labs"></div><div class="tags"></div><div class="notes"></div>
   <div class="side-head">
-    <div class="tagline"><i></i>With the system <small>cameras, software, supply robots</small></div>
+    <div class="tagline"><i></i>With the system <small>cameras, software, ceiling rail</small></div>
     <div class="stats">
       <div class="stat"><b data-k="clock">07:10</b><small>Clock</small></div>
       <div class="stat"><b data-k="chart">0</b><small>Charting min</small></div>
@@ -192,6 +206,16 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
 </div>
 
 <div class="card" id="card" hidden>
+  <div class="legend" aria-label="Who's who">
+    <span class="me"><i style="background:#e0457b"></i>Sam, circulating nurse</span>
+    <span><i style="background:#3f8f5a"></i>Surgeon</span>
+    <span><i style="background:#7a62c4"></i>Anesthesia</span>
+    <span><i style="background:#3d7fc4"></i>Scrub tech</span>
+    <span><i style="background:#7d8590"></i>Cleaning crew</span>
+    <span><i style="background:#c08a3e"></i>Sterile processing</span>
+    <span><i style="background:#ef6a34"></i>Ceiling camera</span>
+    <span><i class="sq" style="background:#6c4fd1"></i>Rail carrier</span>
+  </div>
   <div class="card-top"><span class="k" id="stepK">Step 1 of 7</span><h2 id="stepT"></h2><button class="more" id="more">More</button></div>
   <div class="cols">
     <div class="col t"><b>Today</b><span id="txtT"></span></div>
@@ -210,7 +234,7 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
   <div class="sheet-in">
     <div class="eyebrow">Autonomous Hospital · operating floor</div>
     <h1>One surgery, played two ways <span>at the same time.</span></h1>
-    <p>This is a surgery center with four operating rooms, a clean supply room in the middle, and sterile processing next to it. We follow one gallbladder surgery in OR 2, from check-in to the room being ready for the next patient. The left side is how it works today. The right side is the same case with cameras and software keeping the record, checking the counts, and calling the room reset.</p>
+    <p>This is a surgery center with four operating rooms, a clean supply room in the middle, and sterile processing next to it. We follow one gallbladder surgery in OR 2, from check-in to the room being ready for the next patient. The left side is how it works today. The right side is the same case with ceiling cameras and software keeping the record, checking the counts and calling the room reset, and carriers on a ceiling rail moving instrument trays.</p>
     <div class="who"><i>SO</i><span><b>Sam Ortiz, RN</b> · circulating nurse in OR 2 · first case of the day</span></div>
     <div class="facts">
       <div class="fact"><b>86 of 201</b><small>minutes a patient spends in the OR, plus the room reset, are not surgery</small></div>
@@ -231,7 +255,7 @@ button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
       <div class="fact"><b id="sumMin"></b><small id="sumMinT"></small></div>
       <div class="fact"><b id="sumUsd"></b><small id="sumUsdT"></small></div>
     </div>
-    <div class="still"><b>What people still do</b>Operate, give anesthesia, care for the patient, do the count out loud, and approve the record. The system keeps the record, checks it, and handles the supplies and the reset calls.</div>
+    <div class="still"><b>What people still do</b>Operate, give anesthesia, care for the patient, do the count out loud, and approve the record. The system keeps the record, checks it, and handles the supplies, the tray runs and the reset calls.</div>
     <div class="go"><button class="btn primary" id="again">Watch again</button><button class="btn" id="close">Look around the floor</button></div>
     <div class="fine">Times and counts in this case are illustrative. The pilot measures charting minutes per case and minutes from patient out to next patient in, using the same cameras.</div>
   </div>
@@ -283,7 +307,7 @@ const STEPS = [
  { title:"Asleep and draped", secs:13, cam:{x:26,z:9,zoom:.9},
    clock:{t:[460,485], f:[460,485]},
    txtT:"The surgeon asks for a 5 mm 30° scope that isn't on the cart. Sam leaves the room to find it in the clean supply room, about 7 minutes. Back in the room, Sam calls sterile processing to ask if the next case's tray is ready.",
-   txtF:"The supply wall was stocked from the surgeon's preference card last night, so the scope is in a drawer by the door. The system sees the next case's tray is done in sterile processing, and a robot brings it to OR 2's back door.",
+   txtF:"The supply wall was stocked from the surgeon's preference card last night, so the scope is in a drawer by the door. The system sees the next case's tray is done in sterile processing, and a carrier on the ceiling rail brings it to OR 2's pass-through.",
    t:{ moves:[{a:"nurse",at:[.18,.45],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[20.5,15]]},
               {a:"nurse",at:[.55,.8],path:[[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,9.6],[33.2,9.8],[34.4,9.6]]}],
        ev:[{at:.04,until:.2,note:"“Can I get a 5 mm 30° scope? It's not on the cart.”",on:"surgeon"},
@@ -291,12 +315,13 @@ const STEPS = [
            {at:.45,until:.58,note:"Searching the clean supply room for the scope",on:"nurse"},
            {at:.84,add:{calls:1}},{at:.84,until:1,note:"Calls sterile processing: is the next tray ready?",on:"nurse"}] },
    f:{ moves:[{a:"nurse",at:[.2,.32],path:[[30.6,10.6]]},{a:"nurse",at:[.4,.52],path:[[31.6,4.4]]},
-              {a:"robot",at:[.58,.95],path:[[33.2,15.4],[31,15.4],[31,12.8],[27,12.8]]},
-              {a:"traynext",at:[.58,.95],path:[[33.2,15.4],[31,15.4],[31,12.8],[27,12.8]]}],
+              {a:"robot",at:[.58,.9],path:[[31,15.4],[31,12.8],[27,12.8]]},
+              {a:"traynext",at:[.58,.9],path:[[31,15.4,1.78],[31,12.8,1.78],[27,12.8,1.78]]},
+              {a:"traynext",at:[.9,.98],path:[[27,12.05,1.17]]}],
        ev:[{at:.04,until:.2,note:"“Can I get a 5 mm 30° scope? It's not on the cart.”",on:"surgeon"},
            {at:.24,until:.5,note:"It's in the supply wall drawer, stocked from the surgeon's card",on:"nurse"},
            {at:.3,flash:[30.6,10.8],rec:["07:51","Scope 5 mm 30° taken from wall"]},
-           {at:.6,until:1,note:"Next case's tray is clean. A robot brings it to the back door.",on:"robot"}] } },
+           {at:.6,until:1,note:"Next tray rides the ceiling rail to OR 2's pass-through",on:"robot"}] } },
 
  { title:"Surgery", secs:15, cam:{x:28,z:8,zoom:.95},
    clock:{t:[485,535], f:[485,535]},
@@ -336,7 +361,7 @@ const STEPS = [
  { title:"Patient out", secs:13, cam:{x:30,z:6,zoom:.66},
    clock:{t:[545,552], f:[545,548]},
    txtT:"The patient goes to recovery. Sam finishes the chart, calls the cleaning crew and the front desk for the next patient, then takes the used instruments to sterile processing.",
-   txtF:"The cameras see the patient leave at 09:05. The cleaning crew is paged automatically and a robot takes the used instruments to sterile processing. Sam reads the draft record and signs it with a tap.",
+   txtF:"The cameras see the patient leave at 09:05. The cleaning crew is paged automatically. The scrub tech puts the used tray in the pass-through, and the rail carrier takes it to sterile processing. Sam reads the draft record and signs it with a tap.",
    t:{ moves:[{a:"patient",at:[0,.38],path:[[29.5,1],[29.5,-1.2],[40.6,-1.2],[40.6,1.8]]},
               {a:"anes",at:[0,.38],path:[[28.4,1],[28.4,-.6],[39.4,-.6],[39.4,1.6]]},
               {a:"nurse",at:[.86,1],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[31,12.7],[31,15]]},
@@ -351,20 +376,24 @@ const STEPS = [
               {a:"anes",at:[0,.38],path:[[28.4,1],[28.4,-.6],[39.4,-.6],[39.4,1.6]]},
               {a:"nurse",at:[.42,.5],path:[[34.4,9.6]]},
               {a:"crew",at:[.42,.95],path:[[9,12.8],[25,12.8],[25,11.2],[26.4,8.6]]},
-              {a:"robot",at:[.45,.62],path:[[25,12.8],[25,11.2],[30.6,9.4]]},
-              {a:"robot",at:[.66,.98],path:[[25,11.2],[25,12.8],[31,12.8],[31,15.4],[33.2,15.4]]},
-              {a:"trayused",at:[.66,.98],path:[[25,11.2],[25,12.8],[31,12.8],[31,15.4],[33.4,15.6]]}],
+              {a:"tech",at:[.42,.5],path:[[31.4,9.3]]},
+              {a:"tech",at:[.5,.6],path:[[27,11.3]]},
+              {a:"trayused",at:[.5,.6],path:[[27,11.6,.25]]},
+              {a:"trayused",at:[.6,.66],path:[[27,12.05,.25],[27,12.8,.86]]},
+              {a:"tech",at:[.64,.76],path:[[30.8,7.6]]},
+              {a:"robot",at:[.66,.98],path:[[31,12.8],[31,15.4],[33.2,15.4]]},
+              {a:"trayused",at:[.66,.98],path:[[31,12.8,.86],[31,15.4,.86],[33.2,15.4,.86]]}],
        ev:[{at:.36,flash:[29.5,1],rec:["09:05","Patient out"]},
            {at:.4,until:.6,note:"Patient out seen at 09:05. Cleaning crew paged.",on:[29.5,1]},
            {at:.5,to:.75,add:{chart:3}},
            {at:.5,until:.8,note:"Reads the draft and signs with a tap",on:"nurse"},
            {at:.74,signR:true},
-           {at:.8,until:1,note:"Robot takes the used tray to sterile processing",on:"robot"}] } },
+           {at:.8,until:1,note:"Used tray rides the ceiling rail to sterile processing",on:"robot"}] } },
 
  { title:"Room reset", secs:14, cam:{x:22,z:10,zoom:.6},
    clock:{t:[552,587], f:[548,572]},
    txtT:"The room sits empty until the cleaning crew arrives. Sam calls sterile processing about the next tray and goes back to the clean supply room for items missing from the next case. Next patient in at 09:47.",
-   txtF:"The crew was paged at 09:05 and is already cleaning. The next tray is waiting at the back door, and the supply wall has restocked itself for case 2. Next patient in at 09:32.",
+   txtF:"The crew was paged at 09:05 and is already cleaning. The next tray is waiting in the pass-through, and the supply wall has restocked itself for case 2. Next patient in at 09:32.",
    t:{ moves:[{a:"nurse",at:[.02,.18],path:[[31,12.7],[25,12.7],[25,11.2],[27,9.6],[33.2,9.8],[34.4,9.6]]},
               {a:"crew",at:[.12,.42],path:[[9,12.8],[25,12.8],[25,11.2],[26.4,8.6]]},
               {a:"crew",at:[.44,.7],path:[[28,4.4],[31,4.4],[31,7.6],[28,7.6],[27.4,6]]},
@@ -378,12 +407,11 @@ const STEPS = [
            {at:.7,add:{trips:1}},{at:.66,until:.8,note:"Gets items missing from the next case's setup",on:"nurse"},
            {at:.92,until:1,note:"Room ready. Next patient in at 09:47.",on:[29.5,6]}] },
    f:{ moves:[{a:"crew",at:[0,.42],path:[[28,4.4],[31,4.4],[31,7.6],[28,7.6],[27.4,6]]},
-              {a:"nurse",at:[.3,.44],path:[[27,9.6],[25.6,11],[26.2,12.4]]},
-              {a:"nurse",at:[.46,.62],path:[[26,11],[30.2,9.6]]},
-              {a:"traynext",at:[.46,.62],path:[[26.4,11.6],[26,11],[31.5,8.9]]},
-              {a:"robot",at:[.3,.6],path:[[33.2,16.2]]}],
+              {a:"nurse",at:[.3,.44],path:[[27,11.3]]},
+              {a:"nurse",at:[.46,.62],path:[[30.2,9.6]]},
+              {a:"traynext",at:[.46,.62],path:[[27,11.7,1.17],[31.5,8.9,1.2]]}],
        ev:[{at:.04,until:.3,note:"Cleaning crew is already here",on:"crew"},
-           {at:.36,until:.62,note:"Next tray is waiting at the back door",on:"nurse"},
+           {at:.36,until:.62,note:"Next tray is waiting in the pass-through",on:"nurse"},
            {at:.62,flash:[30.6,10.8],until:.85,note:"Supply wall restocked itself for case 2",on:[30.6,10.8]},
            {at:.85,until:1,note:"Room ready. Next patient in at 09:32.",on:[29.5,6]}] } },
 ];
@@ -417,10 +445,11 @@ mat("sheet","#f4f7fa"); mat("blanket","#9fc3e6"); mat("mattress","#e9eef3"); mat
 mat("shelf","#e8ebee"); mat("binB","#7aa7dc"); mat("binG","#86c79a"); mat("binY","#ecc56a"); mat("binR","#e58e7a");
 mat("supplyT","#c7ced5"); mat("supplyF","#3fae67",{emissive:"#23854a",emissiveIntensity:.35});
 mat("robot","#6c4fd1",{roughness:.45}); mat("robotTop","#efeafc"); mat("tray","#b9c3cc",{roughness:.3,metalness:.6}); mat("trayUsed","#a99a8a",{roughness:.4,metalness:.4});
+mat("rail","#4a5562",{roughness:.4,metalness:.5}); mat("station","#ffffff");
 mat("cam","#ef6a34",{emissive:"#ef6a34",emissiveIntensity:.5}); mat("skin","#e2b896"); mat("skin2","#a87554"); mat("skin3","#c9946b");
 mat("hair","#2f2622"); mat("curtain","#cfe0e6",{transparent:true,opacity:.85}); mat("light","#ffffff",{emissive:"#fffbe8",emissiveIntensity:.4});
 mat("board","#ffffff"); mat("green","#7cc49a"); mat("plant","#7aa884");
-const SCRUB = {nurse:"#2c8f9c", surgeon:"#4f7a5a", anes:"#7a6aa8", tech:"#5b88b5", crew:"#8c8f99", spd:"#b07d4f", other:"#6f9bb3"};
+const SCRUB = {nurse:"#e0457b", surgeon:"#3f8f5a", anes:"#7a62c4", tech:"#3d7fc4", crew:"#7d8590", spd:"#c08a3e", other:"#9fb4c4"};
 
 function box(w,h,d,m,x,y,z,r=0){
   const g = r ? new RoundedBoxGeometry(w,h,d,2,Math.min(r,w/2,h/2,d/2)) : new THREE.BoxGeometry(w,h,d);
@@ -431,7 +460,9 @@ function cyl(rt,rb,h,m,x,y,z,seg=24){ const o=new THREE.Mesh(new THREE.CylinderG
 /* ============================ the building ============================ */
 // Plan coordinates in meters. x to the right, z toward the viewer.
 // Pre-op x0-7, top/bottom patient corridors, ORs 1-4, clean core in the middle, sterile processing, recovery x37-44.
-const WALL_H = 1.5, WT = .18;
+const WALL_H = 1.5, WT = .18, RAIL_Y = 2.75;
+const RAILS = [[[9,12.8],[35,12.8]],[[9,17.2],[35,17.2]],[[9,12.8],[9,17.2]],[[35,12.8],[35,17.2]],[[31,12.8],[31,15.4]],[[31,15.4],[33.2,15.4]],[[24,12.8],[24,15]],[[12,15],[26,15]],[[17,12],[17,12.8]],[[27,12],[27,12.8]],[[17,17.2],[17,18]],[[27,17.2],[27,18]]];
+const LOOP = [[9,12.8],[35,12.8],[35,17.2],[9,17.2],[9,12.8]];
 const ROOMS = [
   {name:"Pre-op", x:3.5,z:15, lab:true},
   {name:"OR 1", x:14.5,z:6, lab:true},{name:"OR 2", x:29.5,z:.9, lab:true, focus:true},
@@ -561,28 +592,47 @@ function buildScene(future){
     [[-1.1,-.3,"surgeon"],[1.1,.2,"tech"],[-.3,-1.6,"anes"],[2.6,2.8,"other"]].forEach(([dx,dz,r])=>{ const p=person(SCRUB[r],["skin","skin2","skin3"][(i+dx>0)%3]); p.position.set(x+dx,0,z+dz); p.rotation.y=Math.atan2(-dx,-dz); g.add(p); });
   });
   // static staff
-  const surgeon = person(SCRUB.surgeon,"skin2"); surgeon.position.set(28.6,0,7.2); surgeon.rotation.y=Math.PI/2; g.add(surgeon);
-  const tech = person(SCRUB.tech,"skin3"); tech.position.set(30.8,0,7.6); tech.rotation.y=-Math.PI/2; g.add(tech);
   // a pre-op nurse and PACU nurse
   const p1=person(SCRUB.other,"skin3"); p1.position.set(5.6,0,12); g.add(p1);
   const p2=person(SCRUB.other,"skin"); p2.position.set(38.6,0,10); g.add(p2);
 
+  // future-only hardware: ceiling cameras with light cones, approval screen glow, ceiling rail
+  const fx = new THREE.Group(); g.add(fx);
   // movable actors
   const A = {};
-  A.nurse = person(SCRUB.nurse,"skin"); A.nurse.add(ring(future?"#2a66cf":"#d9622b",.52)); g.add(A.nurse);
+  A.nurse = person(SCRUB.nurse,"skin"); A.nurse.add(ring(future?"#2a66cf":"#d9622b",.52));
+  { const mk=new THREE.Mesh(new THREE.ConeGeometry(.16,.3,4),new THREE.MeshStandardMaterial({color:SCRUB.nurse,emissive:SCRUB.nurse,emissiveIntensity:.4})); mk.rotation.x=Math.PI; mk.position.y=1.62; A.nurse.add(mk); A.nurse.userData.marker=mk; }
+  g.add(A.nurse);
+  A.surgeon = person(SCRUB.surgeon,"skin2"); A.surgeon.rotation.y=Math.PI/2; g.add(A.surgeon);
+  A.tech = person(SCRUB.tech,"skin3"); A.tech.rotation.y=-Math.PI/2; g.add(A.tech);
   A.anes = person(SCRUB.anes,"skin"); g.add(A.anes);
   A.crew = person(SCRUB.crew,"skin2"); { const c=box(.5,.7,.4,"binY",0,.35,.5,.05); A.crew.add(c);} g.add(A.crew);
   A.spd = person(SCRUB.spd,"skin3"); g.add(A.spd);
   A.patient = new THREE.Group(); bed(A.patient,0,0,Math.PI/2,true,"skin3"); g.add(A.patient);
-  A.traynext = new THREE.Group(); A.traynext.add(box(.9,.75,.55,"steel",0,.38,0,.04)); A.traynext.add(box(.8,.12,.45,"tray",0,.82,0,.03)); g.add(A.traynext);
+  A.traynext = new THREE.Group();
+  if(future) A.traynext.add(box(.8,.14,.45,"tray",0,0,0,.03));
+  else { A.traynext.add(box(.9,.75,.55,"steel",0,.38,0,.04)); A.traynext.add(box(.8,.12,.45,"tray",0,.82,0,.03)); }
+  g.add(A.traynext);
   A.trayused = new THREE.Group(); A.trayused.add(box(.8,.12,.45,"trayUsed",0,.92,0,.03)); g.add(A.trayused);
-  A.robot = new THREE.Group();
-  A.robot.add(box(.9,.5,.7,"robot",0,.3,0,.12)); A.robot.add(box(.82,.06,.62,"robotTop",0,.58,0,.03));
-  A.robot.add(cyl(.06,.06,.1,"cam",.38,.5,0,12)); A.robot.scale.setScalar(1.45);
-  g.add(A.robot); A.robot.visible = future;
+  // rail carrier: a pod hanging from the ceiling rail
+  const pod = () => { const r=new THREE.Group();
+    r.add(box(.12,.5,.12,"dark",0,RAIL_Y-.25,0)); r.add(box(.5,.14,.3,"dark",0,RAIL_Y+.02,0,.04));
+    r.add(box(1.0,.5,.7,"robot",0,RAIL_Y-.66,0,.12)); r.add(box(.86,.06,.56,"robotTop",0,RAIL_Y-.39,0,.02));
+    return r; };
+  A.robot = pod(); A.robot.scale.set(1.3,1,1.3); g.add(A.robot); A.robot.visible = future;
+  const ambient = [];
+  if(future){
+    // the rail network, above the staff corridor and into sterile processing and clean supply
+    RAILS.forEach(([a,b])=>{ const len=Math.hypot(b[0]-a[0],b[1]-a[1]); const horiz=Math.abs(b[1]-a[1])<.01;
+      const r=box(horiz?len+.2:.2,.16,horiz?.2:len+.2,"rail",(a[0]+b[0])/2,RAIL_Y+.12,(a[1]+b[1])/2); fx.add(r);
+      for(let t=0;t<=len;t+=3){ const x=a[0]+(b[0]-a[0])*t/len, z=a[1]+(b[1]-a[1])*t/len; const h=cyl(.03,.03,.9,"rail",x,RAIL_Y+.6,z,6); h.castShadow=false; fx.add(h); } });
+    // pass-throughs in the OR walls and the loading spot in sterile processing
+    [[17,12],[27,12],[17,18],[27,18]].forEach(([x,z])=>{ fx.add(box(1.2,.12,.9,"station",x,1.04,z,.03)); const l=box(1.2,.06,.04,"glowB",x,1.5,z+(z<15?.46:-.46)); l.castShadow=false; fx.add(l); });
+    fx.add(box(1.2,.1,.8,"station",33.2,1.04,15.4,.03));
+    for(let k=0;k<2;k++){ const a=pod(); a.userData.off=k*.5; g.add(a); ambient.push(a); }
+  }
 
-  // future-only hardware: ceiling cameras with light cones, approval screen glow
-  const fx = new THREE.Group(); g.add(fx);
+
   if(future){
     const coneMat = new THREE.MeshBasicMaterial({color:"#ef6a34",transparent:true,opacity:.07,depthWrite:false,side:THREE.DoubleSide});
     const cams=[[24,1],[35,1],[29.5,6],[24,11],[9,1],[20,1],[9,19],[20,29],[24,19],[35,29],[3.5,-2],[40.5,-2],[32,13.6],[12,14]];
@@ -600,14 +650,15 @@ function buildScene(future){
   const flashes = [];
   for(let i=0;i<4;i++){ const r=ring("#ef6a34",1); r.visible=false; g.add(r); flashes.push(r); }
 
-  return {scene, A, flashes, future};
+  return {scene, A, flashes, future, ambient};
 }
 
 const SIDES = { t: buildScene(false), f: buildScene(true) };
 const HOME = {
-  nurse:[33,3], anes:[27.4,5.6], crew:[9,16.4], spd:[33.4,14.8], patient:[3.6,1.6],
-  traynext:[33.6,16.1], trayused:[31.5,8.5], robot:[33.2,16.2],
+  nurse:[33,3], anes:[27.4,5.6], crew:[9,16.4], spd:[33.4,14.8], patient:[3.6,1.6], surgeon:[28.6,7.2], tech:[30.8,7.6],
+  traynext:[33.6,16.1], trayused:[31.5,8.5], robot:[33.2,15.4],
 };
+const HOME_F = { traynext:[33.2,15.4,1.78] };
 
 /* ============================ camera ============================ */
 const cam = new THREE.OrthographicCamera(-1,1,1,-1,.1,400);
@@ -623,14 +674,14 @@ function placeCamera(aspect){
 /* ============================ state ============================ */
 let step = -1, prog = 0, playing = false, last = performance.now();
 const startState = []; // per step: {t:{pos,counts}, f:{...}}
-function initialState(){ const pos={}; for(const k in HOME) pos[k]=[...HOME[k]]; return {pos, counts:{chart:0,trips:0,calls:0}, recs:[], signed:false}; }
+function initialState(side){ const pos={}; for(const k in HOME){ const h=(side==="f"&&HOME_F[k])||HOME[k]; pos[k]=[h[0],h[1],h[2]??0]; } return {pos, counts:{chart:0,trips:0,calls:0}, recs:[], signed:false}; }
 (function precompute(){
-  let s = {t:initialState(), f:initialState()};
+  let s = {t:initialState("t"), f:initialState("f")};
   STEPS.forEach((st,i)=>{
     startState[i] = JSON.parse(JSON.stringify(s));
     for(const side of ["t","f"]){
       const S = s[side], d = st[side];
-      d.moves.forEach(m=>{ S.pos[m.a] = [...m.path[m.path.length-1]]; });
+      d.moves.forEach(m=>{ const e=m.path[m.path.length-1]; S.pos[m.a] = [e[0],e[1],e[2]??S.pos[m.a][2]]; });
       d.ev.forEach(e=>{ if(e.add) for(const k in e.add) S.counts[k]+=e.add[k]; if(e.rec) S.recs.push(e.rec); if(e.signL||e.signR) S.signed=true; });
     }
   });
@@ -641,13 +692,13 @@ function posAt(side, a, i, p){
   let cur = [...startState[i][side].pos[a]], heading=null, moving=false;
   const moves = STEPS[i][side].moves.filter(m=>m.a===a).sort((x,y)=>x.at[0]-y.at[0]);
   for(const m of moves){
-    const pts=[cur,...m.path];
-    if(p>=m.at[1]){ cur=[...m.path[m.path.length-1]]; const n=pts.length; heading=[pts[n-1][0]-pts[n-2][0],pts[n-1][1]-pts[n-2][1]]; continue; }
+    const pts=[cur]; m.path.forEach(q=>pts.push([q[0],q[1],q[2]??pts[pts.length-1][2]]));
+    if(p>=m.at[1]){ cur=[...pts[pts.length-1]]; const n=pts.length; heading=[pts[n-1][0]-pts[n-2][0],pts[n-1][1]-pts[n-2][1]]; continue; }
     if(p<m.at[0]) break;
     const u = (p-m.at[0])/(m.at[1]-m.at[0]);
     const lens=[]; let total=0; for(let k=1;k<pts.length;k++){ const l=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]); lens.push(l); total+=l; }
     let d = u*total;
-    for(let k=1;k<pts.length;k++){ if(d<=lens[k-1]||k===pts.length-1){ const f=lens[k-1]?clamp(d/lens[k-1]):1; cur=[pts[k-1][0]+(pts[k][0]-pts[k-1][0])*f, pts[k-1][1]+(pts[k][1]-pts[k-1][1])*f]; heading=[pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]]; break; } d-=lens[k-1]; }
+    for(let k=1;k<pts.length;k++){ if(d<=lens[k-1]||k===pts.length-1){ const f=lens[k-1]?clamp(d/lens[k-1]):1; cur=[pts[k-1][0]+(pts[k][0]-pts[k-1][0])*f, pts[k-1][1]+(pts[k][1]-pts[k-1][1])*f, pts[k-1][2]+(pts[k][2]-pts[k-1][2])*f]; heading=[pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]]; break; } d-=lens[k-1]; }
     moving=true; break;
   }
   return {pos:cur, heading, moving};
@@ -660,6 +711,20 @@ for(const side of ["t","f"]){
   const box = H[side].querySelector(".labs");
   ROOMS.forEach(r=>{ const e=document.createElement("div"); e.className="lab"+(r.focus?" focus":""); e.textContent=r.name; if(r.small) e.style.fontSize="10px"; box.appendChild(e); labEls[side].push(e); });
 }
+const TAGS = [
+  {a:"nurse", text:"Sam · circulating nurse", cls:"main"},
+  {a:"surgeon", text:"Surgeon", al:"l"},{a:"anes", text:"Anesthesia", al:"l"},{a:"tech", text:"Scrub tech", al:"r"},
+  {a:"crew", text:"Cleaning crew"},{a:"spd", text:"Sterile processing tech"},{a:"patient", text:"Patient", color:"#e2b896"},
+  {a:"robot", text:"Rail carrier", cls:"rail", side:"f"},
+];
+const TAGCOL = {nurse:"#e0457b",surgeon:"#3f8f5a",anes:"#7a62c4",tech:"#3d7fc4",crew:"#7d8590",spd:"#c08a3e",robot:"#6c4fd1"};
+const tagEls = { t:[], f:[] };
+for(const side of ["t","f"]){
+  const box = H[side].querySelector(".tags");
+  TAGS.forEach(t=>{ if(t.side && t.side!==side) return; const e=document.createElement("div"); e.className="tag "+(t.cls||""); e.innerHTML=`<i style="background:${t.color||TAGCOL[t.a]}"></i>${t.text}`; box.appendChild(e); tagEls[side].push([t,e]); });
+}
+const RAIL_LABELS = [{x:20,z:12.8,text:"Ceiling rail"},{x:27,z:12,text:"Pass-through"}];
+const railEls = RAIL_LABELS.map(r=>{ const e=document.createElement("div"); e.className="tag rail"; e.textContent=r.text; H.f.querySelector(".labs").appendChild(e); return e; });
 const notePool = { t:[], f:[] };
 function noteEl(side,i){ const pool=notePool[side]; while(pool.length<=i){ const e=document.createElement("div"); e.className="note"; H[side].querySelector(".notes").appendChild(e); pool.push(e);} return pool[i]; }
 
@@ -719,11 +784,14 @@ function frame(now){
     // actors
     for(const a in S.A){
       const o = S.A[a]; const r = posAt(side,a,i,p);
-      o.position.x = r.pos[0]; o.position.z = r.pos[1];
-      if(r.heading && (r.heading[0]||r.heading[1]) && a!=="patient" && a!=="traynext" && a!=="trayused") o.rotation.y = Math.atan2(r.heading[0],r.heading[1]);
+      o.position.x = r.pos[0]; o.position.z = r.pos[1]; o.position.y = r.pos[2]||0;
+      if(r.heading && (r.heading[0]||r.heading[1]) && a!=="patient" && a!=="traynext" && a!=="trayused" && a!=="robot") o.rotation.y = Math.atan2(r.heading[0],r.heading[1]);
       const body = o.userData.body; if(body){ body.position.y = .62 + (r.moving&&!reduced ? Math.abs(Math.sin(now/110))*.05 : 0); }
     }
-    // patient faces along travel, lies flat
+    if(S.A.nurse.userData.marker) S.A.nurse.userData.marker.position.y = 1.62 + (reduced?0:Math.sin(now/300)*.06);
+    S.ambient.forEach(a=>{ const L=[0]; for(let q=1;q<LOOP.length;q++) L.push(L[q-1]+Math.hypot(LOOP[q][0]-LOOP[q-1][0],LOOP[q][1]-LOOP[q-1][1]));
+      let d=((now/1000*1.6)/L.at(-1)+a.userData.off)%1*L.at(-1); let q=1; while(L[q]<d) q++; const f=(d-L[q-1])/(L[q]-L[q-1]);
+      a.position.x=LOOP[q-1][0]+(LOOP[q][0]-LOOP[q-1][0])*f; a.position.z=LOOP[q-1][1]+(LOOP[q][1]-LOOP[q-1][1])*f; });
     // counters
     const counts = {...base.counts}; const recs=[...base.recs]; let signed = base.signed;
     d.ev.forEach(e=>{
@@ -748,12 +816,16 @@ function frame(now){
     renderer.render(S.scene, cam);
     // labels
     ROOMS.forEach((r,ri)=>{ const [sx,sy] = project(r.x,.1,r.z,vw,vh); const e=labEls[side][ri]; e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
+    // role tags above heads
+    tagEls[side].forEach(([t,e])=>{ const o=S.A[t.a]; const y = t.a==="robot" ? RAIL_Y+.35 : t.a==="patient" ? 1.1 : 2.75;
+      const [sx,sy] = project(o.position.x,y,o.position.z,vw,vh); const ax = t.al==="l"?"-92%":t.al==="r"?"-8%":"-50%"; e.style.transform=`translate(${sx}px,${sy}px) translate(${ax},-100%)`; });
+    if(side==="f") RAIL_LABELS.forEach((r,ri)=>{ const [sx,sy]=project(r.x,RAIL_Y+.3,r.z,vw,vh); railEls[ri].style.transform=`translate(${sx}px,${sy}px) translate(-50%,-100%)`; });
     // notes
     let ni=0;
     if(step>=0) d.ev.forEach(e=>{
       if(!e.note) return; const until = e.until ?? 1; const on = p>=e.at && (p<until || (until>=1 && p>=1));
       const el = noteEl(side,ni++); el.classList.toggle("on",on); if(el.textContent!==e.note) el.textContent=e.note;
-      let x,z,y=1.6; if(typeof e.on==="string"){ const o=S.A[e.on]||(e.on==="surgeon"?{position:{x:28.6,z:7.2}}:null); x=o.position.x; z=o.position.z; } else { [x,z]=e.on; y=.6; }
+      let x,z,y=1.6; if(typeof e.on==="string"){ const o=S.A[e.on]; x=o.position.x; z=o.position.z; y = e.on==="robot" ? 3.4 : 3.55; } else { [x,z]=e.on; y=.6; }
       const [sx,sy] = project(x,y,z,vw,vh);
       const cx = clamp(sx, 120, vw-120);
       el.style.transform = `translate(${cx}px,${sy}px) translate(-50%,calc(-100% - 12px))`;

@@ -2,7 +2,7 @@
 
 A single-file 3D demo (Three.js from a CDN, no build step). It follows one gallbladder surgery in OR 2 of a four-OR surgery center, from pre-op check-in to the room being ready for the next patient.
 
-The screen is split down the middle. The left side is how the circulating nurse works today. The right side is the same case with ceiling cameras, software and supply robots handling the record, the count check, the supplies and the reset calls. Both sides run on the same clock, with live counters for charting minutes, trips out of the room, phone calls and room reset minutes. A summary at the end compares the totals.
+The screen is split down the middle. The left side is how the circulating nurse works today. The right side is the same case with ceiling cameras and software handling the record, the count check and the reset calls, and carriers on a ceiling rail moving instrument trays between sterile processing and the ORs. Every person has a role tag, and Sam, the circulating nurse, is in pink with a marker overhead. Both sides run on the same clock, with live counters for charting minutes, trips out of the room, phone calls and room reset minutes. A summary at the end compares the totals.
 
 Use → / Space to advance, ← to go back, drag to move the view, scroll to zoom. On a phone the two sides stack top and bottom.
 
