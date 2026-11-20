@@ -121,7 +121,16 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
 .call.same{border-color:#9aa6b2;color:var(--ink);background:#fff}
 .call.good{border-color:var(--hands);color:#1f6b3c;background:#effaf2}
 .badge{position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:#fff;border:3px solid var(--pc);box-shadow:0 3px 10px rgba(20,32,44,.25);transition:opacity .25s}
-.badge.on{transform-origin:center}
+.badge{pointer-events:auto;cursor:help;z-index:4}
+.badge.on{animation:ping 1.4s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--pc)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.hint{position:absolute;left:0;top:0;padding:4px 10px;border-radius:999px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .25s;z-index:5;pointer-events:none}
+.hint::after{content:"";position:absolute;top:50%;margin-top:-5px;right:-5px;border:5px solid transparent;border-right:0;border-left-color:var(--ink)}
+.hint.r::after{right:auto;left:-5px;border-left:0;border-right:5px solid var(--ink)}
+.hint.on{opacity:1}
+.tip{position:fixed;left:0;top:0;z-index:20;max-width:260px;padding:10px 12px;border-radius:10px;background:#fff;box-shadow:0 10px 30px rgba(20,32,44,.25);border:1px solid var(--line);font-size:14px;line-height:1.35;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .15s}
+.tip b{display:block;font-size:13px;margin-bottom:3px}
+.tip.on{opacity:1}
 @media (max-width:560px){.tool:not(.on){display:none}.say{padding:6px 10px 7px}.say p{font-size:14px!important}.time .lbl{font-size:10px}.time .lbl b{font-size:13px}.bar{height:12px!important}.foot{padding:6px 9px 7px!important}.tools{margin-bottom:4px!important}.head h1{font-size:15px}.call{font-size:11.5px;max-width:170px;padding:5px 8px}.sam{font-size:11px;padding:3px 8px}}
 @media (max-width:1000px){.tools .k{display:none}.foot{padding:7px 10px 8px}.bar{height:16px}.tools{margin-bottom:6px}}
 @media (max-width:1300px){.tool .nm{display:none}.tool.on .nm{display:inline}.tool{padding:3px 7px}}
@@ -194,11 +203,11 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
    ===================================================================== */
 const OR_MIN_USD = 36;
 const PRODUCTS = {
-  granola:{ic:"🎥", name:"Granola with eyes", c:"#ef6a34", d:"Cameras and mics. Logs the case."},
-  billing:{ic:"🧾", name:"Coding and billing", c:"#23854a", d:"Codes and bills the case."},
-  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Moves supplies overhead."},
-  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies."},
-  clean:  {ic:"🧹", name:"Cleaning robot", c:"#2a66cf", d:"Cleans the room."},
+  granola:{ic:"🎥", name:"Perception Kit: Granola + Eyes", c:"#ef6a34", d:"Cameras and mics. Logs the case.", tip:"Cameras and mics on the ceiling. They see and hear the case and write the record. Sam does not type."},
+  billing:{ic:"🧾", name:"Coding and billing", c:"#23854a", d:"Codes and bills the case.", tip:"Reads the case record and drafts the billing codes and charges. Sam checks them and approves."},
+  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Moves supplies overhead.", tip:"Boxes that run on a rail in the ceiling. They carry supplies and trays between rooms."},
+  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies.", tip:"A robot arm in the supply room. It picks the item off the shelf and puts it in a rail box."},
+  clean:  {ic:"🧹", name:"Cleaning robot", c:"#2a66cf", d:"Cleans the room.", tip:"Starts cleaning the floor when the patient leaves. No waiting for the crew."},
 };
 const TOOLS_T = {
   computer:{ic:"💻", name:"Computer"}, walk:{ic:"🚶", name:"Walking"}, phone:{ic:"📞", name:"Phone"},
@@ -213,10 +222,10 @@ const LEAVE = (x)=>[[x,1.2],[x,-.9],[46,-.9]];
 const ROOM_LOOP = [[26.5,3],[32.5,3],[32.5,9],[26.5,9],[26.5,3]];
 
 const STEPS = [
- { title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:11,
+ { title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:14, zoom:[.42,.8,"cam"],
    clock:{t:[445,465], f:[445,465]},
    sayT:"Sam types the times into the computer.",
-   sayF:"Granola logs it. Sam stays with the patient.",
+   sayF:"The Perception Kit logs it. Sam stays with the patient.",
    t:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:NURSE_IN},{a:"nurse",at:[.56,.66],path:[[33,7.5],DESK]}],
        time:[["hands",12,0,.56],["typing",8,.66,1]],
        ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
@@ -228,7 +237,7 @@ const STEPS = [
            {at:.56,until:1,call:"Logged patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
            {at:.56,until:1,call:"With the patient",kind:"good",on:"nurse"}] } },
 
- { title:"Surgeon needs a scope", product:["arm","rail"], toolT:["walk"], secs:18, frame:"core", zoomArm:[.04,.38],
+ { title:"Surgeon needs a scope", product:["arm","rail"], toolT:["walk"], secs:18, frame:"core", zoom:[.04,.38,"arm"],
    clock:{t:[465,485], f:[465,485]},
    sayT:"Sam leaves the room for 7 min to get it.",
    sayF:"Robot arm picks it. Rail box brings it. Sam stays.",
@@ -253,10 +262,10 @@ const STEPS = [
            {at:.36,until:.7,call:"Brings it to OR 2",kind:"prod",prod:"rail",on:"robot"},
            {at:.7,until:1,call:"Takes it from the hatch",kind:"good",on:"nurse"}] } },
 
- { title:"Surgery", product:["granola"], toolT:["computer"], secs:12,
+ { title:"Surgery", product:["granola"], toolT:["computer"], secs:14, zoom:[.08,.45,"cam"],
    clock:{t:[485,540], f:[485,540]},
    sayT:"Sam types each item opened. 22 min.",
-   sayF:"Granola logs items and counts. Sam helps the team.",
+   sayF:"The Perception Kit logs items and counts. Sam helps the team.",
    t:{ moves:[{a:"nurse",at:[.05,.15],path:[[33,7.5],DESK]}],
        time:[["hands",3,0,.15],["typing",22,.15,.9],["hands",30,.9,1]],
        ev:[{at:.16,until:1,call:"Typing, 22 min",kind:"pain",on:"nurse"}] },
@@ -492,9 +501,9 @@ function buildScene(future){
     A.robot.add(box(1.0,.5,.7,"robot",0,RAIL_Y-.66,0,.12)); A.robot.add(box(.86,.06,.56,"robotTop",0,RAIL_Y-.39,0,.02));
     A.robot.scale.set(1.3,1,1.3); g.add(A.robot);
     // cameras and microphones in OR 2
-    const coneMat = new THREE.MeshBasicMaterial({color:"#ef6a34",transparent:true,opacity:.09,depthWrite:false,side:THREE.DoubleSide});
+    const coneMat = C.coneMat = new THREE.MeshBasicMaterial({color:"#ef6a34",transparent:true,opacity:.09,depthWrite:false,side:THREE.DoubleSide});
     [[23.9,.7],[35.1,.7],[23.9,11.3],[35.1,11.3]].forEach(([x,z])=>{
-      const dome = new THREE.Mesh(new THREE.SphereGeometry(.26,16,10,0,Math.PI*2,0,Math.PI/2),M.cam); dome.rotation.x=Math.PI; dome.position.set(x,2.3,z); fx.add(dome);
+      fx.add(box(.5,.08,.16,"dark",x+.45*(x<30?1:-1),2.42,z)); const dome = new THREE.Mesh(new THREE.SphereGeometry(.34,16,10,0,Math.PI*2,0,Math.PI/2),M.cam); dome.rotation.x=Math.PI; dome.position.set(x,2.3,z); fx.add(dome);
       fx.add(cyl(.02,.02,.3,"steel",x,2.45,z,6));
       const cone = new THREE.Mesh(new THREE.ConeGeometry(2.6,2.3,32,1,true),coneMat); cone.position.set(x,1.15,z); fx.add(cone);
     });
@@ -540,9 +549,9 @@ const HOME_F = { scope:[25.9,14.75,1.55] };
 const cam = new THREE.OrthographicCamera(-1,1,1,-1,.1,400);
 const DIR = new THREE.Vector3(-.22, 1.5, 1).normalize();
 const TARGET = new THREE.Vector3(28.5,0,8);
-const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2], arm:[24.2,28,13.4,16.3] };
+const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2], arm:[24.2,28,13.4,16.3], cam:[29.6,37,-1.6,5.4] };
 const FB = { t:[...FRAMES.core], f:[...FRAMES.core] };
-function frameFor(side,i,p){ if(step<0) return "core"; const s=STEPS[i]; if(side==="f" && s.zoomArm && p>=s.zoomArm[0] && p<s.zoomArm[1]) return "arm"; return s.frame||"room"; }
+function frameFor(side,i,p){ if(step<0) return "core"; const s=STEPS[i]; if(side==="f" && s.zoom && p>=s.zoom[0] && p<s.zoom[1]) return s.zoom[2]; return s.frame||"room"; }
 function placeCamera(fb,vw,vh,top,bot){
   const BOX=[]; for(const x of [fb[0],fb[1]]) for(const z of [fb[2],fb[3]]) for(const y of [0,2.9]) BOX.push(new THREE.Vector3(x,y,z));
   cam.position.copy(TARGET).addScaledVector(DIR,90); cam.lookAt(TARGET); cam.updateMatrixWorld();
@@ -615,7 +624,25 @@ function anchorOf(side,on){
 // product badges: always shown on the right, so you can see where each product is
 const BADGE_DEF = { t:[{k:"computer",on:"desk",ic:"💻",c:"#d9622b"}],
   f:[{k:"granola",on:"cam"},{k:"rail",on:"robot"},{k:"arm",on:"arm"},{k:"clean",on:"bot"},{k:"billing",on:"desk"}] };
-for(const side of ["t","f"]) BADGE_DEF[side].forEach(b=>{ const P=PRODUCTS[b.k]; const e=el("badge",b.ic||P.ic,H[side].querySelector(".labs")); e.style.setProperty("--pc",b.c||P.c); e.title=P?P.name:"Computer"; BADGES[side].push([b,e]); });
+const SEEN = new Set(), TOUCH = matchMedia("(hover: none)").matches;
+const TIP = document.createElement("div"); TIP.className="tip"; document.body.appendChild(TIP);
+const HINT = el("hint", TOUCH ? "Tap to see what it does" : "Hover to see what it does", H.f.querySelector(".calls"));
+let tipFor=null;
+function showTip(e,P){ TIP.innerHTML=`<b style="color:${P.c}">${P.name}</b>${P.tip}`; TIP.classList.add("on"); tipFor=e;
+  const r=e.getBoundingClientRect(), w=TIP.offsetWidth, h=TIP.offsetHeight;
+  let x=clamp(r.left+r.width/2-w/2,8,innerWidth-w-8), y=r.top-h-10; if(y<8) y=r.bottom+10;
+  TIP.style.left=x+"px"; TIP.style.top=y+"px"; }
+function hideTip(){ TIP.classList.remove("on"); tipFor=null; }
+for(const side of ["t","f"]) BADGE_DEF[side].forEach(b=>{
+  const P = PRODUCTS[b.k] || {name:"Computer", c:b.c, tip:"Today Sam types the case record here by hand."};
+  const e=el("badge",b.ic||P.ic,H[side].querySelector(".labs")); e.style.setProperty("--pc",b.c||P.c);
+  e.setAttribute("role","button"); e.tabIndex=0; e.setAttribute("aria-label",P.name+". "+P.tip);
+  const open=()=>{ SEEN.add(b.k); showTip(e,P); };
+  e.addEventListener("mouseenter",open); e.addEventListener("focus",open);
+  e.addEventListener("mouseleave",hideTip); e.addEventListener("blur",hideTip);
+  e.addEventListener("click",ev=>{ ev.stopPropagation(); if(tipFor===e && TOUCH) hideTip(); else open(); });
+  BADGES[side].push([b,e]); });
+addEventListener("click",()=>{ if(TOUCH) hideTip(); });
 
 // tool chips
 const TOOLS = { t:$("#toolsT"), f:$("#toolsF") }, CHIPS = { t:{}, f:{} };
@@ -686,6 +713,7 @@ function frame(now){
     }
     S.A.nurse.userData.marker.position.y = 1.62 + (reduced?0:Math.sin(now/300)*.06);
     if(S.C.arm) S.C.arm(armTarget(step<0?-1:i,p));
+    if(S.C.coneMat){ const on = (step===0 && p>.3 && p<.85) || (step===2 && p>.08 && p<.9); S.C.coneMat.opacity = on ? .14+.1*Math.abs(Math.sin(now/300)) : .07; M.cam.emissiveIntensity = on ? .6+.5*Math.abs(Math.sin(now/300)) : .5; }
     if(S.C.bill){ const on = step===3 && p>.2; S.C.bill.material.emissiveIntensity = on ? .9+.3*Math.sin(now/200) : .3; }
     // Sam's ring pulses red while time is lost
     const pain = step>=0 && CALLS[side].some(([ev])=>ev.kind==="pain" && ev.on==="nurse" && p>=ev.at && p<ev.until);
@@ -707,10 +735,16 @@ function frame(now){
     renderer.render(S.scene, cam);
     // overlays
     LABS[side].forEach(([r,e])=>{ const [sx,sy]=project([r.x,.1,r.z],vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
-    BADGES[side].forEach(([b,e])=>{ const busy = e.classList.contains("on") && CALLS[side].some(([ev,ce])=>ce.classList.contains("on") && (ev.prod===b.k || ev.on===b.on));
-      e.style.opacity = busy ? 0 : 1;
-      const [sx,sy]=project(b.on==="arm"?[27.7,.5,14.2]:anchorOf(side,b.on),vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
-    const placed=[];
+    const placed=[]; let hintAt=null;
+    BADGES[side].forEach(([b,e])=>{
+      const a = b.on==="arm"?[27.7,.5,14.2] : b.on==="cam"?[35.1,3.25,.7] : b.on==="bot"?anchorOf(side,"bot").map((v,k)=>k===1?1.5:v) : anchorOf(side,b.on);
+      const [sx,sy]=project(a,vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`;
+      const vis = sy>L.top+14 && sy<vh-L.bot-14 && sx>10 && sx<vw-10; e.style.visibility = vis?"visible":"hidden";
+      if(vis) placed.push([sx-20,sy-20,40,40]);
+      if(side==="f" && !hintAt && step>=0 && p>=.2 && e.classList.contains("on") && !SEEN.has(b.k) && sx>0 && sx<vw && sy>L.top && sy<vh-L.bot) hintAt=[sx,sy];
+    });
+    if(side==="f"){ HINT.classList.toggle("on",!!hintAt); if(hintAt){ const hw=HINT.offsetWidth, hh=HINT.offsetHeight, left = hintAt[0]-26-hw > 8; HINT.classList.toggle("r",!left);
+      const hx = left ? hintAt[0]-26-hw : hintAt[0]+26, hy = hintAt[1]-hh/2; HINT.style.transform=`translate(${hx}px,${hy}px)`; placed.push([hx,hy,hw,hh]); } }
     { const [sx,sy]=project(anchorOf(side,"nurse").map((v,k)=>k===1?2.75:v),vw,vh); SAM[side].style.transform=`translate(${sx}px,${sy}px) translate(-50%,-100%)`;
       const w=SAM[side].offsetWidth, h=SAM[side].offsetHeight; placed.push([sx-w/2,sy-h,w,h]); }
     CALLS[side].forEach(([ev,e])=>{
@@ -720,7 +754,9 @@ function frame(now){
       let x = clamp(sx-w/2, 8, vw-w-8), y = sy-h-dy;
       y = clamp(y, L.top+4, vh-L.bot-h-4);
       const free = yy => yy>=L.top+4 && yy<=vh-L.bot-h-4 && !placed.some(r=>x<r[0]+r[2]+4 && r[0]<x+w+4 && yy<r[1]+r[3]+4 && r[1]<yy+h+4);
-      if(!free(y)){ const c=[]; placed.forEach(r=>{ c.push(r[1]-h-6, r[1]+r[3]+6); }); c.sort((a,b)=>Math.abs(a-y)-Math.abs(b-y)); const f=c.find(free); if(f!=null) y=f; }
+      if(!free(y)){ const c=[]; placed.forEach(r=>{ c.push(r[1]-h-6, r[1]+r[3]+6); }); c.sort((a,b)=>Math.abs(a-y)-Math.abs(b-y)); const f=c.find(free);
+        if(f!=null) y=f;
+        else { const y0=y; for(const xx of [clamp(sx+28,8,vw-w-8), clamp(sx-28-w,8,vw-w-8)]){ x=xx; if(free(y0)){ y=y0; break; } const g=c.find(free); if(g!=null){ y=g; break; } } } }
       placed.push([x,y,w,h]);
       e.style.transform=`translate(${x}px,${y}px)`;
     });
@@ -732,6 +768,7 @@ function frame(now){
 /* ============================ controls ============================ */
 const dotEls = STEPS.map((s,i)=>{ const b=document.createElement("button"); b.textContent=i+1; b.title=`${i+1}. ${s.title}`; b.setAttribute("aria-label",`Moment ${i+1}: ${s.title}`); b.onclick=()=>go(i); $("#stepn").appendChild(b); return b; });
 function go(i){
+  hideTip();
   if(i>=STEPS.length){ showSummary(); return; }
   step = Math.max(0,i); prog = 0; playing = true; last=performance.now();
   const s = STEPS[step];
