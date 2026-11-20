@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sam's Day, Two Ways</title>
-<meta name="description" content="One surgery in one operating room, played side by side: the circulating nurse's day today, and the same day with our five products installed.">
+<title>OR Demo</title>
+<meta name="description" content="One surgery in OR 2. Today vs. with our system.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -131,7 +131,7 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
 </style>
 </head>
 <body>
-<canvas id="gl" aria-label="The same operating room twice, side by side: today on the left, with our products on the right."></canvas>
+<canvas id="gl" aria-label="OR 2. Left: today. Right: with our system."></canvas>
 <div id="divider"></div>
 
 <header class="head" id="head" hidden>
@@ -147,38 +147,36 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
   <div class="foot">
     <div class="tools" id="toolsT"><span class="k">Tools</span></div>
     <div class="time"><div class="lbl">Sam's time <b data-sum></b></div><div class="bar" data-bar><i class="hands"></i><i class="typing"></i><i class="walking"></i><i class="waiting"></i></div>
-      <div class="key"><span><i style="background:var(--hands)"></i>Hands-on care</span><span><i style="background:var(--typing)"></i>Typing</span><span><i style="background:var(--walking)"></i>Walking out of the room</span><span><i style="background:var(--waiting)"></i>Waiting and phone calls</span></div></div>
+      <div class="key"><span><i style="background:var(--hands)"></i>Patient care</span><span><i style="background:var(--typing)"></i>Typing</span><span><i style="background:var(--walking)"></i>Out of room</span><span><i style="background:var(--waiting)"></i>Waiting</span></div></div>
   </div>
 </div>
 <div class="half r" id="hr">
   <div class="labs"></div><div class="calls"></div>
-  <div class="say"><div class="who">With our products <span class="clk" data-clk>07:25</span></div><p id="sayF"></p></div>
+  <div class="say"><div class="who">With our system <span class="clk" data-clk>07:25</span></div><p id="sayF"></p></div>
   <div class="foot">
     <div class="tools" id="toolsF"><span class="k">Installed</span></div>
     <div class="time"><div class="lbl">Sam's time <b data-sum></b></div><div class="bar" data-bar><i class="hands"></i><i class="typing"></i><i class="walking"></i><i class="waiting"></i></div>
-      <div class="key"><span><i style="background:var(--hands)"></i>Hands-on care</span><span><i style="background:var(--typing)"></i>Typing</span><span><i style="background:var(--walking)"></i>Walking out of the room</span><span><i style="background:var(--waiting)"></i>Waiting and phone calls</span></div></div>
+      <div class="key"><span><i style="background:var(--hands)"></i>Patient care</span><span><i style="background:var(--typing)"></i>Typing</span><span><i style="background:var(--walking)"></i>Out of room</span><span><i style="background:var(--waiting)"></i>Waiting</span></div></div>
   </div>
 </div>
 
 <div class="sheet" id="intro">
   <div class="sheet-in">
-    <div class="eyebrow">Autonomous Hospital · operating room</div>
-    <h2>Sam's day, two ways</h2>
-    <p>Sam is the circulating nurse in OR 2. We follow one surgery, from the patient coming in to the room being ready for the next patient. On the left, Sam's day today. On the right, the same day with our five products installed.</p>
+    <h2>Today vs. with our system</h2>
+    <p>One surgery in OR 2. Sam is the circulating nurse. Left is today. Right is with our system.</p>
     <div class="prods" id="prods"></div>
-    <div class="go"><button class="btn primary" id="start">Start →</button><span style="color:var(--muted);font-size:14px">6 moments. Use Next, or the arrow keys.</span></div>
-    <div class="fine">Fictional nurse and patient. Times are illustrative; a pilot measures the real ones. Background numbers: 86 of every 201 minutes a patient spends in the OR plus the room reset are not surgery (Stavrou et al.), about $36 per OR minute (Childers and Maggard).</div>
+    <div class="go"><button class="btn primary" id="start">Start →</button><span style="color:var(--muted);font-size:14px">6 steps</span></div>
+    <div class="fine">Times are estimates. Sources: Stavrou et al., Childers and Maggard.</div>
   </div>
 </div>
 
 <div class="sheet" id="summary" hidden>
   <div class="sheet-in">
-    <div class="eyebrow">Same surgery · same team</div>
-    <h2>What each product changed</h2>
+    <h2>Results</h2>
     <table class="sum" id="sumT"></table>
     <div class="big" id="big"></div>
-    <div class="go"><button class="btn primary" id="again">Watch again</button></div>
-    <div class="fine">Times are illustrative. People still operate, give anesthesia, care for the patient, count out loud and approve every record.</div>
+    <div class="go"><button class="btn primary" id="again">Restart</button></div>
+    <div class="fine">Times are estimates. Staff approve every record.</div>
   </div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
@@ -196,11 +194,11 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
    ===================================================================== */
 const OR_MIN_USD = 36;
 const PRODUCTS = {
-  granola:{ic:"🎥", name:"Granola with eyes", c:"#ef6a34", d:"Cameras and microphones in the room that write the case record."},
-  billing:{ic:"🧾", name:"Coding and billing", c:"#23854a", d:"Turns the case record into billing codes and charges."},
-  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Boxes on a ceiling rail that carry supplies and instruments."},
-  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks the right supplies off the shelves."},
-  clean:  {ic:"🧹", name:"Cleaning robot", c:"#2a66cf", d:"Cleans the room as soon as the patient leaves."},
+  granola:{ic:"🎥", name:"Granola with eyes", c:"#ef6a34", d:"Cameras and mics. Logs the case."},
+  billing:{ic:"🧾", name:"Coding and billing", c:"#23854a", d:"Codes and bills the case."},
+  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Moves supplies overhead."},
+  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies."},
+  clean:  {ic:"🧹", name:"Cleaning robot", c:"#2a66cf", d:"Cleans the room."},
 };
 const TOOLS_T = {
   computer:{ic:"💻", name:"Computer"}, walk:{ic:"🚶", name:"Walking"}, phone:{ic:"📞", name:"Phone"},
@@ -215,33 +213,33 @@ const LEAVE = (x)=>[[x,1.2],[x,-.9],[46,-.9]];
 const ROOM_LOOP = [[26.5,3],[32.5,3],[32.5,9],[26.5,9],[26.5,3]];
 
 const STEPS = [
- { title:"The patient comes in and the team does the time-out", product:["granola"], toolT:["computer"], secs:11,
+ { title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:11,
    clock:{t:[445,465], f:[445,465]},
-   sayT:"Sam stops to type the patient-in time and the time-out into the computer.",
-   sayF:"Granola with eyes writes it down. Sam stays with the patient.",
+   sayT:"Sam types the times into the computer.",
+   sayF:"Granola logs it. Sam stays with the patient.",
    t:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:NURSE_IN},{a:"nurse",at:[.56,.66],path:[[33,7.5],DESK]}],
        time:[["hands",12,0,.56],["typing",8,.66,1]],
-       ev:[{at:.37,until:.55,call:"Time-out: the team checks the patient's name and surgery",kind:"same",on:[29.5,1.6,6]},
-           {at:.66,until:1,call:"Typing the patient-in time and the time-out",kind:"pain",on:"nurse"}] },
+       ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
+           {at:.66,until:1,call:"Typing",kind:"pain",on:"nurse"}] },
    f:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:NURSE_IN}],
        time:[["hands",20,0,1]],
-       ev:[{at:.37,until:.55,call:"Time-out: the team checks the patient's name and surgery",kind:"same",on:[29.5,1.6,6]},
+       ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
            {at:.3,flash:[29.5,2]},{at:.5,flash:[29.5,6]},
-           {at:.56,until:1,call:"Wrote down: patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
-           {at:.56,until:1,call:"Sam stays with the patient",kind:"good",on:"nurse"}] } },
+           {at:.56,until:1,call:"Logged patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
+           {at:.56,until:1,call:"With the patient",kind:"good",on:"nurse"}] } },
 
- { title:"The surgeon needs a scope that isn't in the room", product:["arm","rail"], toolT:["walk"], secs:13, frame:"core",
+ { title:"Surgeon needs a scope", product:["arm","rail"], toolT:["walk"], secs:13, frame:"core",
    clock:{t:[465,485], f:[465,485]},
-   sayT:"Sam leaves the room for 7 minutes to find it in the supply room.",
-   sayF:"A robot arm picks the scope and a rail box brings it to the room. Sam stays.",
+   sayT:"Sam leaves the room for 7 min to get it.",
+   sayF:"Robot arm picks it. Rail box brings it. Sam stays.",
    t:{ moves:[{a:"nurse",at:[.15,.45],path:TO_SUPPLY},
               {a:"scope",at:[.5,.56],path:[[20.5,16.1,1.3]]},
               {a:"nurse",at:[.58,.86],path:FROM_SUPPLY},{a:"scope",at:[.58,.86],path:FROM_SUPPLY.map(q=>[q[0],q[1],1.3])}],
        time:[["hands",3,0,.15],["walking",7,.15,.86],["hands",10,.86,1]],
-       ev:[{at:0,until:.15,call:"Surgeon: “I need a 30-degree scope.”",kind:"same",on:"surgeon"},
-           {at:.15,until:.45,call:"Sam leaves the room to get it",kind:"pain",on:"nurse"},
-           {at:.45,until:.58,call:"Looking for it on the shelves",kind:"pain",on:"nurse"},
-           {at:.58,until:.88,call:"Out of the room for 7 minutes",kind:"pain",on:"nurse"}] },
+       ev:[{at:0,until:.15,call:"“I need a 30° scope.”",kind:"same",on:"surgeon"},
+           {at:.15,until:.45,call:"Leaves the room",kind:"pain",on:"nurse"},
+           {at:.45,until:.58,call:"Searching shelves",kind:"pain",on:"nurse"},
+           {at:.58,until:.88,call:"Gone 7 min",kind:"pain",on:"nurse"}] },
    f:{ moves:[{a:"scope",at:[.22,.3],path:[[25,15,1.8]]},
               {a:"robot",at:[.36,.68],path:[[24,15],[24,12.8],[27,12.8],[27,12.2]]},
               {a:"scope",at:[.36,.68],path:[[24,15,1.75],[24,12.8,1.75],[27,12.8,1.75],[27,12.2,1.75]]},
@@ -250,41 +248,41 @@ const STEPS = [
               {a:"scope",at:[.74,.76],path:[[27.6,11.2,1.3]]},
               {a:"nurse",at:[.78,.94],path:[[33,10],[33,6],NURSE_BY_PT]},{a:"scope",at:[.78,.94],path:[[33,10,1.3],[33,6,1.3],[NURSE_BY_PT[0],NURSE_BY_PT[1],1.3]]}],
        time:[["hands",20,0,1]],
-       ev:[{at:0,until:.12,call:"Surgeon: “I need a 30-degree scope.”",kind:"same",on:"surgeon"},
-           {at:.1,until:.36,call:"Picks the scope off the shelf",kind:"prod",prod:"arm",on:"arm"},
-           {at:.36,until:.7,call:"Brings the scope to OR 2",kind:"prod",prod:"rail",on:"robot"},
-           {at:.7,until:1,call:"Sam takes it from the wall hatch. Never left the room.",kind:"good",on:"nurse"}] } },
+       ev:[{at:0,until:.12,call:"“I need a 30° scope.”",kind:"same",on:"surgeon"},
+           {at:.1,until:.36,call:"Picks the scope",kind:"prod",prod:"arm",on:"arm"},
+           {at:.36,until:.7,call:"Brings it to OR 2",kind:"prod",prod:"rail",on:"robot"},
+           {at:.7,until:1,call:"Takes it from the hatch",kind:"good",on:"nurse"}] } },
 
  { title:"Surgery", product:["granola"], toolT:["computer"], secs:12,
    clock:{t:[485,540], f:[485,540]},
-   sayT:"Sam spends 22 minutes at the computer, typing every item that is opened.",
-   sayF:"Granola with eyes writes down every item and the count. Sam helps the team.",
+   sayT:"Sam types each item opened. 22 min.",
+   sayF:"Granola logs items and counts. Sam helps the team.",
    t:{ moves:[{a:"nurse",at:[.05,.15],path:[[33,7.5],DESK]}],
        time:[["hands",3,0,.15],["typing",22,.15,.9],["hands",30,.9,1]],
-       ev:[{at:.16,until:1,call:"Typing every item that is opened: 22 minutes",kind:"pain",on:"nurse"}] },
+       ev:[{at:.16,until:1,call:"Typing, 22 min",kind:"pain",on:"nurse"}] },
    f:{ moves:[],
        time:[["hands",55,0,1]],
        ev:[{at:.2,flash:[29.5,6]},{at:.45,flash:[31,7.4]},{at:.7,flash:[29.5,6]},
-           {at:.12,until:1,call:"Wrote down: 14 items opened, sponge count correct",kind:"prod",prod:"granola",on:"cam"},
-           {at:.12,until:1,call:"Sam helps the team",kind:"good",on:"nurse"}] } },
+           {at:.12,until:1,call:"Logged 14 items. Count correct.",kind:"prod",prod:"granola",on:"cam"},
+           {at:.12,until:1,call:"Helping the team",kind:"good",on:"nurse"}] } },
 
- { title:"The case ends and it needs to be billed", product:["billing"], toolT:["paper"], secs:10,
+ { title:"Billing", product:["billing"], toolT:["paper"], secs:10,
    clock:{t:[540,545], f:[540,545]},
-   sayT:"Sam fills out the charge sheet by hand. A coder types in the billing codes days later.",
-   sayF:"Coding and billing turns the record into codes and charges. Sam checks them and taps approve.",
+   sayT:"Sam fills out a paper charge sheet. A coder enters codes days later.",
+   sayF:"Codes are ready when the case ends. Sam approves.",
    t:{ moves:[],
        time:[["typing",5,0,1]],
-       ev:[{at:.05,until:.5,call:"Filling out the charge sheet by hand",kind:"pain",on:"nurse"},
-           {at:.5,until:1,call:"A coder types the billing codes days later",kind:"pain",on:"nurse"}] },
+       ev:[{at:.05,until:.5,call:"Paper charge sheet",kind:"pain",on:"nurse"},
+           {at:.5,until:1,call:"Coded days later",kind:"pain",on:"nurse"}] },
    f:{ moves:[{a:"nurse",at:[.05,.25],path:[[33,7.5],DESK]},{a:"nurse",at:[.75,.95],path:[[33,7.5],NURSE_BY_PT]}],
        time:[["hands",1,0,.25],["typing",1,.3,.7],["hands",3,.7,1]],
-       ev:[{at:.22,until:.75,call:"6 billing codes and charges are ready",kind:"prod",prod:"billing",on:"desk"},
-           {at:.5,until:.8,call:"Sam checks them and taps approve",kind:"good",on:"nurse"}] } },
+       ev:[{at:.22,until:.75,call:"6 codes ready",kind:"prod",prod:"billing",on:"desk"},
+           {at:.5,until:.8,call:"Sam approves",kind:"good",on:"nurse"}] } },
 
- { title:"The patient leaves and the used instruments go back", product:["rail"], toolT:["walk","phone"], secs:12, frame:"core",
+ { title:"Patient out, tray back", product:["rail"], toolT:["walk","phone"], secs:12, frame:"core",
    clock:{t:[545,552], f:[545,552]},
-   sayT:"Sam carries the used tray to sterile processing, then calls the cleaning crew.",
-   sayF:"A rail box takes the used tray to sterile processing. Sam stays with the patient until they leave.",
+   sayT:"Sam carries the tray to sterile processing, then calls cleaning.",
+   sayF:"A rail box takes the tray. Sam stays with the patient.",
    t:{ moves:[{a:"patient",at:[.05,.35],path:[[29.5,1],[29.5,-1.2],[46,-1.2]]},{a:"anes",at:[.05,.35],path:LEAVE(28.2)},
               {a:"nurse",at:[.3,.36],path:[[33,9.4],[31.5,9.4]]},
               {a:"trayused",at:[.36,.38],path:[[31.5,9.4,1.3]]},
@@ -293,9 +291,9 @@ const STEPS = [
               {a:"trayused",at:[.62,.64],path:[[31.4,16.2,.95]]},
               {a:"nurse",at:[.64,.8],path:[[31,14.2],[31,12.7],[25,12.7],[25,11.2],[27,10.8],[33,10],DESK]}],
        time:[["walking",5,.3,.8],["waiting",2,.8,1]],
-       ev:[{at:.05,until:.3,call:"The patient goes to recovery",kind:"same",on:"patient"},
-           {at:.36,until:.8,call:"Carrying the used tray to sterile processing",kind:"pain",on:"nurse"},
-           {at:.8,until:1,call:"Calling the cleaning crew. On hold.",kind:"pain",on:"nurse"}] },
+       ev:[{at:.05,until:.3,call:"Patient to recovery",kind:"same",on:"patient"},
+           {at:.36,until:.8,call:"Carrying the tray",kind:"pain",on:"nurse"},
+           {at:.8,until:1,call:"On hold with cleaning",kind:"pain",on:"nurse"}] },
    f:{ moves:[{a:"patient",at:[.05,.35],path:[[29.5,1],[29.5,-1.2],[46,-1.2]]},{a:"anes",at:[.05,.35],path:LEAVE(28.2)},
               {a:"nurse",at:[.05,.3],path:[[31.2,1.6]]},{a:"nurse",at:[.4,.55],path:[NURSE_BY_PT]},
               {a:"tech",at:[.1,.16],path:[[31.5,9.4]]},{a:"trayused",at:[.16,.18],path:[[31.5,9.4,1.3]]},
@@ -305,27 +303,27 @@ const STEPS = [
               {a:"robot",at:[.4,.8],path:[[27,12.8],[31,12.8],[31,15.4],[33.2,15.4]]},
               {a:"trayused",at:[.4,.8],path:[[27,12.8,1.75],[31,12.8,1.75],[31,15.4,1.75],[33.2,15.4,1.75]]}],
        time:[["hands",7,0,1]],
-       ev:[{at:.05,until:.3,call:"Sam goes with the patient to the door",kind:"good",on:"nurse"},
-           {at:.38,until:.85,call:"Takes the used tray to sterile processing",kind:"prod",prod:"rail",on:"robot"}] } },
+       ev:[{at:.05,until:.3,call:"With the patient",kind:"good",on:"nurse"},
+           {at:.38,until:.85,call:"Takes the tray",kind:"prod",prod:"rail",on:"robot"}] } },
 
- { title:"The room gets cleaned for the next patient", product:["clean"], toolT:["phone","crew"], secs:13,
+ { title:"Room cleaning", product:["clean"], toolT:["phone","crew"], secs:13,
    clock:{t:[552,587], f:[552,572]},
-   sayT:"The room sits empty until the cleaning crew gets there. The next patient comes in at 09:47.",
-   sayF:"A cleaning robot starts as soon as the patient leaves. The next patient comes in at 09:32.",
+   sayT:"The room waits for the crew. Next patient at 09:47.",
+   sayF:"The robot cleans right away. Next patient at 09:32.",
    t:{ moves:[{a:"surgeon",at:[0,.2],path:LEAVE(29.6)},{a:"tech",at:[0,.2],path:LEAVE(30.4)},
               {a:"nurse",at:[.2,.3],path:[[33,7.5],[31.5,7.4]]},
               {a:"crew",at:[.3,.48],path:[[29.5,-1.6],[29.5,1],[26.5,3]]},
               {a:"crew",at:[.48,.94],path:[...ROOM_LOOP,[32.5,3],[32.5,9],[26.5,9],[26.5,3]]}],
        time:[["waiting",6,0,.18],["hands",29,.18,1]],
-       ev:[{at:0,until:.46,call:"Room sits empty. Waiting for the cleaning crew.",kind:"pain",on:[29.5,1.6,6]},
-           {at:.48,until:.94,call:"The cleaning crew cleans the room",kind:"same",on:"crew"},
-           {at:.94,until:1.01,call:"Next patient in at 09:47",kind:"pain",on:[29.5,1.6,6]}] },
+       ev:[{at:0,until:.46,call:"Waiting for the crew",kind:"pain",on:[29.5,1.6,6]},
+           {at:.48,until:.94,call:"Crew cleaning",kind:"same",on:"crew"},
+           {at:.94,until:1.01,call:"Next patient 09:47",kind:"pain",on:[29.5,1.6,6]}] },
    f:{ moves:[{a:"surgeon",at:[0,.2],path:LEAVE(29.6)},{a:"tech",at:[0,.2],path:LEAVE(30.4)},
               {a:"nurse",at:[.1,.25],path:[[33,7.5],[31.5,7.4]]},
               {a:"bot",at:[.04,.86],path:[...ROOM_LOOP,[32.5,3],[32.5,9],[26.5,9],[26.5,3],[24,1.2]]}],
        time:[["hands",20,0,1]],
-       ev:[{at:.04,until:.88,call:"Starts cleaning as soon as the patient leaves",kind:"prod",prod:"clean",on:"bot"},
-           {at:.88,until:1.01,call:"Next patient in at 09:32",kind:"good",on:[29.5,1.6,6]}] } },
+       ev:[{at:.04,until:.88,call:"Cleaning",kind:"prod",prod:"clean",on:"bot"},
+           {at:.88,until:1.01,call:"Next patient 09:32",kind:"good",on:[29.5,1.6,6]}] } },
 ];
 /* ============================ helpers ============================ */
 const $ = s => document.querySelector(s);
@@ -629,7 +627,7 @@ function setChips(i){
   BADGES.f.forEach(([b,e])=>e.classList.toggle("on", !!s && s.product.includes(b.k)));
   BADGES.t.forEach(([b,e])=>e.classList.toggle("on", !!s && s.toolT.includes(b.k)));
 }
-$("#prods").innerHTML = Object.values(PRODUCTS).map(P=>`<div class="prod" style="--pc:${P.c}"><div class="ic">${P.ic}</div><b>${P.name}</b><small>${P.d}</small></div>`).join("");
+$("#prods").innerHTML = Object.values(PRODUCTS).map(P=>`<div class="prod" style="--pc:${P.c}"><b>${P.name}</b><small>${P.d}</small></div>`).join("");
 
 // callouts: one element per event that has text
 function buildCalls(i){
@@ -637,7 +635,7 @@ function buildCalls(i){
     if(i<0) continue;
     STEPS[i][side].ev.filter(e=>e.call).forEach(ev=>{
       const P = ev.prod && PRODUCTS[ev.prod];
-      const e = el("call "+ev.kind, (P?`<small>${P.ic} ${P.name}</small>`:"")+ev.call, H[side].querySelector(".calls"));
+      const e = el("call "+ev.kind, (P?`<small>${P.name}</small>`:"")+ev.call, H[side].querySelector(".calls"));
       if(P) e.style.setProperty("--pc",P.c);
       CALLS[side].push([ev,e]); });
   }
@@ -701,7 +699,7 @@ function frame(now){
     const T = timeAt(side,i,p);
     KINDS.forEach((k,ki)=>BAR[side][ki].style.width = (T[k]/TOTAL*100)+"%");
     const out = Math.round(T.walking);
-    setText(SUM[side], side+"sum", `Typing <em>${Math.round(T.typing)} min</em> · Out of the room <em>${out} min</em>`);
+    setText(SUM[side], side+"sum", `Typing <em>${Math.round(T.typing)} min</em> · Out of room <em>${out} min</em>`);
     // render this half
     const x0 = portrait?0:(side==="t"?0:vw), y0 = portrait?(side==="t"? vh : 0):0;
     renderer.setViewport(x0,y0,vw,vh); renderer.setScissor(x0,y0,vw,vh);
@@ -744,7 +742,7 @@ function go(i){
 }
 function updateControls(){
   $("#back").disabled = step<=0;
-  $("#next").textContent = step===STEPS.length-1 ? "See the totals →" : "Next →";
+  $("#next").textContent = step===STEPS.length-1 ? "Results →" : "Next →";
   $("#next").classList.toggle("ready", !playing && prog>=1);
 }
 $("#next").onclick = ()=>go(step+1);
@@ -762,16 +760,16 @@ addEventListener("keydown", e=>{
 function showSummary(){
   const T = startState[STEPS.length].t.time, F = startState[STEPS.length].f.time;
   const nextT = STEPS.at(-1).clock.t[1], nextF = STEPS.at(-1).clock.f[1], sooner = nextT-nextF;
-  const P = PRODUCTS, row = (ks,t,f)=>`<tr><td class="p">${ks.map(k=>P[k].ic+" "+P[k].name).join("<br>")}</td><td>${t}</td><td class="f">${f}</td></tr>`;
-  $("#sumT").innerHTML = `<tr><th>Product</th><th class="t">Today</th><th class="f">With our products</th></tr>`
-    + row(["granola"],"Sam types for 30 minutes during the case","Nothing to type. Sam stays with the patient and the team.")
-    + row(["arm","rail"],"Sam leaves the room for 7 minutes to find a scope","The arm picks it and a rail box brings it. Sam stays in the room.")
-    + row(["billing"],"Charge sheet by hand. A coder types the codes days later.","Codes and charges are ready when the case ends. Sam approves them in 1 minute.")
-    + row(["rail"],"Sam carries the used tray to sterile processing, 5 minutes","A rail box takes it.")
-    + row(["clean"],`The room waits for the cleaning crew. Next patient in at ${hhmm(nextT)}.`,`Cleaning starts right away. Next patient in at ${hhmm(nextF)}.`);
-  $("#big").innerHTML = `<div><b>${Math.round(T.typing-F.typing)} min</b><small>less typing for Sam on one case</small></div>`
-    + `<div><b>${Math.round(T.walking)} → ${Math.round(F.walking)} min</b><small>Sam spends out of the room</small></div>`
-    + `<div><b>${sooner} min sooner</b><small>the next patient comes in. About $${(sooner*OR_MIN_USD).toLocaleString()} of OR time at $${OR_MIN_USD} a minute.</small></div>`;
+  const P = PRODUCTS, row = (ks,t,f)=>`<tr><td class="p">${ks.map(k=>P[k].name).join("<br>")}</td><td>${t}</td><td class="f">${f}</td></tr>`;
+  $("#sumT").innerHTML = `<tr><th>Product</th><th class="t">Today</th><th class="f">With our system</th></tr>`
+    + row(["granola"],"30 min typing","0 min")
+    + row(["arm","rail"],"7 min out of the room for a scope","0 min")
+    + row(["billing"],"Paper sheet, coded days later","Approved in 1 min")
+    + row(["rail"],"5 min carrying the tray","0 min")
+    + row(["clean"],`Next patient ${hhmm(nextT)}`,`Next patient ${hhmm(nextF)}`);
+  $("#big").innerHTML = `<div><b>${Math.round(T.typing-F.typing)} min</b><small>less typing per case</small></div>`
+    + `<div><b>${Math.round(T.walking)} → ${Math.round(F.walking)} min</b><small>out of the room</small></div>`
+    + `<div><b>${sooner} min</b><small>earlier next case. About $${(sooner*OR_MIN_USD).toLocaleString()} of OR time.</small></div>`;
   showPlay(false); $("#summary").hidden = false; playing=false;
 }
 setChips(-1);
