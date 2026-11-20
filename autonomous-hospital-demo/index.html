@@ -228,7 +228,7 @@ const STEPS = [
            {at:.56,until:1,call:"Logged patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
            {at:.56,until:1,call:"With the patient",kind:"good",on:"nurse"}] } },
 
- { title:"Surgeon needs a scope", product:["arm","rail"], toolT:["walk"], secs:13, frame:"core",
+ { title:"Surgeon needs a scope", product:["arm","rail"], toolT:["walk"], secs:18, frame:"core", zoomArm:[.04,.38],
    clock:{t:[465,485], f:[465,485]},
    sayT:"Sam leaves the room for 7 min to get it.",
    sayF:"Robot arm picks it. Rail box brings it. Sam stays.",
@@ -240,7 +240,7 @@ const STEPS = [
            {at:.15,until:.45,call:"Leaves the room",kind:"pain",on:"nurse"},
            {at:.45,until:.58,call:"Searching shelves",kind:"pain",on:"nurse"},
            {at:.58,until:.88,call:"Gone 7 min",kind:"pain",on:"nurse"}] },
-   f:{ moves:[{a:"scope",at:[.22,.3],path:[[25,15,1.8]]},
+   f:{ moves:[{a:"scope",at:[.22,.3],path:[[24.7,15,1.8]]},
               {a:"robot",at:[.36,.68],path:[[24,15],[24,12.8],[27,12.8],[27,12.2]]},
               {a:"scope",at:[.36,.68],path:[[24,15,1.75],[24,12.8,1.75],[27,12.8,1.75],[27,12.2,1.75]]},
               {a:"scope",at:[.68,.72],path:[[27,11.6,1.15]]},
@@ -473,7 +473,7 @@ function buildScene(future){
   A.anes = person(SCRUB.anes,"skin"); A.anes.rotation.y=Math.PI/2;
   A.crew = person(SCRUB.crew,"skin2"); A.crew.add(box(.5,.7,.4,"binY",0,.35,.5,.05));
   A.patient = new THREE.Group(); bed(A.patient,0,0,Math.PI/2,true,"skin3");
-  A.scope = new THREE.Group(); A.scope.add(box(.7,.14,.22,"arm",0,0,0,.04)); A.scope.add(box(.5,.05,.05,"steel",.05,.1,0));
+  A.scope = new THREE.Group(); mat("scopeC","#f2b81f",{emissive:"#f2b81f",emissiveIntensity:.25}); A.scope.add(box(.7,.16,.26,"scopeC",0,0,0,.04)); A.scope.add(box(.5,.05,.05,"steel",.05,.1,0));
   A.trayused = new THREE.Group(); A.trayused.add(box(.8,.12,.45,"trayUsed",0,0,0,.03));
   for(const k in A) g.add(A[k]);
 
@@ -523,7 +523,7 @@ function buildScene(future){
   for(let i=0;i<3;i++){ const r=ring("#ef6a34",1); r.visible=false; g.add(r); flashes.push(r); }
   return {scene, A, C, flashes, future};
 }
-const ARM_REST = new THREE.Vector3(26.7,2.2,14.5), ARM_SHELF = new THREE.Vector3(25.6,1.55,14.75), ARM_POD = new THREE.Vector3(25,1.8,15);
+const ARM_REST = new THREE.Vector3(26.7,2.2,14.5), ARM_SHELF = new THREE.Vector3(25.9,1.55,14.75), ARM_POD = new THREE.Vector3(24.7,1.8,15);
 const ARM_KEYS = [[0,ARM_REST],[.08,ARM_REST],[.18,ARM_SHELF],[.22,ARM_SHELF],[.3,ARM_POD],[.34,ARM_POD],[.44,ARM_REST]];
 function armTarget(i,p){
   if(i!==1) return ARM_REST;
@@ -533,16 +533,17 @@ function armTarget(i,p){
 
 const SIDES = { t: buildScene(false), f: buildScene(true) };
 const HOME = { nurse:[27.6,-1.0], patient:[22,-1.2], surgeon:[28.6,7.2], tech:[30.8,7.6], anes:[27.4,5.6], crew:[14,-1.6],
-  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[25,15], bot:[24,1.2] };
-const HOME_F = { scope:[25.6,14.75,1.55] };
+  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[24.7,15], bot:[24,1.2] };
+const HOME_F = { scope:[25.9,14.75,1.55] };
 
 /* ============================ camera ============================ */
 const cam = new THREE.OrthographicCamera(-1,1,1,-1,.1,400);
 const DIR = new THREE.Vector3(-.22, 1.5, 1).normalize();
 const TARGET = new THREE.Vector3(28.5,0,8);
-const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2] };
-const fb = [...FRAMES.core];
-function placeCamera(vw,vh,top,bot){
+const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2], arm:[24.2,28,13.4,16.3] };
+const FB = { t:[...FRAMES.core], f:[...FRAMES.core] };
+function frameFor(side,i,p){ if(step<0) return "core"; const s=STEPS[i]; if(side==="f" && s.zoomArm && p>=s.zoomArm[0] && p<s.zoomArm[1]) return "arm"; return s.frame||"room"; }
+function placeCamera(fb,vw,vh,top,bot){
   const BOX=[]; for(const x of [fb[0],fb[1]]) for(const z of [fb[2],fb[3]]) for(const y of [0,2.9]) BOX.push(new THREE.Vector3(x,y,z));
   cam.position.copy(TARGET).addScaledVector(DIR,90); cam.lookAt(TARGET); cam.updateMatrixWorld();
   let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; const q=new THREE.Vector3();
@@ -670,12 +671,11 @@ function frame(now){
   const W = innerWidth, Hh = innerHeight, L = layout();
   renderer.setSize(W,Hh,false);
   const {portrait, vw, vh} = L;
-  const tf = FRAMES[step<0 ? "core" : STEPS[step].frame||"room"], kf = 1-Math.pow(.03,dt);
-  for(let q=0;q<4;q++) fb[q] += (tf[q]-fb[q])*kf;
-  placeCamera(vw,vh,L.top,L.bot);
+  const kf = 1-Math.pow(.05,dt);
   const i = Math.max(step,0), p = step<0?0:prog;
   for(const side of ["t","f"]){
     const S = SIDES[side], st = STEPS[i], d = st[side];
+    { const tf=FRAMES[frameFor(side,i,p)], fb=FB[side]; for(let q=0;q<4;q++) fb[q] += (tf[q]-fb[q])*kf; placeCamera(fb,vw,vh,L.top,L.bot); }
     for(const a in S.A){
       const o = S.A[a]; const r = posAt(side,a,i,p);
       o.position.set(r.pos[0], r.pos[2]||0, r.pos[1]);
