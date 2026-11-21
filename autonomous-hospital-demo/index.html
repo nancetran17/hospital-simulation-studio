@@ -3,419 +3,465 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>One Case, Two Ways</title>
-<meta name="description" content="The same surgery in the same operating room, played side by side: how the circulating nurse works today, and with cameras and software handling the record, the checks and the room reset.">
+<title>OR Demo</title>
+<meta name="description" content="One surgery in OR 2. Today vs. with our system.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
 :root{
   color-scheme:light;
-  --bg:#e8ecf0; --panel:rgba(255,255,255,.9); --panel-solid:#fff; --line:rgba(20,32,44,.12);
-  --ink:#16202a; --muted:#5b6875; --faint:#8a96a2;
-  --today:#d9622b; --today-bg:#fbe9df; --future:#2a66cf; --future-bg:#e1ebfb; --ok:#23854a;
+  --ink:#16202a; --muted:#5b6875; --faint:#8a96a2; --line:rgba(20,32,44,.12);
+  --today:#d9622b; --today-bg:#fbe9df; --future:#2a66cf; --future-bg:#e1ebfb;
   --nurse:#e0457b;
-  --f:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --hands:#3fae67; --typing:#e0392b; --walking:#f0a020; --waiting:#9aa6b2;
+  --f:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.45;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{background:#e8ecf0;color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.4;overflow:hidden;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible{outline:2px solid var(--future);outline-offset:2px}
-#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
-#gl.drag{cursor:grabbing}
+button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
-/* two halves: overlays live inside, clipped so notes never cross the middle */
-.half{position:fixed;overflow:hidden;pointer-events:none}
-.half.l{left:0;top:0;width:50%;height:100%}
-.half.r{left:50%;top:0;width:50%;height:100%}
-#divider{position:fixed;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(20,32,44,.08);pointer-events:none}
-@media (orientation:portrait){
-  #divider{right:0;bottom:auto;width:auto;height:2px;margin:-1px 0 0}
-  .tagline small{display:none}
-  .side-head{top:8px;left:8px;right:8px;gap:5px}
-  .tagline{padding:4px 10px 4px 8px;font-size:12px}
-  .stats{flex-wrap:nowrap;gap:4px;width:100%}
-  .stat{flex:1;padding:3px 6px;border-radius:8px}
-  .stat b{font-size:13px}
-  .stat small{font-size:9px;white-space:normal;line-height:1.15}
-  .lab{font-size:9.5px}
-  .note{font-size:11.5px;max-width:180px;padding:5px 8px}
-  .card{padding:10px 12px 10px;bottom:8px;width:calc(100% - 16px)}
-  .col{font-size:12.5px;line-height:1.35}
-  .ctl{margin-top:8px}
-  .col span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .card.open .col span{display:block}
-  .more{display:inline-block!important}
-}
-.more{display:none;border:0;background:none;color:var(--future);font-weight:600;font-size:12px;padding:0;margin-left:auto}
-
-/* side header: label + counters */
-.side-head{position:absolute;top:12px;left:12px;right:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none}
-.half.l .side-head{padding-top:40px}
-.tagline{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:.01em;background:var(--panel-solid);border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.tagline i{width:10px;height:10px;border-radius:50%}
-.l .tagline i{background:var(--today)} .r .tagline i{background:var(--future)}
-.tagline small{font-weight:500;color:var(--muted);font-size:12px}
-.stats{display:flex;gap:6px;flex-wrap:wrap}
-.stat{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:10px;padding:6px 10px 5px;min-width:74px}
-.stat b{display:block;font-family:var(--mono);font-size:17px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
-.stat small{display:block;font-size:10.5px;color:var(--muted);font-weight:500;white-space:nowrap}
-.stat.bump{animation:bump .5s}
-.l .stat.bump b{color:var(--today)} .r .stat.bump b{color:var(--future)}
-@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
-
-/* the record panel on each side */
-.rec{position:absolute;width:236px;bottom:14px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;box-shadow:0 4px 18px rgba(20,32,44,.08)}
-.l .rec{left:12px} .r .rec{right:12px}
-.rec h4{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
-.rec h4 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:600;padding:1px 7px;border-radius:999px;font-size:10.5px}
-.l .rec h4 em{background:var(--today-bg);color:var(--today)} .r .rec h4 em{background:var(--future-bg);color:var(--future)}
-.rec ol{list-style:none;margin:0;padding:0;display:grid;gap:3px}
-.rec li{display:grid;grid-template-columns:40px 1fr;gap:6px;animation:fadein .4s}
-.rec li span{font-family:var(--mono);font-size:11px;color:var(--faint)}
-.rec .empty{color:var(--faint);font-style:italic;display:block}
-.rec .sign{margin-top:8px;padding:6px 8px;border-radius:8px;background:#eaf6ee;color:var(--ok);font-weight:600;display:none}
-.rec .sign.on{display:block;animation:fadein .4s}
-@keyframes fadein{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
-
-/* notes pinned to people and places */
-.note{position:absolute;left:0;top:0;max-width:220px;padding:7px 10px;border-radius:10px;font-size:12.5px;line-height:1.35;font-weight:500;background:#fff;border:1px solid var(--line);box-shadow:0 6px 18px rgba(20,32,44,.14);transform:translate(-50%,calc(-100% - 12px));transition:opacity .25s;opacity:0;white-space:normal}
-.note.on{opacity:1}
-.note::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:#fff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
-.l .note{border-left:3px solid var(--today)} .r .note{border-left:3px solid var(--future)}
-.lab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:11px;font-weight:600;color:#4c5966;letter-spacing:.02em;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.8)}
-.lab.focus{color:var(--ink);font-size:12px;background:#fff;padding:2px 7px;border-radius:6px;border:1px solid var(--line);text-shadow:none}
-
-/* role tags that follow people */
-.tag{position:absolute;left:0;top:0;padding:2px 7px;border-radius:999px;font-size:10.5px;font-weight:600;white-space:nowrap;background:rgba(255,255,255,.92);border:1px solid var(--line);color:#33404c;display:flex;align-items:center;gap:5px}
-.tag i{width:8px;height:8px;border-radius:50%;flex:none}
-.tag.main{font-size:12.5px;font-weight:700;padding:4px 10px;background:var(--nurse);color:#fff;border-color:var(--nurse);box-shadow:0 3px 10px rgba(224,69,123,.35);z-index:2}
-.tag.main i{background:#fff!important}
-.tag.rail{background:#efeafc;color:#4b34a8;border-color:#cfc4f3}
-/* legend row at the top of the step card */
-.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--muted);padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid var(--line)}
-.legend span{display:flex;align-items:center;gap:5px;white-space:nowrap}
-.legend i{width:9px;height:9px;border-radius:50%;flex:none}
-.legend i.sq{border-radius:2px}
-.legend .me{font-weight:700;color:var(--ink)}
-@media (max-width:760px){.legend{gap:2px 8px;font-size:10px;padding-bottom:6px;margin-bottom:6px}.tag:not(.main):not(.rail){display:none}.tag.main{font-size:10.5px;padding:2px 7px}}
-/* top brand */
-.brand{position:fixed;top:12px;left:12px;z-index:5;display:flex;align-items:center;gap:10px;pointer-events:none}
-.brand b{font-size:14px;font-weight:700}
-.brand small{color:var(--muted);font-weight:500}
-@media (orientation:portrait){.brand{display:none}.half.l .side-head{padding-top:0}}
-
-/* step card */
-.card{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(860px,calc(100% - 24px));background:var(--panel-solid);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 40px rgba(20,32,44,.16);padding:14px 16px 12px;z-index:6}
-.card-top{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
-.card-top .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.card-top h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.col{font-size:13.5px;color:#2a3540;padding-left:10px;border-left:3px solid}
-.col.t{border-color:var(--today)} .col.f{border-color:var(--future)}
-.col b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px}
-.col.t b{color:var(--today)} .col.f b{color:var(--future)}
-.ctl{display:flex;align-items:center;gap:8px;margin-top:12px}
-.dots{display:flex;gap:5px;flex:1;min-width:0;overflow:hidden}
-.dots button{flex:1;min-width:0;height:28px;border:0;border-radius:7px;background:#eef1f4;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;position:relative}
-.dots button[aria-current=true]{background:var(--ink);color:#fff}
-.dots button.done{background:#dfe5ea;color:var(--ink)}
-.dots button .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--future);border-radius:0 0 7px 7px}
-.btn{height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;padding:0 12px;font-weight:600;font-size:13px;white-space:nowrap}
+/* header: the moment we are in, plus Back / Next */
+.head{position:fixed;left:0;right:0;top:0;height:var(--head-h,64px);z-index:6;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 14px}
+.head[hidden]{display:none}
+.stepn{flex:none;display:flex;gap:5px}
+.stepn button{width:30px;height:30px;border-radius:50%;border:2px solid #cfd6dd;background:#fff;font-weight:700;font-size:13px;color:var(--muted);padding:0}
+.stepn button.done{background:#cfd6dd;color:var(--ink)}
+.stepn button[aria-current=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.head h1{flex:1;min-width:0;margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.btn{height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:0 14px;font-weight:700;font-size:15px;white-space:nowrap;flex:none}
 .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
 .btn.primary.ready{animation:pulse 1.6s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,32,42,.35)}70%{box-shadow:0 0 0 9px rgba(22,32,42,0)}100%{box-shadow:0 0 0 0 rgba(22,32,42,0)}}
-.btn:disabled{opacity:.4;cursor:default}
-.foot{position:fixed;right:12px;bottom:4px;font-size:10.5px;color:var(--faint);z-index:4;pointer-events:none}
-@media (max-width:760px){
-  .cols{grid-template-columns:1fr;gap:6px}
-  .dots button{font-size:0}
-  .rec{display:none}
-  .stat{min-width:0;padding:4px 7px}
-  .stat b{font-size:14px}
-  .card-top h2{font-size:16px}
-  .foot{display:none}
-}
-@media (orientation:landscape) and (max-height:620px){.rec{display:none}}
+.btn:disabled{opacity:.35;cursor:default}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,32,42,.4)}70%{box-shadow:0 0 0 10px rgba(22,32,42,0)}100%{box-shadow:0 0 0 0 rgba(22,32,42,0)}}
 
-/* intro and summary sheets */
-.sheet{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(232,236,240,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow:auto}
+/* the two halves */
+.half{position:fixed;overflow:hidden;pointer-events:none}
+#divider{position:fixed;background:#fff;z-index:3;pointer-events:none;box-shadow:0 0 0 1px rgba(20,32,44,.1)}
+
+/* the one line per side */
+.say{position:absolute;top:10px;left:10px;right:10px;background:#fff;border-radius:12px;padding:9px 13px 10px;box-shadow:0 4px 16px rgba(20,32,44,.12);border-top:5px solid}
+.l .say{border-color:var(--today)} .r .say{border-color:var(--future)}
+.say .who{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.l .say .who{color:var(--today)} .r .say .who{color:var(--future)}
+.say .who .clk{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:0;font-size:14px}
+.say p{margin:0;font-size:18px;font-weight:600;line-height:1.3}
+
+/* tools in use, and Sam's time */
+.foot{position:absolute;left:10px;right:10px;bottom:10px;background:rgba(255,255,255,.95);border-radius:12px;padding:9px 12px 10px;box-shadow:0 4px 16px rgba(20,32,44,.12)}
+.tools{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;align-items:center}
+.tools .k{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:3px}
+.tool{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:13px;font-weight:600;background:#eef1f4;color:#5b6875;border:2px solid transparent;transition:all .25s}
+.tool.on{background:#fff;color:var(--ink);border-color:currentColor;box-shadow:0 2px 8px rgba(20,32,44,.15);transform:scale(1.06)}
+.l .tool.on{color:var(--today)} .r .tool.on{color:var(--pc,var(--future))}
+.time .lbl{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.time .lbl b{font-size:15px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.time .lbl b em{font-style:normal;color:var(--typing)}
+.bar{height:22px;border-radius:6px;background:#eef1f4;display:flex;overflow:hidden}
+.bar i{display:block;height:100%;transition:width .15s linear}
+.bar .hands{background:var(--hands)} .bar .typing{background:var(--typing)} .bar .walking{background:var(--walking)} .bar .waiting{background:var(--waiting)}
+.key{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:12px;color:var(--muted);font-weight:500}
+.key span{display:flex;align-items:center;gap:5px}
+.key i{width:10px;height:10px;border-radius:3px}
+
+/* labels in the 3D scene */
+.lab{position:absolute;left:0;top:0;font-size:12px;font-weight:700;color:#4c5966;white-space:nowrap;text-shadow:0 1px 0 rgba(255,255,255,.9)}
+.lab.focus{color:var(--ink);font-size:13px;background:#fff;padding:2px 8px;border-radius:6px;border:1px solid var(--line);text-shadow:none}
+.sam{position:absolute;left:0;top:0;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:800;background:var(--nurse);color:#fff;white-space:nowrap;box-shadow:0 3px 10px rgba(224,69,123,.35)}
+.call{position:absolute;left:0;top:0;max-width:240px;padding:7px 11px;border-radius:10px;font-size:14px;font-weight:700;line-height:1.25;background:#fff;box-shadow:0 6px 18px rgba(20,32,44,.2);border:2px solid;opacity:0;transition:opacity .25s}
+.call.on{opacity:1}
+.call.pain{border-color:var(--typing);color:#a8281c;background:#fff4f2}
+.call.prod{border-color:var(--pc,var(--future));color:var(--ink)}
+.call.prod small{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--pc,var(--future))}
+
+/* small screens */
+@media (max-width:900px){
+  .head h1{font-size:17px}
+  .stepn button{width:24px;height:24px;font-size:11px}
+  .btn{height:34px;padding:0 10px;font-size:13px}
+  .say p{font-size:15px}
+  .tool{font-size:11.5px;padding:2px 7px}
+  .key{display:none}
+  .call{font-size:12.5px;max-width:190px}
+}
+@media (max-width:560px){ .stepn{display:none} .tools .k{display:none} }
+@media (max-height:620px){ .key{display:none} .tools{margin-bottom:5px} .say p{font-size:15.5px} }
+
+/* intro and summary */
+.sheet{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(232,236,240,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow:auto}
 .sheet[hidden]{display:none}
-.sheet-in{width:min(760px,100%);background:#fff;border-radius:20px;border:1px solid var(--line);box-shadow:0 24px 80px rgba(20,32,44,.2);padding:28px 30px 24px}
-.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.sheet h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;margin:8px 0 10px}
-.sheet h1 span{color:var(--future)}
-.sheet p{margin:0 0 14px;color:#33404c;font-size:15px}
-.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 18px}
-.fact{background:#f5f6f7;border-radius:12px;padding:12px}
-.fact b{display:block;font-size:22px;color:var(--today);letter-spacing:-.01em}
-.fact small{display:block;color:#47535f;font-size:12.5px;line-height:1.35}
-.who{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:13px;color:var(--muted)}
-.who i{width:30px;height:30px;border-radius:50%;background:#e0457b;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:700;font-size:12px;flex:none}
-.who b{color:var(--ink)}
+.sheet-in{width:min(820px,100%);background:#fff;border-radius:20px;border:1px solid var(--line);box-shadow:0 24px 80px rgba(20,32,44,.2);padding:26px 28px 22px;margin:auto}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sheet h2{font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:8px 0 10px}
+.sheet p{margin:0 0 14px;color:#33404c;font-size:16px}
+.prods{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 18px}
+.prod{border-radius:12px;padding:10px;border:2px solid var(--pc);background:#fff}
+.prod .ic{font-size:22px}
+.prod b{display:block;font-size:14px;margin:2px 0}
+.prod small{display:block;font-size:12.5px;color:#47535f;line-height:1.3}
 .go{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.go .btn{height:42px;padding:0 18px;font-size:14.5px}
-.fine{font-size:11.5px;color:var(--faint);margin-top:14px}
-.sumgrid{display:grid;grid-template-columns:1.3fr 1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0 16px;font-size:14px}
-.sumgrid div{padding:9px 12px;border-top:1px solid var(--line)}
-.sumgrid .h{border-top:0;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#f5f6f7}
-.sumgrid .h.t{color:var(--today)} .sumgrid .h.f{color:var(--future)}
-.sumgrid .n{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.sumgrid .f.n{color:var(--future);font-weight:500}
-.big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.big .fact b{color:var(--future)}
-.still{background:#f5f6f7;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#33404c;margin-bottom:16px}
-.still b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
-@media (max-width:640px){.facts{grid-template-columns:1fr}.sheet h1{font-size:26px}.big{grid-template-columns:1fr}.sheet-in{padding:20px}}
+.go .btn{height:46px;padding:0 20px;font-size:16px}
+.fine{font-size:12px;color:var(--faint);margin-top:14px}
+.sum{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14.5px}
+.sum th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:2px solid var(--line)}
+.sum th.t{color:var(--today)} .sum th.f{color:var(--future)}
+.sum td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.sum td.p{font-weight:700;white-space:nowrap}
+.sum td.f{color:var(--future);font-weight:600}
+.lvls{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 14px}
+.lvls button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--muted)}
+.lvls button.done{color:var(--ink)}
+.lvls button[aria-selected=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.cmp{margin:6px 0 14px}
+.cmp .row{display:grid;grid-template-columns:170px 1fr 90px;gap:10px;align-items:center;margin-bottom:8px;font-size:14px}
+.cmp .tr{height:26px;background:#eef1f4;border-radius:6px;overflow:hidden}
+.cmp .tr i{display:block;height:100%;border-radius:6px}
+.cmp .row b{text-align:right;font-variant-numeric:tabular-nums}
+.say2{font-size:17px;font-weight:600;margin:0 0 12px}
+@media (max-width:620px){.cmp .row{grid-template-columns:1fr 70px}.cmp .tr{grid-column:1/3;grid-row:2}}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.big.two{grid-template-columns:repeat(2,1fr)}
+.big div{background:#f3f6f9;border-radius:12px;padding:12px}
+.big b{display:block;font-size:26px;color:var(--future)}
+.big small{font-size:13px;color:#47535f}
+@media (max-width:760px){.prods{grid-template-columns:1fr 1fr}.big{grid-template-columns:1fr}.sheet h2{font-size:25px}.sum{font-size:13px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.head{height:auto;min-height:64px;padding:10px 14px}
+.call.same{border-color:#9aa6b2;color:var(--ink);background:#fff}
+.call.good{border-color:var(--hands);color:#1f6b3c;background:#effaf2}
+.badge{position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:#fff;border:3px solid var(--pc);box-shadow:0 3px 10px rgba(20,32,44,.25);transition:opacity .25s}
+.badge{pointer-events:auto;cursor:help;z-index:4}
+.badge.on{animation:ping 1.4s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--pc)}70%{box-shadow:0 0 0 12px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.hint{position:absolute;left:0;top:0;padding:4px 10px;border-radius:999px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .25s;z-index:5;pointer-events:none}
+.hint::after{content:"";position:absolute;top:50%;margin-top:-5px;right:-5px;border:5px solid transparent;border-right:0;border-left-color:var(--ink)}
+.hint.r::after{right:auto;left:-5px;border-left:0;border-right:5px solid var(--ink)}
+.hint.on{opacity:1}
+.tip{position:fixed;left:0;top:0;z-index:20;max-width:260px;padding:10px 12px;border-radius:10px;background:#fff;box-shadow:0 10px 30px rgba(20,32,44,.25);border:1px solid var(--line);font-size:14px;line-height:1.35;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .15s}
+.tip b{display:block;font-size:13px;margin-bottom:3px}
+.tip.on{opacity:1}
+@media (max-width:560px){.tool:not(.on){display:none}.say{padding:6px 10px 7px}.say p{font-size:14px!important}.time .lbl{font-size:10px}.time .lbl b{font-size:13px}.bar{height:12px!important}.foot{padding:6px 9px 7px!important}.tools{margin-bottom:4px!important}.head h1{font-size:15px}.call{font-size:11.5px;max-width:170px;padding:5px 8px}.sam{font-size:11px;padding:3px 8px}}
+@media (max-width:1000px){.tools .k{display:none}.foot{padding:7px 10px 8px}.bar{height:16px}.tools{margin-bottom:6px}}
+@media (max-width:1300px){.tool .nm{display:none}.tool.on .nm{display:inline}.tool{padding:3px 7px}}
+.sam{z-index:2}
+.call{z-index:3}
+@media (max-width:900px){.badge{width:28px;height:28px;font-size:15px;border-width:2px}}
 </style>
 </head>
 <body>
-<canvas id="gl" aria-label="Two copies of the same surgery center floor, side by side. Drag to move the view, scroll to zoom."></canvas>
+<canvas id="gl" aria-label="OR 2. Left: today. Right: with our system."></canvas>
 <div id="divider"></div>
-<div class="brand"><b>Autonomous Hospital</b><small>One case in OR 2</small></div>
+
+<header class="head" id="head" hidden>
+  <div class="stepn" id="stepn"></div>
+  <h1 id="headline"></h1>
+  <button class="btn" id="back" aria-label="Back">←</button>
+  <button class="btn primary" id="next">Next →</button>
+</header>
 
 <div class="half l" id="hl">
-  <div class="labs"></div><div class="tags"></div><div class="notes"></div>
-  <div class="side-head">
-    <div class="tagline"><i></i>Today <small>the nurse does it by hand</small></div>
-    <div class="stats">
-      <div class="stat"><b data-k="clock">07:10</b><small>Clock</small></div>
-      <div class="stat"><b data-k="chart">0</b><small>Charting min</small></div>
-      <div class="stat"><b data-k="trips">0</b><small>Trips out of room</small></div>
-      <div class="stat"><b data-k="calls">0</b><small>Phone calls</small></div>
-      <div class="stat"><b data-k="reset">–</b><small>Room reset min</small></div>
-    </div>
+  <div class="labs"></div><div class="calls"></div>
+  <div class="say"><div class="who">Today <span class="clk" data-clk>07:25</span></div><p id="sayT"></p></div>
+  <div class="foot">
+    <div class="tools" id="toolsT"><span class="k">Tools</span></div>
+    <div class="time"><div class="lbl">Sam's time <b data-sum></b></div><div class="bar" data-bar><i class="hands"></i><i class="typing"></i><i class="walking"></i><i class="waiting"></i></div>
+      <div class="key"><span><i style="background:var(--hands)"></i>Patient care</span><span><i style="background:var(--typing)"></i>Typing</span><span><i style="background:var(--walking)"></i>Out of room</span><span><i style="background:var(--waiting)"></i>Waiting</span></div></div>
   </div>
-  <div class="rec"><h4>Chart <em>typed by Sam</em></h4><ol></ol><div class="sign">Signed</div></div>
 </div>
 <div class="half r" id="hr">
-  <div class="labs"></div><div class="tags"></div><div class="notes"></div>
-  <div class="side-head">
-    <div class="tagline"><i></i>With the system <small>cameras, software, ceiling rail</small></div>
-    <div class="stats">
-      <div class="stat"><b data-k="clock">07:10</b><small>Clock</small></div>
-      <div class="stat"><b data-k="chart">0</b><small>Charting min</small></div>
-      <div class="stat"><b data-k="trips">0</b><small>Trips out of room</small></div>
-      <div class="stat"><b data-k="calls">0</b><small>Phone calls</small></div>
-      <div class="stat"><b data-k="reset">–</b><small>Room reset min</small></div>
-    </div>
-  </div>
-  <div class="rec"><h4>Draft record <em>from the cameras</em></h4><ol></ol><div class="sign">Reviewed and signed by Sam</div></div>
-</div>
-
-<div class="card" id="card" hidden>
-  <div class="legend" aria-label="Who's who">
-    <span class="me"><i style="background:#e0457b"></i>Sam, circulating nurse</span>
-    <span><i style="background:#3f8f5a"></i>Surgeon</span>
-    <span><i style="background:#7a62c4"></i>Anesthesia</span>
-    <span><i style="background:#3d7fc4"></i>Scrub tech</span>
-    <span><i style="background:#7d8590"></i>Cleaning crew</span>
-    <span><i style="background:#c08a3e"></i>Sterile processing</span>
-    <span><i style="background:#ef6a34"></i>Ceiling camera</span>
-    <span><i class="sq" style="background:#6c4fd1"></i>Rail carrier</span>
-  </div>
-  <div class="card-top"><span class="k" id="stepK">Step 1 of 7</span><h2 id="stepT"></h2><button class="more" id="more">More</button></div>
-  <div class="cols">
-    <div class="col t"><b>Today</b><span id="txtT"></span></div>
-    <div class="col f"><b>With the system</b><span id="txtF"></span></div>
-  </div>
-  <div class="ctl">
-    <button class="btn" id="back" aria-label="Previous step">←</button>
-    <div class="dots" id="dots"></div>
-    <button class="btn" id="play" aria-label="Pause">Pause</button>
-    <button class="btn primary" id="next">Next →</button>
+  <div class="labs"></div><div class="calls"></div>
+  <div class="say"><div class="who">With our system <span class="clk" data-clk>07:25</span></div><p id="sayF"></p></div>
+  <div class="foot">
+    <div class="tools" id="toolsF"><span class="k">Installed</span></div>
+    <div class="time"><div class="lbl">Sam's time <b data-sum></b></div><div class="bar" data-bar><i class="hands"></i><i class="typing"></i><i class="walking"></i><i class="waiting"></i></div>
+      <div class="key"><span><i style="background:var(--hands)"></i>Patient care</span><span><i style="background:var(--typing)"></i>Typing</span><span><i style="background:var(--walking)"></i>Out of room</span><span><i style="background:var(--waiting)"></i>Waiting</span></div></div>
   </div>
 </div>
-<div class="foot">Fictional nurse and patient. Times and counts in the animation are illustrative; a pilot measures the real ones.</div>
 
 <div class="sheet" id="intro">
   <div class="sheet-in">
-    <div class="eyebrow">Autonomous Hospital · operating floor</div>
-    <h1>One surgery, played two ways <span>at the same time.</span></h1>
-    <p>This is a surgery center with four operating rooms, a clean supply room in the middle, and sterile processing next to it. We follow one gallbladder surgery in OR 2, from check-in to the room being ready for the next patient. The left side is how it works today. The right side is the same case with ceiling cameras and software keeping the record, checking the counts and calling the room reset, and carriers on a ceiling rail moving instrument trays.</p>
-    <div class="who"><i>SO</i><span><b>Sam Ortiz, RN</b> · circulating nurse in OR 2 · first case of the day</span></div>
-    <div class="facts">
-      <div class="fact"><b>86 of 201</b><small>minutes a patient spends in the OR, plus the room reset, are not surgery</small></div>
-      <div class="fact"><b>~$3,100</b><small>what those 86 minutes cost per case, at about $36 per OR minute</small></div>
-      <div class="fact"><b>41 to 46%</b><small>of the operation the circulating nurse spends writing things down</small></div>
-    </div>
-    <div class="go"><button class="btn primary" id="start">Start the case →</button><span style="color:var(--muted);font-size:13px">About 3 minutes. Arrow keys or space to move on.</span></div>
-    <div class="fine">Sources: Stavrou et al. (548 general-surgery cases) and a 30-minute reset target; Childers and Maggard, JAMA Surgery; Sanders et al., JAMA Ophthalmology. Fictional nurse and patient.</div>
+    <h2>Today vs. with our system</h2>
+    <p>One surgery in OR 2. Sam is the circulating nurse. Left is today. Right is with our system.</p>
+    <div class="prods" id="prods"></div>
+    <div class="go"><button class="btn primary" id="start">Start →</button><span style="color:var(--muted);font-size:14px">8 steps</span></div>
+    <div class="fine">Times are estimates. Sources: Stavrou et al., Childers and Maggard.</div>
   </div>
 </div>
 
 <div class="sheet" id="summary" hidden>
   <div class="sheet-in">
-    <div class="eyebrow">Same surgery · same team · same surgeon</div>
-    <h1>What changed for Sam and for OR 2</h1>
-    <div class="sumgrid" id="sumgrid"></div>
-    <div class="big">
-      <div class="fact"><b id="sumMin"></b><small id="sumMinT"></small></div>
-      <div class="fact"><b id="sumUsd"></b><small id="sumUsdT"></small></div>
-    </div>
-    <div class="still"><b>What people still do</b>Operate, give anesthesia, care for the patient, do the count out loud, and approve the record. The system keeps the record, checks it, and handles the supplies, the tray runs and the reset calls.</div>
-    <div class="go"><button class="btn primary" id="again">Watch again</button><button class="btn" id="close">Look around the floor</button></div>
-    <div class="fine">Times and counts in this case are illustrative. The pilot measures charting minutes per case and minutes from patient out to next patient in, using the same cameras.</div>
+    <h2 id="lvlH">Results</h2>
+    <div class="lvls" id="lvls" role="tablist"></div>
+    <div id="lvl"></div>
+    <div class="go"><button class="btn primary" id="lvlNext">Next →</button><button class="btn" id="again">Restart</button></div>
+    <div class="fine" id="lvlNote"></div>
   </div>
 </div>
-
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-
 /* =====================================================================
-   STORY. Edit text and numbers here. Times are minutes after midnight.
-   Each step plays for `secs` seconds. Inside a step, `at` runs 0 to 1.
-   Moves: {a: actor, at:[start,end], path:[[x,z],...]}
-   Events: {at, to?, add:{chart,trips,calls}, note, on: actor|[x,z], rec, flash}
+   PRODUCTS and STORY. Edit text and numbers here.
+   Times are minutes after midnight. Inside a step, `at` runs 0 to 1.
+   moves: {a: actor, at:[start,end], path:[[x,z,(y)],...]}
+   time:  [kind, minutes, start, end]  fills Sam's time bar
+   ev:    {at, until, call, kind: pain|prod|same|good, prod, on: actor or [x,y,z]}  or {at, flash:[x,z]}
+   arm:   robot arm keyframes and when it searches, finds and holds
+   fill:  when each item lands in a supply kit
    ===================================================================== */
 const OR_MIN_USD = 36;
-const PATIENT_OUT = 9*60+5;
+const PRODUCTS = {
+  planner:{ic:"📋", name:"Case planner", c:"#c2410c", d:"Knows what each case needs.", tip:"Software that reads the OR schedule and past cases. It knows which supplies this surgeon uses for this surgery and makes the pick list. It starts the next case's prep when 30 minutes are left."},
+  granola:{ic:"🎥", name:"Perception Kit: Granola + Eyes", c:"#ef6a34", d:"Cameras and mics. Logs the case.", tip:"Cameras and mics on the ceiling. They see and hear the case and write the record. Sam does not type."},
+  billing:{ic:"🧾", name:"Coding and billing", c:"#23854a", d:"Codes and bills the case.", tip:"Reads the case record and drafts the billing codes and charges. Sam checks them and approves."},
+  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Moves supplies overhead.", tip:"Boxes that run on a rail in the ceiling. Switches on the rail send each box to the right room. They come down to table height, take supplies, and go back up."},
+  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies from the shelves.", tip:"A robot in the supply room. It drives on a track between two shelf walls, stops at the right slot, grips the item and drops it into a rail box at the end of the aisle."},
+  med:    {ic:"💊", name:"Medication robot", c:"#d6336c", d:"Locked med box on the rail.", tip:"A locked box that rides the ceiling rail. The pharmacy robot fills it and a pharmacist locks it. Only the right badge opens it, and every open is logged. Leftover controlled drugs go back to the pharmacy."},
+  clean:  {ic:"🧽", name:"OR cleaning robot", c:"#2a66cf", d:"Cleans and disinfects the OR.", tip:"Built for the OR. It wipes up blood and fluids, scrubs and disinfects the floor, then shines UV light on every surface. It starts as soon as the patient leaves."},
+};
+const EXTRA = {
+  sterile:{ic:"🔆", name:"Sterile pass-through", c:"#8e44d6", tip:"A sealed box in the OR wall. It cleans the outside of each item with UV light before it goes into the sterile OR."},
+};
+const TOOLS_T = {
+  computer:{ic:"💻", name:"Computer"}, walk:{ic:"🚶", name:"Walking"}, phone:{ic:"📞", name:"Phone"},
+  paper:{ic:"📝", name:"Paper charge sheet"}, crew:{ic:"🧹", name:"Cleaning crew"},
+};
+const NURSE_BY_PT = [31.4,4.6], DESK = [34.4,8.7], BACK = [31.5,9.4], KIT = [32.4,8.5,1.2], STAGE = [27.2,15,1.08];
+const TO_SUPPLY = [[33,10],[27,10.8],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[22.6,16.1],[20.5,16.1]];
+const FROM_SUPPLY = [[22.6,16.1],[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,10.8],[33,10],[33,6],NURSE_BY_PT];
+const PT_IN = [[29.5,-1.2],[29.5,1],[29.5,6]];
+const TEAM_IN = (x,z)=>[[29.4,-.6],[29.4,1.6],[x,z]];
+const LEAVE = (x)=>[[x,1.2],[x,-.9],[46,-.9]];
+const LANES = [[26.5,2.6],[33,2.6],[33,4.4],[26.5,4.4],[26.5,6.0],[33,6.0],[33,7.4],[26.5,7.4]];
+const BLOOD = [[28.6,4.4],[30.9,4.3],[29.8,6.0],[31.6,2.7],[28.2,7.3]];
+const TO_PASS = [[24,15],[24,12.8],[27,12.8],[27,12.65]];       // rail: supply room to the OR 2 pass-through
+const FROM_PASS = [[27,12.8],[24,12.8],[24,15],[27.2,15]];      // rail: pass-through back to the supply room table
+// case cart for heavy instrument trays, pushed on the floor by staff
+const CART_HOME = [32.6,14.4], CART_AT = [33.9,10.6];
+const CART_IN = [[31,14.4],[31,12.8],[25,12.8],[25,11],CART_AT];
+const CART_OUT = [[25,11],[25,12.8],[31,12.8],[31,14.4],CART_HOME];
+// medication box: pharmacy, OR 2 pass-through, recovery bedside
+const PACU_BED = [41,5.4], RN_AT = [39.6,7.4], PH_PORT = [41,19.8], PACU_PORT = [41,7.4];
+const MED_TO_OR = [[41,15.4],[35,15.4],[35,12.8],[27,12.8],[27,12.65]];
+const MED_TO_PACU = [[27,12.8],[35,12.8],[35,15.4],[41,15.4],PACU_PORT];
+const MED_HOME = [[41,15.4],PH_PORT];
+const TO_PHARM = [[36.5,-1.6],[36.5,15],[39.6,17.6]];
+// Picking robot keyframes: [progress, x on the track, height, reach toward a shelf (- back, + front), reach toward the exit port]
+const GREST = [20.0,1.0,0,0], GEXIT = 26.2;
+const gpick = (t0,dt,items,dy)=>{ const k=[[0,...GREST],[t0,...GREST]], found=[], held=[]; let t=t0;
+  items.forEach(([gx,gy,ext,act])=>{ k.push([t+dt*.35,gx,gy,0,0],[t+dt*.5,gx,gy,ext,0],[t+dt*.6,gx,gy,0,0],[t+dt*.82,GEXIT,dy,0,0],[t+dt*.92,GEXIT,dy,0,1],[t+dt,GEXIT,dy,0,0]);
+    found.push([t+dt*.25,t+dt*.55,[gx,gy,ext<0?14.46:15.54]]); held.push([t+dt*.5,t+dt*.92,act||"pick"]); t+=dt; });
+  k.push([t+dt*.3,...GREST]); return {keys:k, found, held, drops:held.map(h=>h[1])}; };
+const ARM_PREP = gpick(.06,.15,[[20.4,1.5,-.55],[22.6,.65,.55],[25.0,1.1,-.55]],1.62);
+const ARM_NEXT = gpick(.5,.13,[[21.2,.75,-.55],[23.8,1.5,-.55],[24.8,.3,.55]],1.22);
+const ARM_SCOPE = gpick(.06,.337,[[24.6,1.15,-.55,"scope"]],1.62);
+
 const STEPS = [
- { title:"Check-in in pre-op", secs:11, cam:{x:18,z:6,zoom:.62},
-   clock:{t:[430,445], f:[430,445]},
-   txtT:"Sam walks to pre-op and checks the patient's name, consent and surgery site, then types the checklist into the chart.",
-   txtF:"The same. Sam still walks over and does the check with the patient. This part stays with people.",
-   t:{ moves:[{a:"nurse",at:[0,.5],path:[[33,3],[30.6,1],[30.6,-1.4],[6,-1.4],[5.2,1.6]]}],
-       ev:[{at:.55,until:.92,note:"Checks name, consent and surgery site with the patient",on:"nurse"},
-           {at:.7,to:.95,add:{chart:3},rec:["07:22","Pre-op checklist"]}] },
-   f:{ moves:[{a:"nurse",at:[0,.5],path:[[33,3],[30.6,1],[30.6,-1.4],[6,-1.4],[5.2,1.6]]}],
-       ev:[{at:.55,until:.92,note:"Same check, same conversation with the patient",on:"nurse"},
-           {at:.7,to:.95,add:{chart:3}}] } },
+ { id:"prep", title:"Room prep", product:["planner","arm","rail","sterile"], toolT:["computer","walk"], secs:30, frame:"core", zooms:[[.06,.52,"arm"],[.64,.86,"sterile"]],
+   clock:{t:[410,445], f:[415,445]},
+   sayT:"Sam comes in early, reads the case and collects every item by hand.",
+   sayF:"The system knows what this surgeon uses. Robots bring it. Sam sets up.",
+   t:{ moves:[{a:"nurse",at:[0,.1],path:[[28.4,-.4],[28.4,1],[33,7.5],DESK]},
+              {a:"nurse",at:[.22,.36],path:TO_SUPPLY},
+              {a:"nurse",at:[.36,.48],path:[[16.6,16.1],[12.8,16.1]]},
+              {a:"nurse",at:[.5,.62],path:[[22.6,16.1],[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,10.8],[33,10],BACK]},
+              {a:"cart",at:[.2,.45],path:CART_IN},
+              {a:"surgeon",at:[.86,1],path:TEAM_IN(28.6,7.2)},{a:"tech",at:[.86,1],path:TEAM_IN(30.8,7.6)},{a:"anes",at:[.86,1],path:TEAM_IN(27.4,5.6)}],
+       follow:[{a:"kit",of:"nurse",at:[.38,.62]}],
+       fill:{kit:[.38,.43,.47]},
+       time:[["typing",5,.1,.22],["walking",15,.22,.62],["hands",15,.62,1]],
+       ev:[{at:0,until:.1,call:"06:50. Sam comes in early",kind:"pain",on:"nurse"},
+           {at:.1,until:.22,call:"Reads the case and the surgeon's list",kind:"pain",on:"nurse"},
+           {at:.22,until:.36,call:"Walks to the supply room",kind:"pain",on:"nurse"},
+           {at:.36,until:.5,call:"Finds 22 items, shelf by shelf",kind:"pain",on:"nurse"},
+           {at:.2,until:.45,call:"Heavy trays come on a case cart",kind:"same",on:"cart"},
+           {at:.5,until:.62,call:"Carries them back",kind:"pain",on:"nurse"},
+           {at:.62,until:1,call:"Sets up the room",kind:"same",on:"nurse"}] },
+   f:{ moves:[{a:"robot",at:[.58,.72],path:TO_PASS},{a:"cart",at:[.52,.66],path:CART_IN},
+              {a:"kit",at:[.785,.79],path:[[27,12.6,1.2]]},{a:"kit",at:[.79,.82],path:[[27,11.5,1.15]]},{a:"kit",at:[.95,.96],path:[KIT]},
+              {a:"nurse",at:[.5,.6],path:[[28.4,-.4],[28.4,1.2]]},{a:"nurse",at:[.6,.78],path:[[33,6],[33,10],[27.6,11.2]]},{a:"nurse",at:[.84,.95],path:[[33,10],BACK]},
+              {a:"surgeon",at:[.86,1],path:TEAM_IN(28.6,7.2)},{a:"tech",at:[.86,1],path:TEAM_IN(30.8,7.6)},{a:"anes",at:[.86,1],path:TEAM_IN(27.4,5.6)}],
+       arm:ARM_PREP, fill:{kit:ARM_PREP.drops},
+       ride:[{a:"kit",at:[.12,.785]}],
+       follow:[{a:"kit",of:"nurse",at:[.83,.95]}],
+       drop:[[0,0],[.04,0],[.12,1],[.52,1],[.58,0],[.72,0],[.76,.82],[.84,.82],[.88,0]],
+       uv:[.76,.86],
+       time:[["hands",15,.5,1]],
+       ev:[{at:0,until:.14,call:"Pick list from this surgeon's last 40 gallbladder cases: 22 items",kind:"prod",prod:"planner",on:"planner"},
+           {at:.04,until:.12,call:"Comes down to the table",kind:"prod",prod:"rail",on:"robot"},
+           {at:.14,until:.52,call:"Finds and picks all 22 items",kind:"prod",prod:"arm",on:"arm"},
+           {at:.52,until:.64,call:"Switches on the rail send it to OR 2",kind:"prod",prod:"rail",on:"robot"},
+           {at:.52,until:.66,call:"Heavy trays come on a case cart",kind:"same",on:"cart"},
+           {at:.5,until:.62,call:"07:10. Sam comes in",kind:"good",on:"nurse"},
+           {at:.7,until:.84,call:"Cleans them before they go in",kind:"prod",prod:"sterile",on:"sterile"},
+           {at:.84,until:1,call:"Sam sets up the room",kind:"good",on:"nurse"}] } },
 
- { title:"Into the room and time-out", secs:12, cam:{x:20,z:4,zoom:.7},
-   clock:{t:[445,460], f:[445,460]},
-   txtT:"The patient rolls into OR 2. The team does the time-out. Then Sam goes to the computer and types the patient-in time, who is in the room, and the time-out.",
-   txtF:"The cameras log the patient in at 07:27 and the time-out at 07:29. Those lines go into a draft record. Sam stays next to the patient.",
-   t:{ moves:[{a:"patient",at:[0,.5],path:[[3.6,-1.2],[29.5,-1.2],[29.5,1],[29.5,6]]},
-              {a:"nurse",at:[.02,.5],path:[[5.2,-.4],[28.4,-.4],[28.4,1],[31.6,4.4]]},
-              {a:"nurse",at:[.62,.72],path:[[33.6,7],[34.4,9.6]]}],
-       ev:[{at:.5,until:.62,note:"Time-out: name, procedure, side. Everyone agrees.",on:[29.5,6]},
-           {at:.7,until:1,note:"Types patient-in time, staff list and time-out into the chart",on:"nurse"},
-           {at:.72,to:.98,add:{chart:5},rec:["07:27","Patient in room"]},{at:.85,rec:["07:29","Time-out complete"]}] },
-   f:{ moves:[{a:"patient",at:[0,.5],path:[[3.6,-1.2],[29.5,-1.2],[29.5,1],[29.5,6]]},
-              {a:"nurse",at:[.02,.5],path:[[5.2,-.4],[28.4,-.4],[28.4,1],[31.6,4.4]]}],
-       ev:[{at:.5,until:.62,note:"Time-out: name, procedure, side. Everyone agrees.",on:[29.5,6]},
-           {at:.42,flash:[29.5,2],rec:["07:27","Patient in room"]},
-           {at:.62,flash:[29.5,6],rec:["07:29","Time-out, 5 people in room"]},
-           {at:.66,until:1,note:"Cameras log patient in and the time-out. Nothing typed.",on:[25.6,2.6]}] } },
+ { id:"in", title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:14, zooms:[[.42,.8,"cam"]],
+   clock:{t:[445,465], f:[445,465]},
+   sayT:"Sam types the times into the computer.",
+   sayF:"The Perception Kit logs it. Sam stays with the patient.",
+   t:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:[[33,9.4],[33,6],NURSE_BY_PT]},{a:"nurse",at:[.56,.66],path:[[33,7.5],DESK]}],
+       time:[["hands",12,0,.56],["typing",8,.66,1]],
+       ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
+           {at:.66,until:1,call:"Typing",kind:"pain",on:"nurse"}] },
+   f:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:[[33,9.4],[33,6],NURSE_BY_PT]}],
+       cam:[.3,.85],
+       time:[["hands",20,0,1]],
+       ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
+           {at:.3,flash:[29.5,2]},{at:.5,flash:[29.5,6]},
+           {at:.56,until:1,call:"Logged patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
+           {at:.56,until:1,call:"With the patient",kind:"good",on:"nurse"}] } },
 
- { title:"Asleep and draped", secs:13, cam:{x:26,z:9,zoom:.9},
-   clock:{t:[460,485], f:[460,485]},
-   txtT:"The surgeon asks for a 5 mm 30° scope that isn't on the cart. Sam leaves the room to find it in the clean supply room, about 7 minutes. Back in the room, Sam calls sterile processing to ask if the next case's tray is ready.",
-   txtF:"The supply wall was stocked from the surgeon's preference card last night, so the scope is in a drawer by the door. The system sees the next case's tray is done in sterile processing, and a carrier on the ceiling rail brings it to OR 2's pass-through.",
-   t:{ moves:[{a:"nurse",at:[.18,.45],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[20.5,15]]},
-              {a:"nurse",at:[.55,.8],path:[[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,9.6],[33.2,9.8],[34.4,9.6]]}],
-       ev:[{at:.04,until:.2,note:"“Can I get a 5 mm 30° scope? It's not on the cart.”",on:"surgeon"},
-           {at:.45,add:{trips:1}},
-           {at:.45,until:.58,note:"Searching the clean supply room for the scope",on:"nurse"},
-           {at:.84,add:{calls:1}},{at:.84,until:1,note:"Calls sterile processing: is the next tray ready?",on:"nurse"}] },
-   f:{ moves:[{a:"nurse",at:[.2,.32],path:[[30.6,10.6]]},{a:"nurse",at:[.4,.52],path:[[31.6,4.4]]},
-              {a:"robot",at:[.58,.9],path:[[31,15.4],[31,12.8],[27,12.8]]},
-              {a:"traynext",at:[.58,.9],path:[[31,15.4,1.78],[31,12.8,1.78],[27,12.8,1.78]]},
-              {a:"traynext",at:[.9,.98],path:[[27,12.05,1.17]]}],
-       ev:[{at:.04,until:.2,note:"“Can I get a 5 mm 30° scope? It's not on the cart.”",on:"surgeon"},
-           {at:.24,until:.5,note:"It's in the supply wall drawer, stocked from the surgeon's card",on:"nurse"},
-           {at:.3,flash:[30.6,10.8],rec:["07:51","Scope 5 mm 30° taken from wall"]},
-           {at:.6,until:1,note:"Next tray rides the ceiling rail to OR 2's pass-through",on:"robot"}] } },
+ { id:"scope", title:"Surgeon needs a scope", product:["arm","rail","sterile"], toolT:["walk"], secs:28, frame:"core", zooms:[[.04,.44,"arm"],[.6,.86,"sterile"]],
+   clock:{t:[465,485], f:[465,485]},
+   sayT:"Sam leaves the room for 7 min to get it.",
+   sayF:"The picking robot finds it. A rail box brings it through a sterile pass-through. Sam stays.",
+   t:{ moves:[{a:"nurse",at:[.15,.45],path:TO_SUPPLY},
+              {a:"scope",at:[.5,.56],path:[[20.5,16.1,1.3]]},
+              {a:"nurse",at:[.58,.86],path:FROM_SUPPLY},{a:"scope",at:[.58,.86],path:FROM_SUPPLY.map(q=>[q[0],q[1],1.3])}],
+       time:[["hands",3,0,.15],["walking",7,.15,.86],["hands",10,.86,1]],
+       ev:[{at:0,until:.15,call:"“I need a 30° scope.”",kind:"same",on:"surgeon"},
+           {at:.15,until:.45,call:"Leaves the room",kind:"pain",on:"nurse"},
+           {at:.45,until:.58,call:"Searching shelves",kind:"pain",on:"nurse"},
+           {at:.58,until:.88,call:"Gone 7 min",kind:"pain",on:"nurse"}] },
+   f:{ moves:[{a:"robot",at:[0,.18],path:FROM_PASS},
+              {a:"robot",at:[.46,.62],path:TO_PASS},
+              {a:"scope",at:[.785,.79],path:[[27,12.6,1.2]]},
+              {a:"scope",at:[.79,.82],path:[[27,11.5,1.15]]},
+              {a:"nurse",at:[.72,.82],path:[[33,6],[33,10],[27.6,11.2]]},
+              {a:"scope",at:[.83,.85],path:[[27.6,11.2,1.3]]},
+              {a:"nurse",at:[.86,.97],path:[[33,10],[33,6],NURSE_BY_PT]},{a:"scope",at:[.86,.97],path:[[33,10,1.3],[33,6,1.3],[NURSE_BY_PT[0],NURSE_BY_PT[1],1.3]]}],
+       arm:ARM_SCOPE,
+       ride:[{a:"scope",at:[ARM_SCOPE.drops[0],.785]}],
+       drop:[[0,0],[.2,0],[.28,1],[.38,1],[.44,0],[.62,0],[.68,.82],[.79,.82],[.85,0]],
+       uv:[.68,.79],
+       time:[["hands",20,0,1]],
+       ev:[{at:0,until:.06,call:"“I need a 30° scope.”",kind:"same",on:"surgeon"},
+           {at:.06,until:.22,call:"Drives to the right slot",kind:"prod",prod:"arm",on:"arm"},
+           {at:.22,until:.4,call:"Grips it and drops it in the rail box",kind:"prod",prod:"arm",on:"arm"},
+           {at:.2,until:.3,call:"Comes down from the ceiling",kind:"prod",prod:"rail",on:"robot"},
+           {at:.4,until:.6,call:"Goes back up to the ceiling rail",kind:"prod",prod:"rail",on:"robot"},
+           {at:.64,until:.8,call:"Cleans it before it goes into OR 2",kind:"prod",prod:"sterile",on:"sterile"},
+           {at:.82,until:1,call:"Sam takes it from the wall",kind:"good",on:"nurse"}] } },
 
- { title:"Surgery", secs:15, cam:{x:28,z:8,zoom:.95},
-   clock:{t:[485,535], f:[485,535]},
-   txtT:"Sam spends much of the operation at the computer, scanning and typing each item opened. Sam leaves once more for sutures, and takes a call from the front desk asking when the case will end.",
-   txtF:"The cameras see each item opened and add it to the draft. The system predicts the case will end at 08:55 and tells the front desk, so nobody calls. Sutures come from the supply wall a few steps away. Sam stays with the team.",
-   t:{ moves:[{a:"nurse",at:[.5,.62],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[20.5,15]]},
-              {a:"nurse",at:[.66,.78],path:[[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,9.6],[33.2,9.8],[34.4,9.6]]}],
-       ev:[{at:.02,to:.95,add:{chart:18}},
-           {at:.04,until:.36,note:"Scans and types each item opened",on:"nurse"},
-           {at:.08,rec:["08:06","Incision"]},{at:.22,rec:["08:12","Trocar 5 mm ×3 opened"]},
-           {at:.34,add:{calls:1}},{at:.36,until:.5,note:"Front desk calls: when will OR 2 finish?",on:"nurse"},
-           {at:.62,add:{trips:1}},{at:.6,until:.7,note:"Out of the room again for sutures",on:"nurse"},
-           {at:.72,rec:["08:31","Clip applier opened"]},{at:.86,rec:["08:44","Suture 0 Vicryl ×2 opened"]}] },
-   f:{ moves:[{a:"nurse",at:[.56,.64],path:[[30.6,10.6]]},{a:"nurse",at:[.7,.78],path:[[31.6,4.4]]}],
-       ev:[{at:.02,to:.95,add:{chart:0}},
-           {at:.08,flash:[29.5,6],rec:["08:06","Incision"]},
-           {at:.1,until:.34,note:"Cameras see each item opened and add it to the draft",on:[26.2,3]},
-           {at:.22,flash:[31.5,8.5],rec:["08:12","Trocar 5 mm ×3 opened"]},
-           {at:.36,until:.54,note:"Predicted end 08:55, sent to the front desk. No call.",on:[33.8,9.4]},
-           {at:.58,until:.74,note:"Sutures from the supply wall",on:"nurse"},
-           {at:.72,flash:[31.5,8.5],rec:["08:31","Clip applier opened"]},
-           {at:.86,flash:[30.6,10.8],rec:["08:44","Suture 0 Vicryl ×2 opened"]}] } },
+ { id:"surgery", title:"Surgery", product:["granola","planner","arm"], toolT:["computer"], secs:20, zooms:[[.06,.38,"cam"],[.38,.5,"core"],[.5,.96,"arm"]],
+   clock:{t:[485,540], f:[485,540]},
+   sayT:"Sam types each item opened. 22 min.",
+   sayF:"The Perception Kit logs items and counts. With 30 min left, the next case's supplies are picked.",
+   t:{ moves:[{a:"nurse",at:[.05,.15],path:[[33,7.5],DESK]}],
+       time:[["hands",3,0,.15],["typing",22,.15,.9],["hands",30,.9,1]],
+       ev:[{at:.16,until:1,call:"Typing, 22 min",kind:"pain",on:"nurse"}] },
+   f:{ moves:[],
+       cam:[.06,.95],
+       arm:ARM_NEXT, fill:{kit2:ARM_NEXT.drops},
+       time:[["hands",55,0,1]],
+       ev:[{at:.15,flash:[29.5,6]},{at:.25,flash:[31,7.4]},{at:.35,flash:[29.5,6]},
+           {at:.08,until:.38,call:"Logged 14 items. Count correct.",kind:"prod",prod:"granola",on:"cam"},
+           {at:.08,until:.5,call:"Helping the team",kind:"good",on:"nurse"},
+           {at:.4,until:.56,call:"30 min left. Sends the pick list for the next case.",kind:"prod",prod:"planner",on:"planner"},
+           {at:.52,until:.96,call:"Picks the next case's supplies",kind:"prod",prod:"arm",on:"arm"}] } },
 
- { title:"Closing count", secs:11, cam:{x:29.5,z:6.5,zoom:1.1},
-   clock:{t:[535,545], f:[535,545]},
-   txtT:"Sam and the scrub tech count sponges, needles and instruments out loud. Sam writes the count on the whiteboard, then types it into the chart.",
-   txtF:"People still count out loud. The system's own tally of what it saw opened matches: 14 sponges, 3 needles. Sam confirms it with one tap.",
-   t:{ moves:[{a:"nurse",at:[.05,.25],path:[[35,5]]},{a:"nurse",at:[.6,.75],path:[[34.4,9.6]]}],
-       ev:[{at:.25,until:.6,note:"Counts out loud, writes it on the whiteboard",on:"nurse"},
-           {at:.62,until:1,note:"Types the count into the chart",on:"nurse"},
-           {at:.62,to:.95,add:{chart:4},rec:["09:01","Closing count correct"]}] },
-   f:{ moves:[{a:"nurse",at:[.05,.25],path:[[32.2,6.6]]}],
-       ev:[{at:.25,until:.6,note:"Counts out loud with the scrub tech",on:"nurse"},
-           {at:.6,flash:[31.5,8.5],until:1,note:"System tally matches: 14 sponges, 3 needles",on:[31.5,8.5]},
-           {at:.62,to:.8,add:{chart:1},rec:["09:01","Closing count matched"]}] } },
+ { id:"billing", title:"Billing", product:["billing"], toolT:["paper"], secs:10,
+   clock:{t:[540,545], f:[540,545]},
+   sayT:"Sam fills out a paper charge sheet. A coder enters codes days later.",
+   sayF:"Codes are ready when the case ends. Sam approves.",
+   t:{ moves:[],
+       time:[["typing",5,0,1]],
+       ev:[{at:.05,until:.5,call:"Paper charge sheet",kind:"pain",on:"nurse"},
+           {at:.5,until:1,call:"Coded days later",kind:"pain",on:"nurse"}] },
+   f:{ moves:[{a:"nurse",at:[.05,.25],path:[[33,7.5],DESK]},{a:"nurse",at:[.75,.95],path:[[33,7.5],NURSE_BY_PT]}],
+       bill:.2,
+       time:[["hands",1,0,.25],["typing",1,.3,.7],["hands",3,.7,1]],
+       ev:[{at:.22,until:.75,call:"6 codes ready",kind:"prod",prod:"billing",on:"desk"},
+           {at:.5,until:.8,call:"Sam approves",kind:"good",on:"nurse"}] } },
 
- { title:"Patient out", secs:13, cam:{x:30,z:6,zoom:.66},
-   clock:{t:[545,552], f:[545,548]},
-   txtT:"The patient goes to recovery. Sam finishes the chart, calls the cleaning crew and the front desk for the next patient, then takes the used instruments to sterile processing.",
-   txtF:"The cameras see the patient leave at 09:05. The cleaning crew is paged automatically. The scrub tech puts the used tray in the pass-through, and the rail carrier takes it to sterile processing. Sam reads the draft record and signs it with a tap.",
-   t:{ moves:[{a:"patient",at:[0,.38],path:[[29.5,1],[29.5,-1.2],[40.6,-1.2],[40.6,1.8]]},
-              {a:"anes",at:[0,.38],path:[[28.4,1],[28.4,-.6],[39.4,-.6],[39.4,1.6]]},
-              {a:"nurse",at:[.86,1],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[31,12.7],[31,15]]},
-              {a:"trayused",at:[.86,1],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[31,12.7],[31.6,15.2]]}],
-       ev:[{at:.4,to:.66,add:{chart:6},rec:["09:05","Patient out"]},
-           {at:.4,until:.66,note:"Finishes the chart after the patient leaves",on:"nurse"},
-           {at:.68,add:{calls:1}},{at:.68,until:.78,note:"Calls the cleaning crew",on:"nurse"},
-           {at:.78,add:{calls:1}},{at:.78,until:.86,note:"Calls the front desk for the next patient",on:"nurse"},
-           {at:.9,add:{trips:1}},{at:.88,until:1,note:"Takes the used instruments to sterile processing",on:"nurse"},
-           {at:.99,signL:true}] },
-   f:{ moves:[{a:"patient",at:[0,.38],path:[[29.5,1],[29.5,-1.2],[40.6,-1.2],[40.6,1.8]]},
-              {a:"anes",at:[0,.38],path:[[28.4,1],[28.4,-.6],[39.4,-.6],[39.4,1.6]]},
-              {a:"nurse",at:[.42,.5],path:[[34.4,9.6]]},
-              {a:"crew",at:[.42,.95],path:[[9,12.8],[25,12.8],[25,11.2],[26.4,8.6]]},
-              {a:"tech",at:[.42,.5],path:[[31.4,9.3]]},
-              {a:"tech",at:[.5,.6],path:[[27,11.3]]},
-              {a:"trayused",at:[.5,.6],path:[[27,11.6,.25]]},
-              {a:"trayused",at:[.6,.66],path:[[27,12.05,.25],[27,12.8,.86]]},
-              {a:"tech",at:[.64,.76],path:[[30.8,7.6]]},
-              {a:"robot",at:[.66,.98],path:[[31,12.8],[31,15.4],[33.2,15.4]]},
-              {a:"trayused",at:[.66,.98],path:[[31,12.8,.86],[31,15.4,.86],[33.2,15.4,.86]]}],
-       ev:[{at:.36,flash:[29.5,1],rec:["09:05","Patient out"]},
-           {at:.4,until:.6,note:"Patient out seen at 09:05. Cleaning crew paged.",on:[29.5,1]},
-           {at:.5,to:.75,add:{chart:3}},
-           {at:.5,until:.8,note:"Reads the draft and signs with a tap",on:"nurse"},
-           {at:.74,signR:true},
-           {at:.8,until:1,note:"Used tray rides the ceiling rail to sterile processing",on:"robot"}] } },
+ { id:"out", title:"Patient out, tray back", product:[], toolT:["walk","phone"], secs:12, frame:"core",
+   clock:{t:[545,552], f:[545,552]},
+   sayT:"Sam pushes the tray back to sterile processing, then calls cleaning.",
+   sayF:"Sterile processing staff wheel the used tray back on the case cart. Sam stays with the patient.",
+   t:{ moves:[{a:"patient",at:[.05,.35],path:[[29.5,1],[29.5,-1.2],[46,-1.2]]},{a:"anes",at:[.05,.35],path:LEAVE(28.2)},
+              {a:"nurse",at:[.3,.36],path:[[33,9.4],[31.5,9.4]]},
+              {a:"trayused",at:[.36,.4],path:[[33.9,10.6,1.32]]},
+              {a:"nurse",at:[.36,.4],path:[[33,9.95],[34.8,9.95],[34.8,10.6]]},
+              {a:"cart",at:[.4,.62],path:CART_OUT},{a:"trayused",at:[.4,.62],path:CART_OUT.map(q=>[q[0],q[1],1.32])},
+              {a:"nurse",at:[.4,.62],path:[...CART_OUT.slice(0,-1),[31.5,14.4]]},
+              {a:"nurse",at:[.64,.8],path:[[31,14.2],[31,12.7],[25,12.7],[25,11.2],[27,10.8],[33,10],DESK]}],
+       push:"nurse",
+       time:[["walking",5,.3,.8],["waiting",2,.8,1]],
+       ev:[{at:.05,until:.3,call:"Patient to recovery",kind:"same",on:"patient"},
+           {at:.36,until:.8,call:"Pushes the tray back to sterile processing",kind:"pain",on:"nurse"},
+           {at:.8,until:1,call:"On hold with cleaning",kind:"pain",on:"nurse"}] },
+   f:{ moves:[{a:"patient",at:[.05,.35],path:[[29.5,1],[29.5,-1.2],[46,-1.2]]},{a:"anes",at:[.05,.35],path:LEAVE(28.2)},
+              {a:"nurse",at:[.05,.3],path:[[31.2,1.6]]},{a:"nurse",at:[.4,.55],path:[NURSE_BY_PT]},
+              {a:"tech",at:[.1,.16],path:[[31.5,9.4]]},{a:"trayused",at:[.16,.18],path:[[31.5,9.4,1.3]]},
+              {a:"tech",at:[.18,.26],path:[[33,9.95]]},{a:"trayused",at:[.18,.26],path:[[33,9.95,1.3]]},
+              {a:"trayused",at:[.26,.3],path:[[33.9,10.6,1.32]]},
+              {a:"tech",at:[.3,.42],path:[[30.8,7.6]]},
+              {a:"cart",at:[.34,.8],path:CART_OUT},{a:"trayused",at:[.34,.8],path:CART_OUT.map(q=>[q[0],q[1],1.32])}],
+       time:[["hands",7,0,1]],
+       ev:[{at:.05,until:.3,call:"With the patient",kind:"good",on:"nurse"},
+           {at:.34,until:.82,call:"Sterile processing wheels the tray back",kind:"same",on:"cart"}] } },
 
- { title:"Room reset", secs:14, cam:{x:22,z:10,zoom:.6},
-   clock:{t:[552,587], f:[548,572]},
-   txtT:"The room sits empty until the cleaning crew arrives. Sam calls sterile processing about the next tray and goes back to the clean supply room for items missing from the next case. Next patient in at 09:47.",
-   txtF:"The crew was paged at 09:05 and is already cleaning. The next tray is waiting in the pass-through, and the supply wall has restocked itself for case 2. Next patient in at 09:32.",
-   t:{ moves:[{a:"nurse",at:[.02,.18],path:[[31,12.7],[25,12.7],[25,11.2],[27,9.6],[33.2,9.8],[34.4,9.6]]},
-              {a:"crew",at:[.12,.42],path:[[9,12.8],[25,12.8],[25,11.2],[26.4,8.6]]},
-              {a:"crew",at:[.44,.7],path:[[28,4.4],[31,4.4],[31,7.6],[28,7.6],[27.4,6]]},
-              {a:"spd",at:[.58,.86],path:[[31,15.4],[31,12.8],[25,12.8],[25,11.2],[30.2,9.6]]},
-              {a:"traynext",at:[.58,.86],path:[[31,15.4],[31,12.8],[25,12.8],[25,11.2],[31.5,8.9]]},
-              {a:"nurse",at:[.6,.76],path:[[33.2,9.8],[27,9.6],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[20.5,15]]},
-              {a:"nurse",at:[.78,.94],path:[[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,9.6],[32.4,8]]}],
-       ev:[{at:.06,until:.3,note:"Room is empty. Waiting for the cleaning crew.",on:[29.5,6]},
-           {at:.42,until:.58,note:"Cleaning crew arrives",on:"crew"},
-           {at:.5,add:{calls:1}},{at:.48,until:.6,note:"Calls sterile processing about the next tray",on:"nurse"},
-           {at:.7,add:{trips:1}},{at:.66,until:.8,note:"Gets items missing from the next case's setup",on:"nurse"},
-           {at:.92,until:1,note:"Room ready. Next patient in at 09:47.",on:[29.5,6]}] },
-   f:{ moves:[{a:"crew",at:[0,.42],path:[[28,4.4],[31,4.4],[31,7.6],[28,7.6],[27.4,6]]},
-              {a:"nurse",at:[.3,.44],path:[[27,11.3]]},
-              {a:"nurse",at:[.46,.62],path:[[30.2,9.6]]},
-              {a:"traynext",at:[.46,.62],path:[[27,11.7,1.17],[31.5,8.9,1.2]]}],
-       ev:[{at:.04,until:.3,note:"Cleaning crew is already here",on:"crew"},
-           {at:.36,until:.62,note:"Next tray is waiting in the pass-through",on:"nurse"},
-           {at:.62,flash:[30.6,10.8],until:.85,note:"Supply wall restocked itself for case 2",on:[30.6,10.8]},
-           {at:.85,until:1,note:"Room ready. Next patient in at 09:32.",on:[29.5,6]}] } },
+ { id:"clean", title:"Room cleaning", product:["clean","rail","sterile"], toolT:["phone","crew"], secs:18,
+   clock:{t:[552,587], f:[552,572]},
+   sayT:"The room waits for the crew. Next patient at 09:47.",
+   sayF:"The robot cleans and disinfects right away. The next case's supplies are already here. Next patient at 09:32.",
+   t:{ moves:[{a:"surgeon",at:[0,.2],path:LEAVE(29.6)},{a:"tech",at:[0,.2],path:LEAVE(30.4)},
+              {a:"nurse",at:[.2,.3],path:[[33,7.5],[31.5,7.4]]},
+              {a:"crew",at:[.3,.48],path:[[29.5,-1.6],[29.5,1],[26.5,2.6]]},
+              {a:"crew",at:[.48,.94],path:LANES}],
+       time:[["waiting",6,0,.18],["hands",29,.18,1]],
+       ev:[{at:0,until:.46,call:"Waiting for the crew",kind:"pain",on:[29.5,1.6,6]},
+           {at:.48,until:.94,call:"Crew cleaning",kind:"same",on:"crew"},
+           {at:.94,until:1.01,call:"Next patient 09:47",kind:"pain",on:[29.5,1.6,6]}] },
+   f:{ moves:[{a:"surgeon",at:[0,.2],path:LEAVE(29.6)},{a:"tech",at:[0,.2],path:LEAVE(30.4)},
+              {a:"nurse",at:[.1,.25],path:[[33,7.5],[31.5,7.4]]},
+              {a:"bot",at:[.04,.58],path:LANES},{a:"bot",at:[.58,.62],path:[[29.8,5.2]]},{a:"bot",at:[.86,.92],path:[[26.5,9.6],[24.2,10.6]]},
+              {a:"robot",at:[.1,.35],path:FROM_PASS},
+              {a:"robot",at:[.55,.75],path:TO_PASS},
+              {a:"kit2",at:[.86,.87],path:[[27,12.35,1.05]]}],
+       ride:[{a:"kit2",at:[.42,.86]}],
+       drop:[[0,0],[.35,0],[.42,1],[.48,1],[.55,0],[.75,0],[.8,.82],[.9,.82],[.95,0]],
+       uv:[.8,.9], burst:[.62,.86],
+       time:[["hands",20,0,1]],
+       ev:[{at:.04,until:.58,call:"Wipes up blood and fluids, scrubs the floor",kind:"prod",prod:"clean",on:"bot"},
+           {at:.62,until:.86,call:"UV light on every surface",kind:"prod",prod:"clean",on:"bot"},
+           {at:.6,until:.8,call:"Brings the next case's supplies",kind:"prod",prod:"rail",on:"robot"},
+           {at:.8,until:1.01,call:"Next case's supplies are ready",kind:"prod",prod:"sterile",on:"sterile"},
+           {at:.9,until:1.01,call:"Next patient 09:32",kind:"good",on:[29.5,1.6,6]}] } },
+
+ { id:"meds", title:"Medications, start to end", product:["med"], toolT:["walk","paper"], secs:26, frame:"wide", zooms:[[0,.16,"pharm"],[.3,.46,"sterile"],[.58,.74,"pacu"]],
+   clock:{t:[435,560], f:[435,560]},
+   sayT:"Staff walk to the pharmacy for meds. After the case, Sam counts leftover drugs and a witness signs.",
+   sayF:"A locked box brings meds on the rail. Only the right badge opens it. Leftovers go back, and every open is logged.",
+   t:{ moves:[{a:"anes",at:[0,.14],path:TO_PHARM},{a:"anes",at:[.22,.36],path:[[36.5,15],[36.5,-.6],[29.4,-.6],[29.4,1.6],[28.2,10.9]]},
+              {a:"patient",at:[.4,.55],path:[[41,-1.2],[41,1],PACU_BED]},
+              {a:"rn2",at:[.5,.6],path:[[39.6,12],[39.6,17.6]]},{a:"rn2",at:[.66,.76],path:[[39.6,12],RN_AT]},
+              {a:"nurse",at:[.76,.8],path:[[33,7.5],DESK]}],
+       time:[["typing",6,.8,1]],
+       ev:[{at:0,until:.22,call:"07:15. Walks to the pharmacy for the case meds",kind:"pain",on:"anes"},
+           {at:.22,until:.38,call:"Carries them back to OR 2",kind:"pain",on:"anes"},
+           {at:.5,until:.76,call:"09:15. Recovery nurse walks to the pharmacy",kind:"pain",on:"rn2"},
+           {at:.8,until:1.01,call:"Sam counts leftover drugs and a witness signs. 6 min.",kind:"pain",on:"nurse"}] },
+   f:{ moves:[{a:"kit2",at:[0,.01],path:[[50,0,0]]},{a:"robot",at:[0,.12],path:FROM_PASS},
+              {a:"anes",at:[.12,.3],path:TEAM_IN(26.0,11.2)},
+              {a:"patient",at:[.4,.55],path:[[41,-1.2],[41,1],PACU_BED]},
+              {a:"medbox",at:[.16,.3],path:MED_TO_OR},{a:"medbox",at:[.46,.58],path:MED_TO_PACU},{a:"medbox",at:[.74,.92],path:MED_HOME}],
+       mdrop:[[0,1],[.12,1],[.16,0],[.3,0],[.34,.82],[.42,.82],[.46,0],[.58,0],[.62,1],[.7,1],[.74,0],[.92,0],[.97,1]],
+       uv:[.34,.42], pgx:[[0,41.6],[.05,43.4],[.1,42.2],[.13,41.6]],
+       time:[],
+       ev:[{at:0,until:.16,call:"Pharmacy robot picks 6 meds. The pharmacist checks and locks the box.",kind:"prod",prod:"med",on:"medbox"},
+           {at:.16,until:.3,call:"Rides the rail to OR 2",kind:"prod",prod:"med",on:"medbox"},
+           {at:.3,until:.46,call:"Opens only with the anesthesiologist's badge",kind:"prod",prod:"med",on:"medbox"},
+           {at:.46,until:.74,call:"After surgery: recovery meds to the bedside. Opens with the nurse's badge.",kind:"prod",prod:"med",on:"medbox"},
+           {at:.74,until:1.01,call:"Leftover drugs go back to the pharmacy. Every open is logged.",kind:"prod",prod:"med",on:"medbox"},
+           {at:.8,until:1.01,call:"No drug count for Sam",kind:"good",on:"nurse"}] } },
 ];
-
 /* ============================ helpers ============================ */
 const $ = s => document.querySelector(s);
 const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
@@ -445,11 +491,14 @@ mat("sheet","#f4f7fa"); mat("blanket","#9fc3e6"); mat("mattress","#e9eef3"); mat
 mat("shelf","#e8ebee"); mat("binB","#7aa7dc"); mat("binG","#86c79a"); mat("binY","#ecc56a"); mat("binR","#e58e7a");
 mat("supplyT","#c7ced5"); mat("supplyF","#3fae67",{emissive:"#23854a",emissiveIntensity:.35});
 mat("robot","#6c4fd1",{roughness:.45}); mat("robotTop","#efeafc"); mat("tray","#b9c3cc",{roughness:.3,metalness:.6}); mat("trayUsed","#a99a8a",{roughness:.4,metalness:.4});
-mat("rail","#4a5562",{roughness:.4,metalness:.5}); mat("station","#ffffff");
+mat("rail","#4a5562",{roughness:.4,metalness:.5}); mat("station","#ffffff"); mat("glass","#cfe6f2",{transparent:true,opacity:.35,roughness:.1}); mat("uv","#9b59e6",{emissive:"#8e44d6",emissiveIntensity:.4}); mat("found","#3fae67",{emissive:"#3fae67",emissiveIntensity:.8}); mat("beam","#ff4d4d",{emissive:"#ff4d4d",emissiveIntensity:.8,transparent:true,opacity:.7});
+mat("arm","#0f8b8d",{roughness:.4,metalness:.3}); mat("armJ","#e9eef2",{roughness:.4}); mat("bot","#2a66cf",{roughness:.45}); mat("botTop","#e6eefc");
 mat("cam","#ef6a34",{emissive:"#ef6a34",emissiveIntensity:.5}); mat("skin","#e2b896"); mat("skin2","#a87554"); mat("skin3","#c9946b");
 mat("hair","#2f2622"); mat("curtain","#cfe0e6",{transparent:true,opacity:.85}); mat("light","#ffffff",{emissive:"#fffbe8",emissiveIntensity:.4});
-mat("board","#ffffff"); mat("green","#7cc49a"); mat("plant","#7aa884");
-const SCRUB = {nurse:"#e0457b", surgeon:"#3f8f5a", anes:"#7a62c4", tech:"#3d7fc4", crew:"#7d8590", spd:"#c08a3e", other:"#9fb4c4"};
+mat("board","#ffffff"); mat("blood","#8e1b1b",{roughness:.35}); mat("uvT","#b57cf2",{emissive:"#9b59e6",emissiveIntensity:.9}); mat("plan","#c2410c",{emissive:"#c2410c",emissiveIntensity:.45}); mat("planScr","#fff4ec",{emissive:"#fde3d3",emissiveIntensity:.5}); mat("green","#7cc49a"); mat("plant","#7aa884");
+mat("med","#fbfbfd",{roughness:.4}); mat("medBand","#d6336c",{emissive:"#d6336c",emissiveIntensity:.3}); mat("lock","#e0b23a",{roughness:.3,metalness:.6});
+mat("pharm","#fde3d3"); mat("pacu","#f6e3c4"); mat("switch","#f2b81f",{emissive:"#f2b81f",emissiveIntensity:.25}); mat("trayBlue","#4f86c6",{roughness:.4,metalness:.2});
+const SCRUB = {nurse:"#e0457b", surgeon:"#3f8f5a", anes:"#7a62c4", tech:"#3d7fc4", crew:"#7d8590", spd:"#c08a3e", other:"#9fb4c4", pharm:"#4a90a4", rn2:"#2bb3a3"};
 
 function box(w,h,d,m,x,y,z,r=0){
   const g = r ? new RoundedBoxGeometry(w,h,d,2,Math.min(r,w/2,h/2,d/2)) : new THREE.BoxGeometry(w,h,d);
@@ -460,15 +509,14 @@ function cyl(rt,rb,h,m,x,y,z,seg=24){ const o=new THREE.Mesh(new THREE.CylinderG
 /* ============================ the building ============================ */
 // Plan coordinates in meters. x to the right, z toward the viewer.
 // Pre-op x0-7, top/bottom patient corridors, ORs 1-4, clean core in the middle, sterile processing, recovery x37-44.
-const WALL_H = 1.5, WT = .18, RAIL_Y = 2.75;
-const RAILS = [[[9,12.8],[35,12.8]],[[9,17.2],[35,17.2]],[[9,12.8],[9,17.2]],[[35,12.8],[35,17.2]],[[31,12.8],[31,15.4]],[[31,15.4],[33.2,15.4]],[[24,12.8],[24,15]],[[12,15],[26,15]],[[17,12],[17,12.8]],[[27,12],[27,12.8]],[[17,17.2],[17,18]],[[27,17.2],[27,18]]];
+const WALL_H = 1.5, WT = .18, RAIL_Y = 3.1;
+const RAILS = [[[9,12.8],[35,12.8]],[[9,17.2],[35,17.2]],[[9,12.8],[9,17.2]],[[35,12.8],[35,17.2]],[[31,12.8],[31,15.4]],[[31,15.4],[33.2,15.4]],[[24,12.8],[24,15]],[[12,15],[27.6,15]],[[17,12],[17,12.8]],[[27,12],[27,12.8]],[[17,17.2],[17,18]],[[27,17.2],[27,18]],[[33.2,15.4],[41,15.4]],[[41,7.4],[41,19.8]]];
+const SWITCHES = [[17,12.8],[24,12.8],[27,12.8],[31,12.8],[35,12.8],[24,15],[31,15.4],[35,15.4],[41,15.4]];
 const LOOP = [[9,12.8],[35,12.8],[35,17.2],[9,17.2],[9,12.8]];
 const ROOMS = [
-  {name:"Pre-op", x:3.5,z:15, lab:true},
-  {name:"OR 1", x:14.5,z:6, lab:true},{name:"OR 2", x:29.5,z:.9, lab:true, focus:true},
-  {name:"OR 3", x:14.5,z:24, lab:true},{name:"OR 4", x:29.5,z:24, lab:true},
-  {name:"Clean supply", x:15,z:15, lab:true},{name:"Sterile processing", x:33,z:13.9, lab:true},
-  {name:"Recovery", x:40.5,z:15, lab:true},{name:"Cleaning crew", x:9,z:17.4, lab:true, small:true},
+  {name:"OR 2", x:29.5,z:.9, focus:true},
+  {name:"Supply room", x:20,z:16.1},{name:"Sterile processing", x:32.6,z:16.5},
+  {name:"Pharmacy", x:40.9,z:22.7},{name:"Recovery", x:40.9,z:.55},
 ];
 function wallSeg(g,x0,z0,x1,z1){
   const len = Math.hypot(x1-x0,z1-z0); if(len<.01) return;
@@ -525,168 +573,215 @@ function orRoom(g,x0,z0,big=false){
   d.add(box(1.0,.8,.55,"wood",0,.4,0,.04)); d.add(box(.55,.36,.05,"screen",0,1.05,top?.2:-.2));
 }
 
+
+/* ============================ scene ============================ */
 function buildScene(future){
-  const scene = new THREE.Scene();
-  scene.environment = envTex;
-  scene.background = null;
+  const scene = new THREE.Scene(); scene.environment = envTex; scene.background = null;
   const g = new THREE.Group(); scene.add(g);
-  // light
   scene.add(new THREE.HemisphereLight("#ffffff","#9aa6b2",1.1));
   const sun = new THREE.DirectionalLight("#fff4e6",1.5);
-  sun.position.set(-14,30,22); sun.target.position.set(22,0,15);
+  sun.position.set(-8,30,22); sun.target.position.set(28,0,8);
   sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
-  Object.assign(sun.shadow.camera,{left:-30,right:30,top:30,bottom:-30,near:1,far:90}); sun.shadow.bias=-.0004; sun.shadow.radius=4;
+  Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:90}); sun.shadow.bias=-.0004; sun.shadow.radius=4;
   scene.add(sun, sun.target);
 
-  // ground and floors
   const gr = box(140,.2,120,"ground",22,-.1,15); gr.castShadow=false; g.add(gr);
   floor(g,0,-3,44,33,"corr",-.005);
-  floor(g,0,-3,7,33,"bay"); floor(g,37,-3,44,33,"bay");
   [[8,0],[23,0],[8,18],[23,18]].forEach(([x,z])=>floor(g,x,z,x+13,z+12,"or",.004));
   floor(g,10,13.4,28,16.6,"clean",.004); floor(g,29,13,36,17,"spd",.004);
-
-  // outer walls
   wall(g,0,-3,44,-3); wall(g,0,33,44,33); wall(g,0,-3,0,33); wall(g,44,-3,44,33);
-  // pre-op and recovery bay dividers (low curtains)
-  for(let i=0;i<7;i++){ const z=-1+i*4.6;
-    bed(g,3.6,z+1.6+0.0,Math.PI/2, i!==0 && i%2===0, i%3?"skin":"skin3");
-    const c=box(.04,1.0,2.4,"curtain",6.2,.5,z+1.6); c.castShadow=false; g.add(c);
-    if(i<6){ const d=box(5.6,.9,.05,"curtain",3.6,.45,z+3.9); d.castShadow=false; g.add(d); }
-    bed(g,40.6,z+1.6,Math.PI/2, i>1 && i%2===1, i%2?"skin2":"skin");
-    if(i<6){ const d=box(5.6,.9,.05,"curtain",40.6,.45,z+3.9); d.castShadow=false; g.add(d); }
-  }
   wall(g,7,0,7,30,[[13,17]]); wall(g,37,0,37,30,[[13,17]]);
-  // ORs: patient doors on the corridor side, staff door to the clean core
   const ors=[[8,0,"t",18,19.6],[23,0,"t",24.2,25.8],[8,18,"b",18,19.6],[23,18,"b",24.2,25.8]];
   ors.forEach(([x,z,side,d0,d1])=>{
     const outer = side==="t"?z:z+12, inner = side==="t"?z+12:z;
-    wall(g,x,outer,x+13,outer,[[x+5.3,x+7.7]]);
-    wall(g,x,inner,x+13,inner,[[d0,d1]]);
+    wall(g,x,outer,x+13,outer,[[x+5.3,x+7.7]]); wall(g,x,inner,x+13,inner,[[d0,d1]]);
     wall(g,x,z,x,z+12); wall(g,x+13,z,x+13,z+12);
     orRoom(g,x,z, x===23&&z===0);
-    // supply cabinet along the inner wall
-    const sx=x+7.6, sz= side==="t"? z+11.55 : z+.45;
-    if(future){ g.add(box(6.2,1.1,.5,"supplyT",sx,.55,sz,.04)); const strip=box(6.2,.08,.52,"supplyF",sx,1.12,sz); strip.castShadow=false; g.add(strip); }
-    else g.add(box(6.2,1.1,.5,"supplyT",sx,.55,sz,.04));
   });
-  // whiteboard in OR 2
-  g.add(box(.05,.7,1.4,"board",35.85,1.0,5));
-  // scrub sinks between ORs
-  [[21,6],[21,24]].forEach(([x,z])=>{ g.add(box(2,.9,.6,"steel",x+1,.45,z,.04)); });
   wall(g,21,0,21,12); wall(g,21,18,21,30); wall(g,23,0,23,12); wall(g,23,18,23,30);
-  // clean supply room
+  // supply room and sterile processing
   wall(g,10,13.4,28,13.4,[[23.2,24.8]]); wall(g,10,16.6,28,16.6,[[13.2,14.8]]); wall(g,10,13.4,10,16.6); wall(g,28,13.4,28,16.6);
-  for(let i=0;i<4;i++) shelving(g,12.6+i*4,15,3.2);
-  // sterile processing
+  for(let i=0;i<(future?2:4);i++) shelving(g,12.6+i*4,15,3.2);
   wall(g,29,13,36,13,[[30.2,31.8]]); wall(g,29,17,36,17); wall(g,29,13,29,17); wall(g,36,13,36,17);
-  [[34.6,14.2],[34.6,15.8]].forEach(([x,z])=>{ g.add(box(1.6,1.3,1.1,"steel",x,.65,z,.08)); g.add(box(.9,.5,.04,"screen",x-.82,.85,z)); });
+  [[34.6,14.2],[34.6,15.8]].forEach(([x,z])=>{ g.add(box(1.6,1.3,1.1,"steel",x,.65,z,.08)); });
   g.add(box(2.4,.85,.8,"steel",31.2,.43,16.3,.04));
-  // cleaning crew closet
-  g.add(box(1.2,.8,.8,"dark",8.6,.4,17.3,.05));
-  // a few plants and benches for scale
-  [[1,-2.4],[43,-2.4],[1,32.4],[43,32.4]].forEach(([x,z])=>{ g.add(cyl(.3,.24,.5,"wood",x,.25,z)); const p=new THREE.Mesh(new THREE.IcosahedronGeometry(.45,1),M.plant); p.position.set(x,.85,z); p.castShadow=true; g.add(p); });
+  // pharmacy and recovery
+  floor(g,37,17,44,23,"pharm",.004); floor(g,37,0,44,11,"pacu",.004);
+  wall(g,37,17,44,17,[[38.6,40.6]]); wall(g,37,23,44,23); wall(g,37,11,44,11,[[38.6,40.6]]); wall(g,37,0,44,0,[[39.8,42.2]]);
+  shelving(g,42.5,17.6,2.6);
+  g.add(box(1.8,.95,.5,"wood",39.6,.48,18.3,.04));      // pharmacy window counter
+  bed(g,40.6,2.2,Math.PI/2,false);
 
-  // other ORs are busy too
-  [[14.5,6],[14.5,24],[29.5,24]].forEach(([x,z],i)=>{
-    bed(g,x,z,0,true,i%2?"skin2":"skin");
-    [[-1.1,-.3,"surgeon"],[1.1,.2,"tech"],[-.3,-1.6,"anes"],[2.6,2.8,"other"]].forEach(([dx,dz,r])=>{ const p=person(SCRUB[r],["skin","skin2","skin3"][(i+dx>0)%3]); p.position.set(x+dx,0,z+dz); p.rotation.y=Math.atan2(-dx,-dz); g.add(p); });
-  });
-  // static staff
-  // a pre-op nurse and PACU nurse
-  const p1=person(SCRUB.other,"skin3"); p1.position.set(5.6,0,12); g.add(p1);
-  const p2=person(SCRUB.other,"skin"); p2.position.set(38.6,0,10); g.add(p2);
-
-  // future-only hardware: ceiling cameras with light cones, approval screen glow, ceiling rail
-  const fx = new THREE.Group(); g.add(fx);
-  // movable actors
   const A = {};
-  A.nurse = person(SCRUB.nurse,"skin"); A.nurse.add(ring(future?"#2a66cf":"#d9622b",.52));
+  A.nurse = person(SCRUB.nurse,"skin"); A.nurse.userData.ring = ring(SCRUB.nurse,.55); A.nurse.add(A.nurse.userData.ring);
   { const mk=new THREE.Mesh(new THREE.ConeGeometry(.16,.3,4),new THREE.MeshStandardMaterial({color:SCRUB.nurse,emissive:SCRUB.nurse,emissiveIntensity:.4})); mk.rotation.x=Math.PI; mk.position.y=1.62; A.nurse.add(mk); A.nurse.userData.marker=mk; }
-  g.add(A.nurse);
-  A.surgeon = person(SCRUB.surgeon,"skin2"); A.surgeon.rotation.y=Math.PI/2; g.add(A.surgeon);
-  A.tech = person(SCRUB.tech,"skin3"); A.tech.rotation.y=-Math.PI/2; g.add(A.tech);
-  A.anes = person(SCRUB.anes,"skin"); g.add(A.anes);
-  A.crew = person(SCRUB.crew,"skin2"); { const c=box(.5,.7,.4,"binY",0,.35,.5,.05); A.crew.add(c);} g.add(A.crew);
-  A.spd = person(SCRUB.spd,"skin3"); g.add(A.spd);
-  A.patient = new THREE.Group(); bed(A.patient,0,0,Math.PI/2,true,"skin3"); g.add(A.patient);
-  A.traynext = new THREE.Group();
-  if(future) A.traynext.add(box(.8,.14,.45,"tray",0,0,0,.03));
-  else { A.traynext.add(box(.9,.75,.55,"steel",0,.38,0,.04)); A.traynext.add(box(.8,.12,.45,"tray",0,.82,0,.03)); }
-  g.add(A.traynext);
-  A.trayused = new THREE.Group(); A.trayused.add(box(.8,.12,.45,"trayUsed",0,.92,0,.03)); g.add(A.trayused);
-  // rail carrier: a pod hanging from the ceiling rail
-  const pod = () => { const r=new THREE.Group();
-    r.add(box(.12,.5,.12,"dark",0,RAIL_Y-.25,0)); r.add(box(.5,.14,.3,"dark",0,RAIL_Y+.02,0,.04));
-    r.add(box(1.0,.5,.7,"robot",0,RAIL_Y-.66,0,.12)); r.add(box(.86,.06,.56,"robotTop",0,RAIL_Y-.39,0,.02));
-    return r; };
-  A.robot = pod(); A.robot.scale.set(1.3,1,1.3); g.add(A.robot); A.robot.visible = future;
-  const ambient = [];
+  A.surgeon = person(SCRUB.surgeon,"skin2"); A.surgeon.rotation.y=Math.PI/2;
+  A.tech = person(SCRUB.tech,"skin3"); A.tech.rotation.y=-Math.PI/2;
+  A.anes = person(SCRUB.anes,"skin"); A.anes.rotation.y=Math.PI/2;
+  A.crew = person(SCRUB.crew,"skin2"); A.crew.add(box(.5,.7,.4,"binY",0,.35,.5,.05));
+  A.patient = new THREE.Group(); bed(A.patient,0,0,Math.PI/2,true,"skin3");
+  A.scope = new THREE.Group(); mat("scopeC","#f2b81f",{emissive:"#f2b81f",emissiveIntensity:.25}); A.scope.add(box(.7,.16,.26,"scopeC",0,0,0,.04)); A.scope.add(box(.5,.05,.05,"steel",.05,.1,0));
+  A.trayused = new THREE.Group(); A.trayused.add(box(.8,.12,.45,"trayUsed",0,0,0,.03));
+  const kit = ()=>{ const k=new THREE.Group(); k.userData.parts=[["binB",-.3],["binG",0],["binY",.3]].map(([m,x])=>{ const b=box(.26,.22,.34,m,x,0,0,.03); k.add(b); return b; }); return k; };
+  A.kit = kit(); A.kit2 = kit();
+  A.pick = new THREE.Group(); A.pick.add(box(.24,.2,.3,"binY",0,0,0,.03));
+  // case cart: open shelves with instrument trays, handle at the back
+  A.cart = new THREE.Group(); { const c=A.cart;
+    [[-.3,-.5],[.3,-.5],[-.3,.5],[.3,.5]].forEach(([x,z])=>{ c.add(cyl(.07,.07,.06,"dark",x,.07,z,10)); c.add(box(.04,.78,.04,"steel",x,.5,z)); });
+    c.add(box(.7,.05,1.1,"steel",0,.14,0,.02)); c.add(box(.7,.05,1.1,"steel",0,.5,0,.02)); c.add(box(.7,.05,1.1,"steel",0,.87,0,.02));
+    c.add(box(.55,.12,.45,"trayBlue",0,.59,-.26,.02)); c.add(box(.55,.12,.45,"trayBlue",0,.59,.26,.02)); c.add(box(.55,.12,.45,"trayBlue",0,.96,.26,.02));
+    c.add(box(.6,.05,.05,"dark",0,1.02,-.62)); c.add(box(.04,.2,.04,"dark",-.28,.93,-.6)); c.add(box(.04,.2,.04,"dark",.28,.93,-.6));
+    c.scale.setScalar(1.3); }
+  A.runner = person(SCRUB.spd,"skin3");
+  A.pharm = person(SCRUB.pharm,"skin2");
+  A.rn2 = person(SCRUB.rn2,"skin3"); A.rn2.rotation.y=Math.PI/2;
+  for(const k in A) g.add(A[k]);
+
+  const fx = new THREE.Group(); g.add(fx);
+  const C = {};
+  C.blood = BLOOD.map(([x,z],k)=>{ const b=new THREE.Mesh(new THREE.CircleGeometry(.28+.08*(k%3),20),M.blood); b.rotation.x=-Math.PI/2; b.position.set(x,.075,z); b.scale.set(1,1.4-(k%2)*.5,1); g.add(b); b.visible=false; return b; });
   if(future){
-    // the rail network, above the staff corridor and into sterile processing and clean supply
+    // ceiling rail and wall hatches
     RAILS.forEach(([a,b])=>{ const len=Math.hypot(b[0]-a[0],b[1]-a[1]); const horiz=Math.abs(b[1]-a[1])<.01;
-      const r=box(horiz?len+.2:.2,.16,horiz?.2:len+.2,"rail",(a[0]+b[0])/2,RAIL_Y+.12,(a[1]+b[1])/2); fx.add(r);
-      for(let t=0;t<=len;t+=3){ const x=a[0]+(b[0]-a[0])*t/len, z=a[1]+(b[1]-a[1])*t/len; const h=cyl(.03,.03,.9,"rail",x,RAIL_Y+.6,z,6); h.castShadow=false; fx.add(h); } });
-    // pass-throughs in the OR walls and the loading spot in sterile processing
-    [[17,12],[27,12],[17,18],[27,18]].forEach(([x,z])=>{ fx.add(box(1.2,.12,.9,"station",x,1.04,z,.03)); const l=box(1.2,.06,.04,"glowB",x,1.5,z+(z<15?.46:-.46)); l.castShadow=false; fx.add(l); });
+      fx.add(box(horiz?len+.2:.2,.16,horiz?.2:len+.2,"rail",(a[0]+b[0])/2,RAIL_Y+.12,(a[1]+b[1])/2));
+      for(let t=0;t<=len;t+=3){ const x=a[0]+(b[0]-a[0])*t/len, z=a[1]+(b[1]-a[1])*t/len; const h=cyl(.035,.035,1.2,"rail",x,RAIL_Y+.75,z,6); h.castShadow=false; fx.add(h); } });
+    [[17,12],[17,18],[27,18]].forEach(([x,z])=>{ fx.add(box(1.2,.12,.9,"station",x,1.04,z,.03)); });
+    // sterile pass-through in the OR 2 wall
+    fx.add(box(1.5,.08,1.3,"station",27,.92,12.35,.02)); fx.add(box(1.5,.9,1.3,"steel",27,.45,12.35,.04));
+    const gl=box(1.5,1.1,1.3,"glass",27,1.5,12.35,.04); gl.castShadow=false; fx.add(gl);
+    C.uv = box(1.3,.05,1.1,"uv",27,2.02,12.35); C.uv.castShadow=false; fx.add(C.uv);
     fx.add(box(1.2,.1,.8,"station",33.2,1.04,15.4,.03));
-    for(let k=0;k<2;k++){ const a=pod(); a.userData.off=k*.5; g.add(a); ambient.push(a); }
-  }
-
-
-  if(future){
-    const coneMat = new THREE.MeshBasicMaterial({color:"#ef6a34",transparent:true,opacity:.07,depthWrite:false,side:THREE.DoubleSide});
-    const cams=[[24,1],[35,1],[29.5,6],[24,11],[9,1],[20,1],[9,19],[20,29],[24,19],[35,29],[3.5,-2],[40.5,-2],[32,13.6],[12,14]];
-    cams.forEach(([x,z],i)=>{
-      const dome = new THREE.Mesh(new THREE.SphereGeometry(.17,16,10,0,Math.PI*2,0,Math.PI/2),M.cam); dome.rotation.x=Math.PI; dome.position.set(x,2.3,z); fx.add(dome);
-      const post = cyl(.015,.015,.25,"steel",x,2.42,z,6); post.castShadow=false; fx.add(post);
-      if(i<4){ const cone = new THREE.Mesh(new THREE.ConeGeometry(2.4,2.3,32,1,true),coneMat); cone.position.set(x,1.15,z); fx.add(cone); }
+    fx.add(box(1.2,.06,.9,"station",27.2,.95,15,.02)); fx.add(box(1.1,.92,.8,"steel",27.2,.46,15,.03));
+    fx.add(box(.1,.9,1.3,"plan",23.2,1.15,2.6,.03)); fx.add(box(.04,.72,1.1,"planScr",23.27,1.15,2.6));
+    // rail box
+    A.robot = new THREE.Group();
+A.robot.add(box(.5,.18,.34,"dark",0,RAIL_Y,0,.04)); A.robot.add(box(.3,.1,.3,"dark",0,RAIL_Y-.12,0));
+    const bx = new THREE.Group(); bx.add(box(1.0,.5,.7,"robot",0,0,0,.12)); bx.add(box(.86,.06,.56,"robotTop",0,.27,0,.02)); A.robot.add(bx);
+    const cable = cyl(.025,.025,1,"dark",0,0,0,6); cable.castShadow=false; A.robot.add(cable);
+    A.robot.userData.box = bx; A.robot.userData.cable = cable;
+    A.robot.scale.set(1.3,1,1.3); g.add(A.robot);
+    // cameras and microphones in OR 2
+    const coneMat = C.coneMat = new THREE.MeshBasicMaterial({color:"#ef6a34",transparent:true,opacity:.09,depthWrite:false,side:THREE.DoubleSide});
+    [[23.9,.7],[35.1,.7],[23.9,11.3],[35.1,11.3]].forEach(([x,z])=>{
+      fx.add(box(.5,.08,.16,"dark",x+.45*(x<30?1:-1),2.42,z)); const dome = new THREE.Mesh(new THREE.SphereGeometry(.34,16,10,0,Math.PI*2,0,Math.PI/2),M.cam); dome.rotation.x=Math.PI; dome.position.set(x,2.3,z); fx.add(dome);
+      fx.add(cyl(.02,.02,.3,"steel",x,2.45,z,6));
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(2.6,2.3,32,1,true),coneMat); cone.position.set(x,1.15,z); fx.add(cone);
     });
-    // approval screen at the charting desk
-    const s = box(.58,.38,.06,"glowB",34.4,1.06,9.84); s.castShadow=false; fx.add(s);
-    // central control desk near pre-op
-    fx.add(box(1.6,.8,.7,"wood",9,.4,-1.9,.04)); [8.5,9,9.5].forEach(x=>{const t=box(.4,.28,.04,"glowB",x,1.0,-2.15); t.castShadow=false; fx.add(t);});
+    // billing screen at the desk
+    mat("bill","#2fa35d",{emissive:"#23854a",emissiveIntensity:.5});
+    C.bill = box(.8,.5,.06,"bill",34.4,1.2,9.92); C.bill.castShadow=false; fx.add(C.bill);
+    // picking robot: drives on a track between two shelf walls, drops items into the rail box at the aisle end
+    const ab = new THREE.Group(); g.add(ab);
+    const SX0=19.0, SX1=26.0, SL=SX1-SX0, SC=(SX0+SX1)/2, BINS=["binB","binG","binY","binR","binB","binG"];
+    ab.add(box(SL,1.9,.4,"shelf",SC,.95,14.2,.03));
+    for(let i=0;i<14;i++) for(let r=0;r<4;r++) ab.add(box(.4,.28,.06,BINS[(i+r*2)%6],SX0+.25+i*.5,.35+r*.4,14.43,.02));
+    ab.add(box(SL,.9,.4,"shelf",SC,.45,15.8,.03));
+    for(let i=0;i<14;i++) for(let r=0;r<2;r++) ab.add(box(.4,.28,.06,BINS[(i+r*3)%6],SX0+.25+i*.5,.3+r*.38,15.57,.02));
+    { const gl=box(SL,1.0,.04,"glass",SC,1.4,15.98); gl.castShadow=false; ab.add(gl); }
+    { const tr=box(7.4,.05,.26,"rail",22.7,.03,15); tr.castShadow=false; ab.add(tr); }
+    const crane = new THREE.Group(); ab.add(crane);
+    crane.add(box(.8,.14,.44,"arm",0,.1,0,.03)); crane.add(box(.14,1.86,.26,"arm",-.3,1.08,0,.03)); crane.add(box(.3,.1,.3,"arm",-.22,2.03,0,.03));
+    const car = box(.42,.16,.38,"armJ",0,1,0,.03); crane.add(car);
+    const fork = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),M.armJ); fork.castShadow=true; ab.add(fork);
+    const head = box(.24,.12,.24,"arm",0,0,0,.02); ab.add(head);
+    const foundM = box(.42,.32,.04,"found",0,0,0); foundM.castShadow=false; foundM.visible=false; ab.add(foundM); C.found=foundM;
+    C.armBase=GREST[0]; C.armEnd=new THREE.Vector3();
+    const gs=new THREE.Vector3();
+    C.gantry = (gx,gy,ext,ex)=>{ crane.position.set(gx,0,15); car.position.y=gy; C.armBase=gx;
+      gs.set(gx,gy,15); C.armEnd.set(gx+ex,gy,15+ext); const L=gs.distanceTo(C.armEnd);
+      fork.visible = L>.05; if(fork.visible){ fork.position.copy(gs).lerp(C.armEnd,.5); fork.scale.set(.1,.06,L); fork.lookAt(C.armEnd); }
+      head.position.copy(C.armEnd); };
+    C.gantry(...GREST);
+    // rail switches
+    C.switches = SWITCHES.map(([x,z])=>{ const m=box(.5,.22,.5,M.switch.clone(),x,RAIL_Y+.12,z,.04); m.castShadow=false; fx.add(m); return m; });
+    // medication box ports: pharmacy and recovery bedside
+    [PH_PORT,PACU_PORT].forEach(([x,z])=>{ fx.add(box(1.2,.1,.8,"station",x,1.04,z,.03)); fx.add(box(1.1,.95,.7,"steel",x,.49,z,.03)); });
+    // pharmacy picking robot
+    { const tr=box(2.8,.05,.22,"rail",42.5,.03,18.7); tr.castShadow=false; fx.add(tr); }
+    const pg = new THREE.Group(); g.add(pg); pg.position.set(41.6,0,18.7);
+    pg.add(box(.6,.12,.4,"arm",0,.08,0,.03)); pg.add(box(.12,1.7,.22,"arm",-.22,.95,0,.03)); pg.add(box(.36,.14,.3,"armJ",0,1.2,0,.03)); pg.add(box(.08,.06,.7,"armJ",0,1.2,-.45));
+    C.pg = x=>{ pg.position.x=x; };
+    // medication box on the rail
+    A.medbox = new THREE.Group();
+    A.medbox.add(box(.5,.18,.34,"dark",0,RAIL_Y,0,.04)); A.medbox.add(box(.3,.1,.3,"dark",0,RAIL_Y-.12,0));
+    { const mb=new THREE.Group(); mb.add(box(.72,.42,.52,"med",0,0,0,.08)); mb.add(box(.74,.1,.54,"medBand",0,.04,0,.02)); mb.add(box(.14,.14,.06,"lock",0,-.02,.28,.02));
+      A.medbox.add(mb); A.medbox.userData.box=mb; }
+    { const cb=cyl(.025,.025,1,"dark",0,0,0,6); cb.castShadow=false; A.medbox.add(cb); A.medbox.userData.cable=cb; }
+    A.medbox.scale.set(1.3,1,1.3); g.add(A.medbox);
+    // cleaning robot
+    A.bot = new THREE.Group();
+    A.bot.add(box(.9,.34,1.2,"bot",0,.24,0,.12)); A.bot.add(box(.84,.08,.3,"dark",0,.06,.52,.03));        // body and scrub deck
+    A.bot.add(box(.5,.05,.06,"glowB",0,.09,.68));                                                    // wet line
+    A.bot.add(cyl(.17,.2,1.4,"botTop",0,1.08,-.15,20));                                              // UV tower
+    for(let k=0;k<4;k++){ const a=k*Math.PI/2+Math.PI/4; A.bot.add(cyl(.045,.045,1.2,"uvT",Math.cos(a)*.2,1.1,-.15+Math.sin(a)*.2,8)); }
+    A.bot.add(cyl(.22,.22,.12,"bot",0,1.84,-.15,20)); A.bot.add(cyl(.06,.06,.1,"glowB",0,1.95,-.15,10));
+    A.bot.add(box(.08,.08,.5,"armJ",.32,.5,.35)); A.bot.add(box(.2,.06,.2,"glowB",.32,.42,.62,.02));  // wiper arm
+    A.bot.scale.setScalar(1.25); g.add(A.bot);
+    const burst = new THREE.Mesh(new THREE.SphereGeometry(1,24,16), new THREE.MeshBasicMaterial({color:"#a970ff",transparent:true,opacity:0,depthWrite:false}));
+    burst.visible=false; g.add(burst); C.burst=burst;
   }
-  // flash rings (pool)
   const flashes = [];
-  for(let i=0;i<4;i++){ const r=ring("#ef6a34",1); r.visible=false; g.add(r); flashes.push(r); }
-
-  return {scene, A, flashes, future, ambient};
+  for(let i=0;i<3;i++){ const r=ring("#ef6a34",1); r.visible=false; g.add(r); flashes.push(r); }
+  return {scene, A, C, flashes, future};
 }
+function gantryPose(def,p){
+  const K = def && def.keys; if(!K) return GREST;
+  for(let k=1;k<K.length;k++){ const A=K[k-1], B=K[k]; if(p<=B[0]){ const u=ease(B[0]>A[0]?clamp((p-A[0])/(B[0]-A[0])):1);
+    return [1,2,3,4].map(j=>(A[j]||0)+((B[j]||0)-(A[j]||0))*u); } }
+  return K.at(-1).slice(1);
+}
+const inW = (ws,p)=>(ws||[]).find(w=>p>=w[0] && p<w[1]);
+// how many items are in a kit at this point in the story
+function fillCount(side,a,i,p){
+  const idx = STEPS.findIndex(s=>s[side].fill && s[side].fill[a]); if(idx<0 || step<0 || i<idx) return 0;
+  return i>idx ? 3 : STEPS[idx][side].fill[a].filter(t=>p>=t).length;
+}
+const SIDX = STEPS.findIndex(s=>s.id==="surgery"), CIDX = STEPS.findIndex(s=>s.id==="clean");
+const DROP = RAIL_Y-.66-1.25; // how far the box lowers at full drop
+function keyAt(keys,p){ if(!keys) return 0; for(let k=1;k<keys.length;k++){ if(p<=keys[k][0]){ const u=ease(clamp((p-keys[k-1][0])/((keys[k][0]-keys[k-1][0])||1))); return keys[k-1][1]+(keys[k][1]-keys[k-1][1])*u; } } return keys.at(-1)[1]; }
 
 const SIDES = { t: buildScene(false), f: buildScene(true) };
-const HOME = {
-  nurse:[33,3], anes:[27.4,5.6], crew:[9,16.4], spd:[33.4,14.8], patient:[3.6,1.6], surgeon:[28.6,7.2], tech:[30.8,7.6],
-  traynext:[33.6,16.1], trayused:[31.5,8.5], robot:[33.2,15.4],
-};
-const HOME_F = { traynext:[33.2,15.4,1.78] };
+const HOME = { nurse:[27.6,-1.0], patient:[22,-1.2], surgeon:[33.6,-1.7], tech:[35,-1.7], anes:[32.2,-1.7], crew:[14,-1.6],
+  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[27.2,15], bot:[24.2,10.6], kit:KIT, kit2:[50,0,0], pick:[50,0,0],
+  cart:CART_HOME, runner:[50,0], pharm:[39.6,19.1], rn2:RN_AT, medbox:[50,0] };
+const HOME_F = { scope:[24.6,14.55,1.15], kit2:STAGE, pharm:[42.7,20.1], medbox:PH_PORT };
 
 /* ============================ camera ============================ */
 const cam = new THREE.OrthographicCamera(-1,1,1,-1,.1,400);
-const view = {x:22,z:13,zoom:1,  tx:22,tz:13,tzoom:1};
-const DIR = new THREE.Vector3(-.22, 1.5, 1).normalize(); // looking from the front-left, from above
-function placeCamera(aspect){
-  const base = 14 / view.zoom / (aspect>1.3 ? 1.35 : 1); // half-height in meters
-  cam.top = base; cam.bottom = -base; cam.left = -base*aspect; cam.right = base*aspect;
-  const t = new THREE.Vector3(view.x,0,view.z + (aspect>1.3 ? -3 : 4)/view.zoom); // keep the focus clear of the step card (or the header on phones)
-  cam.position.copy(t).addScaledVector(DIR,90); cam.lookAt(t); cam.updateProjectionMatrix();
+const DIR = new THREE.Vector3(-.22, 1.5, 1).normalize();
+const TARGET = new THREE.Vector3(28.5,0,8);
+const FRAMES = { room:[22.6,37.2,-2,12.4], core:[19.8,37.2,-2,17.2], arm:[18.8,28.2,13.3,16.6], cam:[29.6,37,-1.6,5.4], sterile:[24.4,30,10.2,14],
+  wide:[22.6,44.4,-2,23.4], pharm:[36.4,44.4,16.4,23.4], pacu:[36.4,44.4,-.6,11.6] };
+const FB = { t:[...FRAMES.core], f:[...FRAMES.core] };
+function frameFor(side,i,p){ if(step<0) return "core"; const s=STEPS[i]; if(side==="f" && s.zooms){ const z=s.zooms.find(z=>p>=z[0] && p<z[1]); if(z) return z[2]; } return s.frame||"room"; }
+function placeCamera(fb,vw,vh,top,bot){
+  const BOX=[]; for(const x of [fb[0],fb[1]]) for(const z of [fb[2],fb[3]]) for(const y of [0,2.9]) BOX.push(new THREE.Vector3(x,y,z));
+  cam.position.copy(TARGET).addScaledVector(DIR,90); cam.lookAt(TARGET); cam.updateMatrixWorld();
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; const q=new THREE.Vector3();
+  BOX.forEach(b=>{ q.copy(b).applyMatrix4(cam.matrixWorldInverse); x0=Math.min(x0,q.x); x1=Math.max(x1,q.x); y0=Math.min(y0,q.y); y1=Math.max(y1,q.y); });
+  const aw=vw-16, ah=Math.max(60,vh-top-bot-8);
+  const s=Math.min(aw/(x1-x0), ah/(y1-y0));          // pixels per meter
+  const cx=(x0+x1)/2, cy=(y0+y1)/2, py = top+4+ah/2;  // screen y of the content center
+  cam.left = cx - vw/2/s; cam.right = cx + vw/2/s; cam.top = cy + py/s; cam.bottom = cy - (vh-py)/s;
+  cam.updateProjectionMatrix();
 }
 
 /* ============================ state ============================ */
 let step = -1, prog = 0, playing = false, last = performance.now();
-const startState = []; // per step: {t:{pos,counts}, f:{...}}
-function initialState(side){ const pos={}; for(const k in HOME){ const h=(side==="f"&&HOME_F[k])||HOME[k]; pos[k]=[h[0],h[1],h[2]??0]; } return {pos, counts:{chart:0,trips:0,calls:0}, recs:[], signed:false}; }
+const KINDS = ["hands","typing","walking","waiting"];
+const startState = [];
+function initialState(side){ const pos={}; for(const k in HOME){ const h=(side==="f"&&HOME_F[k])||HOME[k]; pos[k]=[h[0],h[1],h[2]??0]; } return {pos, time:{hands:0,typing:0,walking:0,waiting:0}}; }
 (function precompute(){
   let s = {t:initialState("t"), f:initialState("f")};
   STEPS.forEach((st,i)=>{
     startState[i] = JSON.parse(JSON.stringify(s));
-    for(const side of ["t","f"]){
-      const S = s[side], d = st[side];
-      d.moves.forEach(m=>{ const e=m.path[m.path.length-1]; S.pos[m.a] = [e[0],e[1],e[2]??S.pos[m.a][2]]; });
-      d.ev.forEach(e=>{ if(e.add) for(const k in e.add) S.counts[k]+=e.add[k]; if(e.rec) S.recs.push(e.rec); if(e.signL||e.signR) S.signed=true; });
-    }
+    for(const side of ["t","f"]){ const S=s[side], d=st[side];
+      d.moves.forEach(m=>{ const e=m.path[m.path.length-1]; S.pos[m.a]=[e[0],e[1],e[2]??S.pos[m.a][2]]; });
+      d.time.forEach(([k,mins])=>S.time[k]+=mins); }
   });
   startState[STEPS.length] = s;
 })();
+const TOTAL = Math.max(...["t","f"].map(sd=>KINDS.reduce((a,k)=>a+startState[STEPS.length][sd].time[k],0)));
 
 function posAt(side, a, i, p){
   let cur = [...startState[i][side].pos[a]], heading=null, moving=false;
@@ -696,172 +791,227 @@ function posAt(side, a, i, p){
     if(p>=m.at[1]){ cur=[...pts[pts.length-1]]; const n=pts.length; heading=[pts[n-1][0]-pts[n-2][0],pts[n-1][1]-pts[n-2][1]]; continue; }
     if(p<m.at[0]) break;
     const u = (p-m.at[0])/(m.at[1]-m.at[0]);
-    const lens=[]; let total=0; for(let k=1;k<pts.length;k++){ const l=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]); lens.push(l); total+=l; }
+    const lens=[]; let total=0; for(let k=1;k<pts.length;k++){ const l=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1],(pts[k][2]-pts[k-1][2])*.5); lens.push(l); total+=l; }
     let d = u*total;
     for(let k=1;k<pts.length;k++){ if(d<=lens[k-1]||k===pts.length-1){ const f=lens[k-1]?clamp(d/lens[k-1]):1; cur=[pts[k-1][0]+(pts[k][0]-pts[k-1][0])*f, pts[k-1][1]+(pts[k][1]-pts[k-1][1])*f, pts[k-1][2]+(pts[k][2]-pts[k-1][2])*f]; heading=[pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]]; break; } d-=lens[k-1]; }
     moving=true; break;
   }
   return {pos:cur, heading, moving};
 }
+function timeAt(side,i,p){
+  const T = {...startState[i][side].time};
+  if(step>=0) STEPS[i][side].time.forEach(([k,mins,a,b])=>{ T[k]+=mins*clamp((p-a)/(b-a)); });
+  return T;
+}
 
 /* ============================ overlays ============================ */
 const H = { t:$("#hl"), f:$("#hr") };
-const labEls = { t:[], f:[] };
+const el = (cls,html,parent)=>{ const e=document.createElement("div"); e.className=cls; if(html!=null) e.innerHTML=html; parent.appendChild(e); return e; };
+const LABS = { t:[], f:[] }, BADGES = { t:[], f:[] }, CALLS = { t:[], f:[] }, SAM = {};
 for(const side of ["t","f"]){
-  const box = H[side].querySelector(".labs");
-  ROOMS.forEach(r=>{ const e=document.createElement("div"); e.className="lab"+(r.focus?" focus":""); e.textContent=r.name; if(r.small) e.style.fontSize="10px"; box.appendChild(e); labEls[side].push(e); });
+  const labs = H[side].querySelector(".labs"), calls = H[side].querySelector(".calls");
+  ROOMS.forEach(r=>LABS[side].push([r, el("lab"+(r.focus?" focus":""), r.name, labs)]));
+  SAM[side] = el("sam","Sam, nurse",calls);
 }
-const TAGS = [
-  {a:"nurse", text:"Sam · circulating nurse", cls:"main"},
-  {a:"surgeon", text:"Surgeon", al:"l"},{a:"anes", text:"Anesthesia", al:"l"},{a:"tech", text:"Scrub tech", al:"r"},
-  {a:"crew", text:"Cleaning crew"},{a:"spd", text:"Sterile processing tech"},{a:"patient", text:"Patient", color:"#e2b896"},
-  {a:"robot", text:"Rail carrier", cls:"rail", side:"f"},
-];
-const TAGCOL = {nurse:"#e0457b",surgeon:"#3f8f5a",anes:"#7a62c4",tech:"#3d7fc4",crew:"#7d8590",spd:"#c08a3e",robot:"#6c4fd1"};
-const tagEls = { t:[], f:[] };
-for(const side of ["t","f"]){
-  const box = H[side].querySelector(".tags");
-  TAGS.forEach(t=>{ if(t.side && t.side!==side) return; const e=document.createElement("div"); e.className="tag "+(t.cls||""); e.innerHTML=`<i style="background:${t.color||TAGCOL[t.a]}"></i>${t.text}`; box.appendChild(e); tagEls[side].push([t,e]); });
+const ANCH = { cam:[35.1,2.75,.7], desk:[34.4,1.9,9.6], planner:[23.3,2.1,2.6], arm:null, robot:null, bot:null };
+function anchorOf(side,on){
+  const S=SIDES[side];
+  if(Array.isArray(on)) return on;
+  if(ANCH[on]) return ANCH[on];
+  if(on==="arm") return [S.C.armBase??GREST[0],2.2,15];
+  if(on==="sterile") return [27,2.3,12.35];
+  const o=S.A[on]; if(!o) return [0,0,0];
+  const y = (on==="robot"||on==="medbox") ? RAIL_Y+.45 : on==="bot" ? 2.1 : on==="patient" ? 1.4 : on==="nurse" ? 3.15 : 2.5;
+  return [o.position.x,y,o.position.z];
 }
-const RAIL_LABELS = [{x:20,z:12.8,text:"Ceiling rail"},{x:27,z:12,text:"Pass-through"}];
-const railEls = RAIL_LABELS.map(r=>{ const e=document.createElement("div"); e.className="tag rail"; e.textContent=r.text; H.f.querySelector(".labs").appendChild(e); return e; });
-const notePool = { t:[], f:[] };
-function noteEl(side,i){ const pool=notePool[side]; while(pool.length<=i){ const e=document.createElement("div"); e.className="note"; H[side].querySelector(".notes").appendChild(e); pool.push(e);} return pool[i]; }
+// product badges: always shown on the right, so you can see where each product is
+const BADGE_DEF = { t:[{k:"computer",on:"desk",ic:"💻",c:"#d9622b"}],
+  f:[{k:"planner",on:"planner"},{k:"granola",on:"cam"},{k:"rail",on:"robot"},{k:"arm",on:"arm"},{k:"sterile",on:"sterile"},{k:"clean",on:"bot"},{k:"med",on:"medbox"},{k:"billing",on:"desk"}] };
+const SEEN = new Set(), TOUCH = matchMedia("(hover: none)").matches;
+const TIP = document.createElement("div"); TIP.className="tip"; document.body.appendChild(TIP);
+const HINT = el("hint", TOUCH ? "Tap to see what it does" : "Hover to see what it does", H.f.querySelector(".calls"));
+let tipFor=null;
+function showTip(e,P){ TIP.innerHTML=`<b style="color:${P.c}">${P.name}</b>${P.tip}`; TIP.classList.add("on"); tipFor=e;
+  const r=e.getBoundingClientRect(), w=TIP.offsetWidth, h=TIP.offsetHeight;
+  let x=clamp(r.left+r.width/2-w/2,8,innerWidth-w-8), y=r.top-h-10; if(y<8) y=r.bottom+10;
+  TIP.style.left=x+"px"; TIP.style.top=y+"px"; }
+function hideTip(){ TIP.classList.remove("on"); tipFor=null; }
+for(const side of ["t","f"]) BADGE_DEF[side].forEach(b=>{
+  const P = PRODUCTS[b.k] || EXTRA[b.k] || {name:"Computer", c:b.c, tip:"Today Sam types the case record here by hand."};
+  const e=el("badge",b.ic||P.ic,H[side].querySelector(".labs")); e.style.setProperty("--pc",b.c||P.c);
+  e.setAttribute("role","button"); e.tabIndex=0; e.setAttribute("aria-label",P.name+". "+P.tip);
+  const open=()=>{ SEEN.add(b.k); showTip(e,P); };
+  e.addEventListener("mouseenter",open); e.addEventListener("focus",open);
+  e.addEventListener("mouseleave",hideTip); e.addEventListener("blur",hideTip);
+  e.addEventListener("click",ev=>{ ev.stopPropagation(); if(tipFor===e && TOUCH) hideTip(); else open(); });
+  BADGES[side].push([b,e]); });
+addEventListener("click",()=>{ if(TOUCH) hideTip(); });
 
-const statEls = s => Object.fromEntries([...H[s].querySelectorAll("[data-k]")].map(e=>[e.dataset.k,e]));
-const ST = { t:statEls("t"), f:statEls("f") };
-const lastShown = { t:{}, f:{} };
-function setStat(side,k,v){ const e=ST[side][k]; if(lastShown[side][k]===v) return; const bump = lastShown[side][k]!==undefined && k!=="clock" && v!=="–" && playing; lastShown[side][k]=v; e.textContent=v; if(bump){ const p=e.parentElement; p.classList.remove("bump"); void p.offsetWidth; p.classList.add("bump"); } }
-const recKey = { t:"", f:"" };
-function setRecords(side, recs, signed){
-  const key = recs.map(r=>r.join()).join("|")+signed;
-  if(recKey[side]===key) return; recKey[side]=key;
-  const ol = H[side].querySelector(".rec ol");
-  ol.innerHTML = recs.length ? recs.slice(-6).map(([t,x])=>`<li><span>${t}</span>${x}</li>`).join("") : `<li class="empty">${side==="t"?"Nothing typed yet":"Nothing captured yet"}</li>`;
-  H[side].querySelector(".rec .sign").classList.toggle("on", signed);
+// tool chips
+const TOOLS = { t:$("#toolsT"), f:$("#toolsF") }, CHIPS = { t:{}, f:{} };
+for(const k in TOOLS_T){ const e=document.createElement("span"); e.className="tool"; e.innerHTML=`${TOOLS_T[k].ic}<span class="nm"> ${TOOLS_T[k].name}</span>`; e.title=TOOLS_T[k].name; TOOLS.t.appendChild(e); CHIPS.t[k]=e; }
+for(const k in PRODUCTS){ const e=document.createElement("span"); e.className="tool"; e.style.setProperty("--pc",PRODUCTS[k].c); e.innerHTML=`${PRODUCTS[k].ic}<span class="nm"> ${PRODUCTS[k].name}</span>`; e.title=PRODUCTS[k].name; TOOLS.f.appendChild(e); CHIPS.f[k]=e; }
+function setChips(i){
+  const s=STEPS[i];
+  for(const k in CHIPS.t) CHIPS.t[k].classList.toggle("on", !!s && s.toolT.includes(k));
+  for(const k in CHIPS.f) CHIPS.f[k].classList.toggle("on", !!s && s.product.includes(k));
+  BADGES.f.forEach(([b,e])=>e.classList.toggle("on", !!s && s.product.includes(b.k)));
+  BADGES.t.forEach(([b,e])=>e.classList.toggle("on", !!s && s.toolT.includes(b.k)));
 }
+$("#prods").innerHTML = Object.values(PRODUCTS).map(P=>`<div class="prod" style="--pc:${P.c}"><b>${P.name}</b><small>${P.d}</small></div>`).join("");
+
+// callouts: one element per event that has text
+function buildCalls(i){
+  for(const side of ["t","f"]){ CALLS[side].forEach(([,e])=>e.remove()); CALLS[side]=[];
+    if(i<0) continue;
+    STEPS[i][side].ev.filter(e=>e.call).forEach(ev=>{
+      const P = ev.prod && (PRODUCTS[ev.prod] || EXTRA[ev.prod]);
+      const e = el("call "+ev.kind, (P?`<small>${P.name}</small>`:"")+ev.call, H[side].querySelector(".calls"));
+      if(P) e.style.setProperty("--pc",P.c);
+      CALLS[side].push([ev,e]); });
+  }
+}
+const BAR = {}, SUM = {}, CLK = {};
+for(const side of ["t","f"]){ BAR[side]=[...H[side].querySelectorAll("[data-bar] i")]; SUM[side]=H[side].querySelector("[data-sum]"); CLK[side]=H[side].querySelector("[data-clk]"); }
+const shown = {};
+function setText(e,key,v){ if(shown[key]!==v){ shown[key]=v; e.innerHTML=v; } }
 
 /* ============================ layout ============================ */
-// Landscape: two halves side by side. Portrait: stacked, above the step card.
 let lastL="";
 function layout(){
   const W=innerWidth, Hh=innerHeight, portrait = Hh>W*1.05;
-  const card=$("#card"); const cr = card.hidden ? null : card.getBoundingClientRect();
-  let vw, vh;
-  if(portrait){ const avail = Hh - (cr ? (Hh-cr.top)+6 : 0); vw=W; vh=Math.max(120,avail/2); }
-  else { vw=W/2; vh=Hh; }
-  const key=[W,Hh,portrait,vh,cr&&Math.round(cr.left),cr&&Math.round(cr.height)].join();
+  const head=$("#head"); const hh = head.hidden ? 0 : head.getBoundingClientRect().height;
+  const vw = portrait ? W : W/2, vh = portrait ? (Hh-hh)/2 : Hh-hh;
+  const key=[W,Hh,portrait,hh].join();
   if(key!==lastL){ lastL=key;
     const hl=H.t.style, hr=H.f.style, dv=$("#divider").style;
-    if(portrait){ Object.assign(hl,{left:"0",top:"0",width:W+"px",height:vh+"px"}); Object.assign(hr,{left:"0",top:vh+"px",width:W+"px",height:vh+"px"}); Object.assign(dv,{top:vh+"px",left:"0"}); }
-    else { Object.assign(hl,{left:"0",top:"0",width:"50%",height:"100%"}); Object.assign(hr,{left:"50%",top:"0",width:"50%",height:"100%"}); Object.assign(dv,{top:"0",left:"50%"}); }
-    // record panels sit in the bottom outer corners; lift them above the card if it would overlap
-    const lift = cr && cr.left < 262 ? (Hh-cr.top)+10 : 14;
-    document.querySelectorAll(".rec").forEach(r=>r.style.bottom=lift+"px");
+    if(portrait){ Object.assign(hl,{left:"0",top:hh+"px",width:W+"px",height:vh+"px"}); Object.assign(hr,{left:"0",top:(hh+vh)+"px",width:W+"px",height:vh+"px"}); Object.assign(dv,{top:(hh+vh-2)+"px",left:"0",width:W+"px",height:"4px"}); }
+    else { Object.assign(hl,{left:"0",top:hh+"px",width:vw+"px",height:vh+"px"}); Object.assign(hr,{left:vw+"px",top:hh+"px",width:vw+"px",height:vh+"px"}); Object.assign(dv,{top:hh+"px",left:(vw-2)+"px",width:"4px",height:vh+"px"}); }
   }
-  return {portrait, vw, vh};
+  const say=H.t.querySelector(".say").getBoundingClientRect(), foot=H.t.querySelector(".foot").getBoundingClientRect(), hb=H.t.getBoundingClientRect();
+  return {portrait, vw, vh, hh, top:say.bottom-hb.top, bot:hb.bottom-foot.top};
 }
 
 /* ============================ per-frame ============================ */
 const v3 = new THREE.Vector3();
-function project(x,y,z,vw,vh){ v3.set(x,y,z).project(cam); return [(v3.x+1)/2*vw, (1-v3.y)/2*vh, v3.z<1]; }
-
+function project(a,vw,vh){ v3.set(a[0],a[1],a[2]).project(cam); return [(v3.x+1)/2*vw, (1-v3.y)/2*vh]; }
 function frame(now){
   const dt = Math.min(.1,(now-last)/1000); last=now;
   if(playing && step>=0){ prog = Math.min(1, prog + dt/STEPS[step].secs); if(prog>=1){ playing=false; updateControls(); } }
-  // camera easing
-  const k = 1-Math.pow(.02,dt);
-  view.x += (view.tx-view.x)*k; view.z += (view.tz-view.z)*k; view.zoom += (view.tzoom-view.zoom)*k;
-
   const W = innerWidth, Hh = innerHeight, L = layout();
   renderer.setSize(W,Hh,false);
-  const portrait = L.portrait, vw = L.vw, vh = L.vh;
-  placeCamera(vw/vh);
-
+  const {portrait, vw, vh} = L;
+  const kf = 1-Math.pow(.05,dt);
   const i = Math.max(step,0), p = step<0?0:prog;
   for(const side of ["t","f"]){
-    const S = SIDES[side], st = STEPS[i], d = st[side], base = startState[i][side];
-    // actors
+    const S = SIDES[side], st = STEPS[i], d = st[side], R = {};
+    { const tf=FRAMES[frameFor(side,i,p)], fb=FB[side]; for(let q=0;q<4;q++) fb[q] += (tf[q]-fb[q])*kf; placeCamera(fb,vw,vh,L.top,L.bot); }
     for(const a in S.A){
-      const o = S.A[a]; const r = posAt(side,a,i,p);
-      o.position.x = r.pos[0]; o.position.z = r.pos[1]; o.position.y = r.pos[2]||0;
-      if(r.heading && (r.heading[0]||r.heading[1]) && a!=="patient" && a!=="traynext" && a!=="trayused" && a!=="robot") o.rotation.y = Math.atan2(r.heading[0],r.heading[1]);
-      const body = o.userData.body; if(body){ body.position.y = .62 + (r.moving&&!reduced ? Math.abs(Math.sin(now/110))*.05 : 0); }
+      const o = S.A[a]; const r = R[a] = posAt(side,a,i,p);
+      o.position.set(r.pos[0], r.pos[2]||0, r.pos[1]);
+      o.visible = r.pos[0]<45.5;
+      const turn = !["patient","scope","trayused","robot","medbox","kit","kit2","pick"].includes(a);
+      if(turn && r.heading && (r.heading[0]||r.heading[1])) o.rotation.y = Math.atan2(r.heading[0],r.heading[1]);
+      const body = o.userData.body; if(body) body.position.y = .62 + (r.moving&&!reduced ? Math.abs(Math.sin(now/110))*.05 : 0);
     }
-    if(S.A.nurse.userData.marker) S.A.nurse.userData.marker.position.y = 1.62 + (reduced?0:Math.sin(now/300)*.06);
-    S.ambient.forEach(a=>{ const L=[0]; for(let q=1;q<LOOP.length;q++) L.push(L[q-1]+Math.hypot(LOOP[q][0]-LOOP[q-1][0],LOOP[q][1]-LOOP[q-1][1]));
-      let d=((now/1000*1.6)/L.at(-1)+a.userData.off)%1*L.at(-1); let q=1; while(L[q]<d) q++; const f=(d-L[q-1])/(L[q]-L[q-1]);
-      a.position.x=LOOP[q-1][0]+(LOOP[q][0]-LOOP[q-1][0])*f; a.position.z=LOOP[q-1][1]+(LOOP[q][1]-LOOP[q-1][1])*f; });
-    // counters
-    const counts = {...base.counts}; const recs=[...base.recs]; let signed = base.signed;
-    d.ev.forEach(e=>{
-      if(e.add){ const f = e.to ? clamp((p-e.at)/(e.to-e.at)) : (p>=e.at?1:0); for(const kk in e.add) counts[kk] += e.add[kk]*f; }
-      if(e.rec && p>=e.at) recs.push(e.rec);
-      if((e.signL||e.signR) && p>=e.at) signed=true;
-    });
-    const [c0,c1] = st.clock[side]; const clock = c0+(c1-c0)*p;
-    setStat(side,"clock",hhmm(clock));
-    setStat(side,"chart",String(Math.round(counts.chart)));
-    setStat(side,"trips",String(Math.round(counts.trips)));
-    setStat(side,"calls",String(Math.round(counts.calls)));
-    setStat(side,"reset", (i>=5 && clock>=PATIENT_OUT && p>=.36) || i>5 ? String(Math.round(clock-PATIENT_OUT)) : "–");
-    setRecords(side, step<0?[]:recs, signed);
-    // flashes
+    // whoever pushes the case cart walks just behind it
+    { const rc=R.cart; if(step>=0 && rc && rc.moving && rc.heading){ const pu=S.A[d.push||"runner"], h=rc.heading, n=Math.hypot(h[0],h[1])||1;
+        pu.position.set(rc.pos[0]-h[0]/n*1.15, 0, rc.pos[1]-h[1]/n*1.15); pu.rotation.y=Math.atan2(h[0],h[1]); pu.visible=true; } }
+    S.A.nurse.userData.marker.position.y = 1.62 + (reduced?0:Math.sin(now/300)*.06);
+    (step>=0 && d.follow||[]).forEach(f=>{ if(p>=f.at[0] && p<f.at[1]){ const o=S.A[f.a], n=S.A[f.of]; o.position.set(n.position.x, 1.3, n.position.z); } });
+    for(const a of ["kit","kit2"]){ const n=fillCount(side,a,i,p); S.A[a].userData.parts.forEach((b,k)=>b.visible=k<n); }
+    S.A.pick.visible=false;
+    if(S.C.gantry){ const def = step<0?null:d.arm; S.C.gantry(...gantryPose(def,p)); const e=S.C.armEnd;
+      const fw = def && inW(def.found,p); S.C.found.visible=!!fw; if(fw) S.C.found.position.set(...fw[2]);
+      const hw = def && inW(def.held,p); if(hw){ const o=S.A[hw[2]]; o.position.set(e.x,e.y-.05,e.z); o.visible=true; } }
+    { const B=S.C.blood; let show = step>=0 && i>=SIDX && i<=CIDX; const grow = i===SIDX ? clamp((p-.45)*5) : 1;
+      let path=null; if(show && i===CIDX){ path=[]; for(let q=0;q<=p;q+=.01) path.push(posAt(side,side==="t"?"crew":"bot",i,q).pos); }
+      B.forEach((b,k)=>{ const [x,z]=BLOOD[k]; const gone = path && path.some(q=>Math.hypot(q[0]-x,q[1]-z)<.8); b.visible = show && grow>0 && !gone; b.scale.x = grow; b.scale.z = grow; }); }
+    if(S.C.burst){ const w = step>=0 && d.burst, on = w && p>=w[0] && p<w[1]; S.C.burst.visible=!!on;
+      if(on){ const u=(p-w[0])/(w[1]-w[0]); const r=.6+5.5*Math.sin(Math.PI*Math.min(1,u*1.2))**.5; S.C.burst.scale.set(r,r*.45,r); S.C.burst.position.set(S.A.bot.position.x,1.2,S.A.bot.position.z); S.C.burst.material.opacity=.16+.06*Math.sin(now/120); }
+      M.uvT.emissiveIntensity = (step>=0 && i===CIDX) ? 1.2+.6*Math.abs(Math.sin(now/150)) : .5; }
+    for(const [a,dk] of [["robot","drop"],["medbox","mdrop"]]){ const B=S.A[a]; if(!B || !B.userData.box) continue;
+      const dy = keyAt(step<0?null:d[dk],p)*DROP, u=B.userData;
+      u.box.position.y = RAIL_Y-.66-dy; const len=.32+dy; u.cable.scale.y=len; u.cable.position.y=RAIL_Y-.15-len/2;
+      if(a==="robot" && step>=0) (d.ride||[]).forEach(r=>{ if(p>=r.at[0] && p<r.at[1]){ const o=S.A[r.a]; o.position.set(B.position.x, RAIL_Y-.66-dy+.33, B.position.z); } }); }
+    if(S.C.pg) S.C.pg(step>=0 && d.pgx ? keyAt(d.pgx,p) : 41.6);
+    if(S.C.switches) S.C.switches.forEach(m=>{ const near = ["robot","medbox"].some(a=>{ const o=S.A[a]; return o && Math.hypot(o.position.x-m.position.x,o.position.z-m.position.z)<.7; });
+      m.material.emissiveIntensity = near ? 1.1 : .25; });
+    if(S.C.uv){ const on = step>=0 && d.uv && p>=d.uv[0] && p<d.uv[1]; S.C.uv.material.emissiveIntensity = on ? 1.2+.8*Math.abs(Math.sin(now/120)) : .4; }
+    if(S.C.coneMat){ const on = step>=0 && d.cam && p>d.cam[0] && p<d.cam[1]; S.C.coneMat.opacity = on ? .14+.1*Math.abs(Math.sin(now/300)) : .07; M.cam.emissiveIntensity = on ? .6+.5*Math.abs(Math.sin(now/300)) : .5; }
+    if(S.C.bill){ const on = step>=0 && d.bill!=null && p>d.bill; S.C.bill.material.emissiveIntensity = on ? .9+.3*Math.sin(now/200) : .3; }
+    // Sam's ring pulses red while time is lost
+    const pain = step>=0 && CALLS[side].some(([ev])=>ev.kind==="pain" && ev.on==="nurse" && p>=ev.at && p<ev.until);
+    const rg=S.A.nurse.userData.ring; rg.material.color.set(pain?"#e0392b":SCRUB.nurse);
+    const sc = pain&&!reduced ? 1.25+.35*Math.abs(Math.sin(now/260)) : 1; rg.scale.set(sc,sc,sc);
+    // flashes for "written down"
     let fi=0; S.flashes.forEach(f=>f.visible=false);
-    if(step>=0) d.ev.forEach(e=>{ if(!e.flash) return; const age=(p-e.at)*st.secs; if(age>=0 && age<1.6 && fi<S.flashes.length){ const f=S.flashes[fi++]; f.visible=true; f.position.x=e.flash[0]; f.position.z=e.flash[1]; const s=.4+age*1.1; f.scale.set(s,s,s); f.material.opacity=.9*(1-age/1.6); } });
-    // render half
-    const x0 = portrait?0:(side==="t"?0:W/2), y0 = portrait?(side==="t"? Hh-vh : Hh-2*vh):0;
+    if(step>=0) d.ev.forEach(e=>{ if(!e.flash) return; const age=(p-e.at)*st.secs; if(age>=0 && age<1.6 && fi<S.flashes.length){ const f=S.flashes[fi++]; f.visible=true; f.position.x=e.flash[0]; f.position.z=e.flash[1]; const s=.4+age*1.3; f.scale.set(s,s,s); f.material.opacity=.9*(1-age/1.6); } });
+    // clock and Sam's time
+    const [c0,c1] = st.clock[side]; CLK[side].textContent = hhmm(step<0?c0:c0+(c1-c0)*p);
+    const T = timeAt(side,i,p);
+    KINDS.forEach((k,ki)=>BAR[side][ki].style.width = (T[k]/TOTAL*100)+"%");
+    const out = Math.round(T.walking);
+    setText(SUM[side], side+"sum", `Typing <em>${Math.round(T.typing)} min</em> · Out of room <em>${out} min</em>`);
+    // render this half
+    const x0 = portrait?0:(side==="t"?0:vw), y0 = portrait?(side==="t"? vh : 0):0;
     renderer.setViewport(x0,y0,vw,vh); renderer.setScissor(x0,y0,vw,vh);
     renderer.setClearColor(side==="t"?"#e7ebef":"#e5eaf1",1);
     renderer.render(S.scene, cam);
-    // labels
-    ROOMS.forEach((r,ri)=>{ const [sx,sy] = project(r.x,.1,r.z,vw,vh); const e=labEls[side][ri]; e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
-    // role tags above heads
-    tagEls[side].forEach(([t,e])=>{ const o=S.A[t.a]; const y = t.a==="robot" ? RAIL_Y+.35 : t.a==="patient" ? 1.1 : 2.75;
-      const [sx,sy] = project(o.position.x,y,o.position.z,vw,vh); const ax = t.al==="l"?"-92%":t.al==="r"?"-8%":"-50%"; e.style.transform=`translate(${sx}px,${sy}px) translate(${ax},-100%)`; });
-    if(side==="f") RAIL_LABELS.forEach((r,ri)=>{ const [sx,sy]=project(r.x,RAIL_Y+.3,r.z,vw,vh); railEls[ri].style.transform=`translate(${sx}px,${sy}px) translate(-50%,-100%)`; });
-    // notes
-    let ni=0;
-    if(step>=0) d.ev.forEach(e=>{
-      if(!e.note) return; const until = e.until ?? 1; const on = p>=e.at && (p<until || (until>=1 && p>=1));
-      const el = noteEl(side,ni++); el.classList.toggle("on",on); if(el.textContent!==e.note) el.textContent=e.note;
-      let x,z,y=1.6; if(typeof e.on==="string"){ const o=S.A[e.on]; x=o.position.x; z=o.position.z; y = e.on==="robot" ? 3.4 : 3.55; } else { [x,z]=e.on; y=.6; }
-      const [sx,sy] = project(x,y,z,vw,vh);
-      const cx = clamp(sx, 120, vw-120);
-      el.style.transform = `translate(${cx}px,${sy}px) translate(-50%,calc(-100% - 12px))`;
+    // overlays
+    LABS[side].forEach(([r,e])=>{ const [sx,sy]=project([r.x,.1,r.z],vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
+    const placed=[]; let hintAt=null;
+    BADGES[side].forEach(([b,e])=>{
+      const a = b.on==="arm"?[S.C.armBase,2.35,15] : b.on==="cam"?[35.1,3.25,.7] : b.on==="bot"?anchorOf(side,"bot").map((v,k)=>k===1?2.6:v) : anchorOf(side,b.on);
+      const [sx,sy]=project(a,vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`;
+      const vis = sy>L.top+14 && sy<vh-L.bot-14 && sx>10 && sx<vw-10; e.style.visibility = vis?"visible":"hidden";
+      if(vis) placed.push([sx-20,sy-20,40,40]);
+      if(side==="f" && !hintAt && step>=0 && p>=.2 && e.classList.contains("on") && !SEEN.has(b.k) && sx>0 && sx<vw && sy>L.top && sy<vh-L.bot) hintAt=[sx,sy];
     });
-    for(;ni<notePool[side].length;ni++) notePool[side][ni].classList.remove("on");
+    if(side==="f"){ HINT.classList.toggle("on",!!hintAt); if(hintAt){ const hw=HINT.offsetWidth, hh=HINT.offsetHeight, left = hintAt[0]-26-hw > 8; HINT.classList.toggle("r",!left);
+      const hx = left ? hintAt[0]-26-hw : hintAt[0]+26, hy = hintAt[1]-hh/2; HINT.style.transform=`translate(${hx}px,${hy}px)`; placed.push([hx,hy,hw,hh]); } }
+    { const [sx,sy]=project(anchorOf(side,"nurse").map((v,k)=>k===1?2.75:v),vw,vh); SAM[side].style.transform=`translate(${sx}px,${sy}px) translate(-50%,-100%)`; SAM[side].style.visibility = (sx>20 && sx<vw-20 && sy>L.top+20 && sy<vh-L.bot) ? "visible" : "hidden";
+      const w=SAM[side].offsetWidth, h=SAM[side].offsetHeight; placed.push([sx-w/2,sy-h,w,h]); }
+    CALLS[side].forEach(([ev,e])=>{
+      const on = step>=0 && p>=ev.at && p<ev.until; e.classList.toggle("on",on); if(!on) return;
+      let [sx,sy]=project(ev.on==="arm"?[S.C.armBase,2.9,15]:anchorOf(side,ev.on),vw,vh); const w=e.offsetWidth, h=e.offsetHeight;
+      const dy = ev.on==="nurse" ? 30 : (ev.prod ? 24 : 6);
+      let x = clamp(sx-w/2, 8, vw-w-8), y = sy-h-dy;
+      y = clamp(y, L.top+4, vh-L.bot-h-4);
+      const free = yy => yy>=L.top+4 && yy<=vh-L.bot-h-4 && !placed.some(r=>x<r[0]+r[2]+4 && r[0]<x+w+4 && yy<r[1]+r[3]+4 && r[1]<yy+h+4);
+      if(!free(y)){ const c=[]; placed.forEach(r=>{ c.push(r[1]-h-6, r[1]+r[3]+6); }); c.sort((a,b)=>Math.abs(a-y)-Math.abs(b-y)); const f=c.find(free);
+        if(f!=null) y=f;
+        else { const y0=y; for(const xx of [clamp(sx+28,8,vw-w-8), clamp(sx-28-w,8,vw-w-8)]){ x=xx; if(free(y0)){ y=y0; break; } const g=c.find(free); if(g!=null){ y=g; break; } } } }
+      placed.push([x,y,w,h]);
+      e.style.transform=`translate(${x}px,${y}px)`;
+    });
   }
-  // step progress bar
-  if(step>=0){ const b=dotEls[step]?.querySelector(".bar"); if(b) b.style.width=(prog*100)+"%"; }
+  if(step>=0){ const b=dotEls[step]; if(b) b.style.setProperty("--p",prog); }
   requestAnimationFrame(frame);
 }
 
 /* ============================ controls ============================ */
-const dots = $("#dots"); const dotEls = STEPS.map((s,i)=>{ const b=document.createElement("button"); b.innerHTML=`${i+1}. ${s.title}<span class="bar"></span>`; b.title=s.title; b.onclick=()=>go(i); dots.appendChild(b); return b; });
+const dotEls = STEPS.map((s,i)=>{ const b=document.createElement("button"); b.textContent=i+1; b.title=`${i+1}. ${s.title}`; b.setAttribute("aria-label",`Moment ${i+1}: ${s.title}`); b.onclick=()=>go(i); $("#stepn").appendChild(b); return b; });
 function go(i){
+  hideTip();
   if(i>=STEPS.length){ showSummary(); return; }
   step = Math.max(0,i); prog = 0; playing = true; last=performance.now();
   const s = STEPS[step];
-  $("#stepK").textContent = `Step ${step+1} of ${STEPS.length}`; $("#stepT").textContent = s.title;
-  $("#txtT").textContent = s.txtT; $("#txtF").textContent = s.txtF;
-  view.tx = s.cam.x; view.tz = s.cam.z; view.tzoom = s.cam.zoom;
-  dotEls.forEach((b,k)=>{ b.setAttribute("aria-current", k===step); b.classList.toggle("done",k<step); b.querySelector(".bar").style.width = k<step?"0":"0"; });
-  updateControls();
+  $("#headline").textContent = `${step+1}. ${s.title}`;
+  $("#sayT").textContent = s.sayT; $("#sayF").textContent = s.sayF;
+  dotEls.forEach((b,k)=>{ b.setAttribute("aria-current", k===step); b.classList.toggle("done",k<step); });
+  buildCalls(step); setChips(step); updateControls();
 }
 function updateControls(){
   $("#back").disabled = step<=0;
-  $("#play").textContent = playing ? "Pause" : (prog>=1 ? "Replay" : "Play");
-  $("#next").textContent = step===STEPS.length-1 ? "See the totals →" : "Next →";
+  $("#next").textContent = step===STEPS.length-1 ? "Results →" : "Next →";
   $("#next").classList.toggle("ready", !playing && prog>=1);
 }
-$("#play").onclick = ()=>{ if(prog>=1){ prog=0; } playing=!playing; last=performance.now(); updateControls(); };
 $("#next").onclick = ()=>go(step+1);
-$("#more").onclick = ()=>{ const c=$("#card"); c.classList.toggle("open"); $("#more").textContent = c.classList.contains("open")?"Less":"More"; };
 $("#back").onclick = ()=>go(step-1);
-$("#start").onclick = ()=>{ $("#intro").hidden=true; $("#card").hidden=false; go(0); };
-$("#again").onclick = ()=>{ $("#summary").hidden=true; $("#card").hidden=false; go(0); };
-$("#close").onclick = ()=>{ $("#summary").hidden=true; $("#card").hidden=false; view.tx=22; view.tz=15; view.tzoom=.5; };
+function showPlay(on){ $("#head").hidden=!on; }
+$("#start").onclick = ()=>{ $("#intro").hidden=true; showPlay(true); go(0); };
+$("#again").onclick = ()=>{ $("#summary").hidden=true; showPlay(true); go(0); };
 addEventListener("keydown", e=>{
   if(!$("#intro").hidden){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("#start").click(); } return; }
   if(!$("#summary").hidden) return;
@@ -869,32 +1019,89 @@ addEventListener("keydown", e=>{
   if(e.key==="ArrowLeft"){ e.preventDefault(); go(step-1); }
 });
 
-function showSummary(){
-  const T = startState[STEPS.length].t, F = startState[STEPS.length].f;
-  const resetT = STEPS.at(-1).clock.t[1]-PATIENT_OUT, resetF = STEPS.at(-1).clock.f[1]-PATIENT_OUT;
-  const rows = [["Minutes Sam spent charting",T.counts.chart,F.counts.chart],["Trips out of the room",T.counts.trips,F.counts.trips],["Phone calls",T.counts.calls,F.counts.calls],["Minutes from patient out to next patient in",resetT,resetF],["Next patient in at",hhmm(STEPS.at(-1).clock.t[1]),hhmm(STEPS.at(-1).clock.f[1])]];
-  $("#sumgrid").innerHTML = `<div class="h"></div><div class="h t">Today</div><div class="h f">With the system</div>` + rows.map(r=>`<div>${r[0]}</div><div class="n">${r[1]}</div><div class="f n">${r[2]}</div>`).join("");
-  const saved = T.counts.chart - F.counts.chart, faster = resetT-resetF;
-  $("#sumMin").textContent = `${saved} minutes`; $("#sumMinT").textContent = `of charting Sam got back on this one case, time spent with the patient and the team instead`;
-  $("#sumUsd").textContent = `~$${(faster*OR_MIN_USD).toLocaleString()}`; $("#sumUsdT").textContent = `of OR time: the room was ready ${faster} minutes sooner, at about $${OR_MIN_USD} per OR minute`;
-  $("#card").hidden = true; $("#summary").hidden = false; playing=false;
+/* ===================== results: one case up to one year =====================
+   Every number below comes from these assumptions. Edit them here. */
+const ROI = {
+  casesPerDay: 4,        // cases per OR per day (about a 10-hour OR day at 142 min per case)
+  ors: 5,                // ORs on the floor
+  days: 250,             // working days a year
+  orMinUSD: OR_MIN_USD,  // $36 per OR minute (Childers and Maggard)
+  rnHourUSD: 45,         // RN median pay, BLS
+  lossUSD: 5.19e6,       // average hospital loss to nurse turnover a year (NSI, via Becker's)
+  pricePerORMonth: 2500, // Perception Kit plus planning software, per OR per month (our pricing)
+  codingPerCase: 10,     // coding, per case (our pricing)
+  // Hardware for one 5-OR floor (estimates from public comparables, see README)
+  hwRail: 600000,        // ceiling rail, lifts and boxes (near a large pneumatic tube install)
+  hwPass: 125000,        // 5 sterile pass-through boxes with UV, $25K each
+  hwArm: 250000,         // one picking arm cell on a track, with vision and software
+  hwClean: 250000,       // 2 OR cleaning robots at about $125K each (near the Xenex UV robot list price)
+  hwMed: 40000,          // 2 locked med boxes with badge readers (assumes the pharmacy already has a picking robot)
+  hwServicePct: 0.10,    // yearly service, 10% of hardware
+  hwYears: 7, hwRate: 0.08, // financed over 7 years at 8%
+};
+const money = v => v>=1e6 ? "$"+(v/1e6).toFixed(2).replace(/\.?0+$/,"")+"M" : "$"+Math.round(v/1000).toLocaleString()+"K";
+const hm = m => { m=Math.round(m); const h=Math.floor(m/60), r=m%60; return h ? (r ? `${h} h ${r} min` : `${h} h`) : `${r} min`; };
+let lvl = 0;
+function levels(){
+  const T = startState[STEPS.length].t.time, F = startState[STEPS.length].f.time;
+  const CL = STEPS.find(s=>s.id==="clean").clock, nextT = CL.t[1], nextF = CL.f[1];
+  const room = nextT-nextF;                                   // OR minutes freed per case
+  const typing = Math.round(T.typing-F.typing), out = Math.round(T.walking-F.walking);
+  const nurse = typing + out;                                 // nurse minutes freed per case
+  const perDay = ROI.casesPerDay, floorDay = perDay*ROI.ors, yearCases = floorDay*ROI.days;
+  const roomYear = room*yearCases, nurseYear = nurse*yearCases;
+  const roomUSD = roomYear*ROI.orMinUSD, nurseUSD = nurseYear/60*ROI.rnHourUSD, saved = roomUSD+nurseUSD;
+  const soft = ROI.pricePerORMonth*12*ROI.ors + ROI.codingPerCase*yearCases;
+  const hwUp = ROI.hwRail+ROI.hwPass+ROI.hwArm+ROI.hwClean+ROI.hwMed, r = ROI.hwRate, n = ROI.hwYears;
+  const hwSvc = hwUp*ROI.hwServicePct, hwYear = hwUp*r/(1-Math.pow(1+r,-n)) + hwSvc;
+  const price = soft + hwYear;
+  const P = PRODUCTS, row = (ks,t,f)=>`<tr><td class="p">${ks.map(k=>P[k]?P[k].name:k).join("<br>")}</td><td>${t}</td><td class="f">${f}</td></tr>`;
+  const tiles = (r,f)=>`<div class="big two"><div><b>${r}</b><small>sooner the room is ready</small></div><div><b>${f}</b><small>of nurse time back</small></div></div>`;
+  const bars = rows => { const mx=Math.max(...rows.map(r=>r[1])); return `<div class="cmp">`+rows.map(r=>`<div class="row"><span>${r[0]}</span><div class="tr"><i style="width:${r[1]/mx*100}%;background:${r[2]}"></i></div><b>${money(r[1])}</b></div>`).join("")+`</div>`; };
+  return [
+    { k:"One case", h:"One case",
+      html: tiles(`${room} min`,`${nurse} min`) + `<table class="sum"><tr><th>Product</th><th class="t">Today</th><th class="f">With our system</th></tr>`
+        + row(["planner","arm","rail"],"5 min reading the case, 15 min collecting supplies","0 min. Robots bring them.")
+        + row(["granola"],"30 min typing","0 min") + row(["arm","rail"],"7 min out of the room for a scope","0 min")
+        + row(["billing"],"Paper sheet, coded days later","Approved in 1 min") + row(["Case cart (sterile processing staff)"],"5 min taking the tray back","0 min. Sterile processing wheels it back.")
+        + row(["med"],"6 min counting and signing for leftover drugs","0 min. Locked box, every open logged.")
+        + row(["clean"],`Next patient ${hhmm(nextT)}`,`Next patient ${hhmm(nextF)}`) + `</table>`,
+      note:`Nurse time: ${typing} min less typing and ${out} min less out of the room. Times are estimates.` },
+    { k:"One day in OR 2", h:"One day in OR 2",
+      html: `<p class="say2">${perDay} cases in one OR.</p>` + tiles(hm(room*perDay), hm(nurse*perDay)),
+      note:`Assumes ${perDay} cases a day in one OR, about a 10-hour day.` },
+    { k:`Whole floor, ${ROI.ors} ORs`, h:`One day, whole floor`,
+      html: `<p class="say2">${floorDay} cases across ${ROI.ors} ORs.</p>` + tiles(hm(room*floorDay), hm(nurse*floorDay)),
+      note:`Assumes ${ROI.ors} ORs, ${perDay} cases each.` },
+    { k:"One year", h:"One year, whole floor",
+      html: `<p class="say2">${yearCases.toLocaleString()} cases.</p><div class="big"><div><b>${Math.round(roomYear/60).toLocaleString()} h</b><small>of OR time, worth ${money(roomUSD)}</small></div><div><b>${Math.round(nurseYear/60).toLocaleString()} h</b><small>of nurse time, worth ${money(nurseUSD)}</small></div><div><b>${money(saved)}</b><small>saved a year</small></div></div>`,
+      note:`${ROI.days} working days. OR time at $${ROI.orMinUSD} a minute (Childers and Maggard). Nurse time at $${ROI.rnHourUSD} an hour (BLS median RN pay). OR savings count only if the freed time is used for more cases or less overtime.` },
+    { k:"Vs. hospital losses", h:"Compared with what hospitals lose",
+      html: bars([["Average hospital loss to nurse turnover, per year",ROI.lossUSD,"#d9622b"],["Our savings on one floor, per year",saved,"#2a66cf"]])
+        + `<p class="say2">One floor saves ${Math.round(saved/ROI.lossUSD*100)}% of what the average hospital loses to nurse turnover each year.</p>`,
+      note:`Turnover loss: $5.19M a year for the average hospital (NSI 2026, via Becker's).` },
+    { k:"Our price", h:"Our price vs. savings",
+      html: `<div class="big two"><div><b>$${ROI.pricePerORMonth.toLocaleString()}</b><small>per OR a month for software, plus $${ROI.codingPerCase} a case for coding</small></div><div><b>$${(Math.round(hwYear/12/ROI.ors/100)*100).toLocaleString()}</b><small>per OR a month for the hardware, rent-to-buy over ${n} years, service included</small></div></div>`
+        + bars([["Savings per year",saved,"#2a66cf"],["Software subscription",soft,"#3fae67"],["Hardware, rent-to-buy",hwYear,"#8e44d6"],["Total price per year",price,"#14202c"]])
+        + `<p class="say2">The floor saves about ${(saved/price).toFixed(1).replace(/\.0$/,"")} times what it pays. After ${n} years the hospital owns the hardware, and the price drops to ${money(soft+hwSvc)} a year.</p>`,
+      note:`Software: Perception Kit and Case planner. Hardware: rails, pass-throughs, picking robot, 2 cleaning robots and 2 locked med boxes, about ${money(hwUp)} if bought outright. The monthly rent pays it off over ${n} years at ${Math.round(r*100)}%, plus ${Math.round(ROI.hwServicePct*100)}% a year for service. After that, service only. Hardware prices are estimates from similar hospital systems.` },
+  ];
 }
-
-/* drag to pan, wheel to zoom (both sides move together) */
-let drag=null;
-canvas.addEventListener("pointerdown",e=>{ drag={x:e.clientX,y:e.clientY,vx:view.tx,vz:view.tz}; canvas.setPointerCapture(e.pointerId); canvas.classList.add("drag"); });
-canvas.addEventListener("pointermove",e=>{ if(!drag) return; const vh=layout().vh; const mpp = (2*14/view.zoom)/vh;
-  const dx=(e.clientX-drag.x)*mpp, dy=(e.clientY-drag.y)*mpp;
-  // screen right maps to world (cos,-sin) of the camera yaw
-  const yaw = Math.atan2(DIR.x,DIR.z); const rx=Math.cos(yaw), rz=-Math.sin(yaw); const fx=-Math.sin(yaw), fz=-Math.cos(yaw);
-  const sinP = Math.sqrt(1-DIR.y*DIR.y)/1; const k=1/Math.max(.3,DIR.y);
-  view.tx = drag.vx - dx*rx + dy*fx*k; view.tz = drag.vz - dx*rz + dy*fz*k; view.x=view.tx; view.z=view.tz; });
-addEventListener("pointerup",()=>{ drag=null; canvas.classList.remove("drag"); });
-canvas.addEventListener("wheel",e=>{ e.preventDefault(); view.tzoom = clamp(view.tzoom*Math.exp(-e.deltaY*.0015),.6,3); },{passive:false});
-
-view.x=view.tx=22; view.z=view.tz=15; view.zoom=view.tzoom=.5;
+function showLevel(n){
+  const L = levels(); lvl = clamp(n,0,L.length-1); const v = L[lvl];
+  $("#lvlH").textContent = v.h; $("#lvl").innerHTML = v.html; $("#lvlNote").textContent = v.note;
+  $("#lvls").innerHTML = L.map((x,k)=>`<button role="tab" aria-selected="${k===lvl}" class="${k<lvl?"done":""}" data-k="${k}">${x.k}</button>`).join("");
+  $("#lvls").querySelectorAll("button").forEach(b=>b.onclick=()=>showLevel(+b.dataset.k));
+  $("#lvlNext").textContent = lvl<L.length-1 ? `${L[lvl+1].k} →` : "Back to one case";
+}
+$("#lvlNext").onclick = ()=>showLevel(lvl<levels().length-1 ? lvl+1 : 0);
+function showSummary(){
+  showLevel(0); hideTip();
+  showPlay(false); $("#summary").hidden = false; playing=false;
+}
+setChips(-1);
 requestAnimationFrame(frame);
-window.__demo = {go, get step(){return step}, set prog(v){prog=v; playing=false; updateControls();}, showSummary};
+window.__demo = {go, showLevel, get step(){return step}, set prog(v){prog=v; playing=false; updateControls();}, showSummary};
 </script>
 </body>
 </html>
