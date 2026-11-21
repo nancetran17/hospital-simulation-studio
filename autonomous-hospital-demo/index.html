@@ -97,7 +97,7 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
 .eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .sheet h2{font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:8px 0 10px}
 .sheet p{margin:0 0 14px;color:#33404c;font-size:16px}
-.prods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 18px}
+.prods{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 18px}
 .prod{border-radius:12px;padding:10px;border:2px solid var(--pc);background:#fff}
 .prod .ic{font-size:22px}
 .prod b{display:block;font-size:14px;margin:2px 0}
@@ -186,7 +186,7 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
     <h2>Today vs. with our system</h2>
     <p>One surgery in OR 2. Sam is the circulating nurse. Left is today. Right is with our system.</p>
     <div class="prods" id="prods"></div>
-    <div class="go"><button class="btn primary" id="start">Start →</button><span style="color:var(--muted);font-size:14px">6 steps</span></div>
+    <div class="go"><button class="btn primary" id="start">Start →</button><span style="color:var(--muted);font-size:14px">7 steps</span></div>
     <div class="fine">Times are estimates. Sources: Stavrou et al., Childers and Maggard.</div>
   </div>
 </div>
@@ -205,54 +205,110 @@ button:focus-visible{outline:3px solid var(--future);outline-offset:2px}
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-
 /* =====================================================================
    PRODUCTS and STORY. Edit text and numbers here.
    Times are minutes after midnight. Inside a step, `at` runs 0 to 1.
    moves: {a: actor, at:[start,end], path:[[x,z,(y)],...]}
    time:  [kind, minutes, start, end]  fills Sam's time bar
    ev:    {at, until, call, kind: pain|prod|same|good, prod, on: actor or [x,y,z]}  or {at, flash:[x,z]}
+   arm:   robot arm keyframes and when it searches, finds and holds
+   fill:  when each item lands in a supply kit
    ===================================================================== */
 const OR_MIN_USD = 36;
 const PRODUCTS = {
+  planner:{ic:"📋", name:"Case planner", c:"#c2410c", d:"Knows what each case needs.", tip:"Software that reads the OR schedule and past cases. It knows which supplies this surgeon uses for this surgery and makes the pick list. It starts the next case's prep when 30 minutes are left."},
   granola:{ic:"🎥", name:"Perception Kit: Granola + Eyes", c:"#ef6a34", d:"Cameras and mics. Logs the case.", tip:"Cameras and mics on the ceiling. They see and hear the case and write the record. Sam does not type."},
   billing:{ic:"🧾", name:"Coding and billing", c:"#23854a", d:"Codes and bills the case.", tip:"Reads the case record and drafts the billing codes and charges. Sam checks them and approves."},
-  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Moves supplies overhead.", tip:"Boxes that run on a rail in the ceiling. They carry supplies and trays between rooms."},
-  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies.", tip:"A robot arm in the supply room. It picks the item off the shelf and puts it in a rail box."},
-  clean:  {ic:"🧹", name:"Cleaning robot", c:"#2a66cf", d:"Cleans the room.", tip:"Starts cleaning the floor when the patient leaves. No waiting for the crew."},
+  rail:   {ic:"📦", name:"Ceiling rail boxes", c:"#6c4fd1", d:"Moves supplies overhead.", tip:"Boxes that run on a rail in the ceiling. They come down to table height, take supplies and trays, and go back up."},
+  arm:    {ic:"🦾", name:"Robot picking arm", c:"#0f8b8d", d:"Picks supplies.", tip:"A robot arm in the supply room. It finds each item on the shelves and puts it in a rail box."},
+  clean:  {ic:"🧽", name:"OR cleaning robot", c:"#2a66cf", d:"Cleans and disinfects the OR.", tip:"Built for the OR. It wipes up blood and fluids, scrubs and disinfects the floor, then shines UV light on every surface. It starts as soon as the patient leaves."},
 };
 const EXTRA = {
-  sterile:{ic:"🔆", name:"Sterile pass-through", c:"#8e44d6", tip:"A sealed box in the OR wall. It cleans the outside of the item with UV light before it goes into the sterile OR."},
+  sterile:{ic:"🔆", name:"Sterile pass-through", c:"#8e44d6", tip:"A sealed box in the OR wall. It cleans the outside of each item with UV light before it goes into the sterile OR."},
 };
 const TOOLS_T = {
   computer:{ic:"💻", name:"Computer"}, walk:{ic:"🚶", name:"Walking"}, phone:{ic:"📞", name:"Phone"},
   paper:{ic:"📝", name:"Paper charge sheet"}, crew:{ic:"🧹", name:"Cleaning crew"},
 };
-const NURSE_BY_PT = [31.4,4.6], DESK = [34.4,8.7];
+const NURSE_BY_PT = [31.4,4.6], DESK = [34.4,8.7], BACK = [31.5,9.4], KIT = [32.4,8.5,1.2], STAGE = [27.2,15,1.08];
 const TO_SUPPLY = [[33,10],[27,10.8],[25,11.2],[25,12.7],[24,12.7],[24,14.2],[22.6,16.1],[20.5,16.1]];
 const FROM_SUPPLY = [[22.6,16.1],[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,10.8],[33,10],[33,6],NURSE_BY_PT];
 const PT_IN = [[29.5,-1.2],[29.5,1],[29.5,6]];
-const NURSE_IN = [[28.4,-.4],[28.4,1],NURSE_BY_PT];
+const TEAM_IN = (x,z)=>[[29.4,-.6],[29.4,1.6],[x,z]];
 const LEAVE = (x)=>[[x,1.2],[x,-.9],[46,-.9]];
-const ROOM_LOOP = [[26.5,3],[32.5,3],[32.5,9],[26.5,9],[26.5,3]];
+const LANES = [[26.5,2.6],[33,2.6],[33,4.4],[26.5,4.4],[26.5,6.0],[33,6.0],[33,7.4],[26.5,7.4]];
+const BLOOD = [[28.6,4.4],[30.9,4.3],[29.8,6.0],[31.6,2.7],[28.2,7.3]];
+const TO_PASS = [[24,15],[24,12.8],[27,12.8],[27,12.65]];       // rail: supply room to the OR 2 pass-through
+const FROM_PASS = [[27,12.8],[24,12.8],[24,15],[27.2,15]];      // rail: pass-through back to the supply room table
+// Robot arm keyframes: [progress, base x, target x, y, z]
+const REST = [23,2.1,14.4], BOX = [27.2,1.62,15], TABLE = [27.2,1.22,15];
+const ARM_SCOPE = [
+  [0,23,...REST],[.05,23,...REST],[.09,21.4, 21.4,2.1,14.4],
+  [.11,21.4, 20.8,1.55,14.75],[.13,21.4, 22.0,1.55,14.75],[.15,21.4, 22.0,.95,14.75],[.17,21.4, 20.8,.95,14.75],
+  [.21,24.0, 23.4,1.55,14.75],[.23,24.0, 24.6,1.55,14.75],[.25,24.0, 24.6,.95,14.75],
+  [.28,25.6, 25.9,1.55,14.75],[.30,25.6, 25.9,1.55,14.75],[.34,25.6, 27.2,1.62,15],[.37,25.6, 27.2,1.62,15],[.44,23,...REST]];
+// three picks, each carried to the rail box (or to the table)
+const picks = (t0,dt,to)=>{ const k=[[0,23,...REST],[t0,23,...REST]], S=[[21.4,21.0,21.8,.95],[24.0,23.4,24.4,1.25],[25.6,25.4,25.9,.95]];
+  const search=[], found=[], held=[]; let t=t0;
+  S.forEach(([bx,x0,x1,y])=>{ k.push([t+dt*.15,bx, x0,1.6,14.75],[t+dt*.3,bx, x1,1.6,14.75],[t+dt*.42,bx, x1,y,14.75]); search.push([t+dt*.1,t+dt*.38]); found.push([t+dt*.36,t+dt*.48,[x1,y,14.75]]);
+    k.push([t+dt*.55,bx, x1,1.6,14.65],[t+dt*.9,25.6, ...to],[t+dt,25.6, ...to]); held.push([t+dt*.42,t+dt*.9,"pick"]); t+=dt; });
+  k.push([t+dt*.35,23,...REST]); return {keys:k, search, found, held, drops:held.map(h=>h[1])}; };
+const ARM_PREP = picks(.06,.15,BOX), ARM_NEXT = picks(.5,.13,TABLE);
 
 const STEPS = [
- { title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:14, zooms:[[.42,.8,"cam"]],
+ { id:"prep", title:"Room prep", product:["planner","arm","rail","sterile"], toolT:["computer","walk"], secs:30, frame:"core", zooms:[[.06,.52,"arm"],[.64,.86,"sterile"]],
+   clock:{t:[410,445], f:[415,445]},
+   sayT:"Sam comes in early, reads the case and collects every item by hand.",
+   sayF:"The system knows what this surgeon uses. Robots bring it. Sam sets up.",
+   t:{ moves:[{a:"nurse",at:[0,.1],path:[[28.4,-.4],[28.4,1],[33,7.5],DESK]},
+              {a:"nurse",at:[.22,.36],path:TO_SUPPLY},
+              {a:"nurse",at:[.36,.48],path:[[16.6,16.1],[12.8,16.1]]},
+              {a:"nurse",at:[.5,.62],path:[[22.6,16.1],[24,14.2],[24,12.7],[25,12.7],[25,11.2],[27,10.8],[33,10],BACK]},
+              {a:"surgeon",at:[.86,1],path:TEAM_IN(28.6,7.2)},{a:"tech",at:[.86,1],path:TEAM_IN(30.8,7.6)},{a:"anes",at:[.86,1],path:TEAM_IN(27.4,5.6)}],
+       follow:[{a:"kit",of:"nurse",at:[.38,.62]}],
+       fill:{kit:[.38,.43,.47]},
+       time:[["typing",5,.1,.22],["walking",15,.22,.62],["hands",15,.62,1]],
+       ev:[{at:0,until:.1,call:"06:50. Sam comes in early",kind:"pain",on:"nurse"},
+           {at:.1,until:.22,call:"Reads the case and the surgeon's list",kind:"pain",on:"nurse"},
+           {at:.22,until:.36,call:"Walks to the supply room",kind:"pain",on:"nurse"},
+           {at:.36,until:.5,call:"Finds 22 items, shelf by shelf",kind:"pain",on:"nurse"},
+           {at:.5,until:.62,call:"Carries them back",kind:"pain",on:"nurse"},
+           {at:.62,until:1,call:"Sets up the room",kind:"same",on:"nurse"}] },
+   f:{ moves:[{a:"robot",at:[.58,.72],path:TO_PASS},
+              {a:"kit",at:[.785,.79],path:[[27,12.6,1.2]]},{a:"kit",at:[.79,.82],path:[[27,11.5,1.15]]},{a:"kit",at:[.95,.96],path:[KIT]},
+              {a:"nurse",at:[.5,.6],path:[[28.4,-.4],[28.4,1.2]]},{a:"nurse",at:[.6,.78],path:[[33,6],[33,10],[27.6,11.2]]},{a:"nurse",at:[.84,.95],path:[[33,10],BACK]},
+              {a:"surgeon",at:[.86,1],path:TEAM_IN(28.6,7.2)},{a:"tech",at:[.86,1],path:TEAM_IN(30.8,7.6)},{a:"anes",at:[.86,1],path:TEAM_IN(27.4,5.6)}],
+       arm:ARM_PREP, fill:{kit:ARM_PREP.drops},
+       ride:[{a:"kit",at:[.12,.785]}],
+       follow:[{a:"kit",of:"nurse",at:[.83,.95]}],
+       drop:[[0,0],[.04,0],[.12,1],[.52,1],[.58,0],[.72,0],[.76,.82],[.84,.82],[.88,0]],
+       uv:[.76,.86],
+       time:[["hands",15,.5,1]],
+       ev:[{at:0,until:.14,call:"Pick list from this surgeon's last 40 gallbladder cases: 22 items",kind:"prod",prod:"planner",on:"planner"},
+           {at:.04,until:.12,call:"Comes down to the table",kind:"prod",prod:"rail",on:"robot"},
+           {at:.14,until:.52,call:"Finds and picks all 22 items",kind:"prod",prod:"arm",on:"arm"},
+           {at:.52,until:.64,call:"Carries them to OR 2",kind:"prod",prod:"rail",on:"robot"},
+           {at:.5,until:.62,call:"07:10. Sam comes in",kind:"good",on:"nurse"},
+           {at:.7,until:.84,call:"Cleans them before they go in",kind:"prod",prod:"sterile",on:"sterile"},
+           {at:.84,until:1,call:"Sam sets up the room",kind:"good",on:"nurse"}] } },
+
+ { id:"in", title:"Patient in, time-out", product:["granola"], toolT:["computer"], secs:14, zooms:[[.42,.8,"cam"]],
    clock:{t:[445,465], f:[445,465]},
    sayT:"Sam types the times into the computer.",
    sayF:"The Perception Kit logs it. Sam stays with the patient.",
-   t:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:NURSE_IN},{a:"nurse",at:[.56,.66],path:[[33,7.5],DESK]}],
+   t:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:[[33,9.4],[33,6],NURSE_BY_PT]},{a:"nurse",at:[.56,.66],path:[[33,7.5],DESK]}],
        time:[["hands",12,0,.56],["typing",8,.66,1]],
        ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
            {at:.66,until:1,call:"Typing",kind:"pain",on:"nurse"}] },
-   f:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:NURSE_IN}],
+   f:{ moves:[{a:"patient",at:[0,.35],path:PT_IN},{a:"nurse",at:[0,.35],path:[[33,9.4],[33,6],NURSE_BY_PT]}],
+       cam:[.3,.85],
        time:[["hands",20,0,1]],
        ev:[{at:.37,until:.55,call:"Time-out",kind:"same",on:[29.5,1.6,6]},
            {at:.3,flash:[29.5,2]},{at:.5,flash:[29.5,6]},
            {at:.56,until:1,call:"Logged patient in 07:32, time-out 07:34",kind:"prod",prod:"granola",on:"cam"},
            {at:.56,until:1,call:"With the patient",kind:"good",on:"nurse"}] } },
 
- { title:"Surgeon needs a scope", product:["arm","rail","sterile"], toolT:["walk"], secs:28, frame:"core", zooms:[[.04,.44,"arm"],[.6,.86,"sterile"]],
+ { id:"scope", title:"Surgeon needs a scope", product:["arm","rail","sterile"], toolT:["walk"], secs:28, frame:"core", zooms:[[.04,.44,"arm"],[.6,.86,"sterile"]],
    clock:{t:[465,485], f:[465,485]},
    sayT:"Sam leaves the room for 7 min to get it.",
    sayF:"The arm finds it. A rail box brings it through a sterile pass-through. Sam stays.",
@@ -264,12 +320,14 @@ const STEPS = [
            {at:.15,until:.45,call:"Leaves the room",kind:"pain",on:"nurse"},
            {at:.45,until:.58,call:"Searching shelves",kind:"pain",on:"nurse"},
            {at:.58,until:.88,call:"Gone 7 min",kind:"pain",on:"nurse"}] },
-   f:{ moves:[{a:"robot",at:[.46,.62],path:[[24,15],[24,12.8],[27,12.8],[27,12.65]]},
+   f:{ moves:[{a:"robot",at:[0,.18],path:FROM_PASS},
+              {a:"robot",at:[.46,.62],path:TO_PASS},
               {a:"scope",at:[.785,.79],path:[[27,12.6,1.2]]},
               {a:"scope",at:[.79,.82],path:[[27,11.5,1.15]]},
               {a:"nurse",at:[.72,.82],path:[[33,6],[33,10],[27.6,11.2]]},
               {a:"scope",at:[.83,.85],path:[[27.6,11.2,1.3]]},
               {a:"nurse",at:[.86,.97],path:[[33,10],[33,6],NURSE_BY_PT]},{a:"scope",at:[.86,.97],path:[[33,10,1.3],[33,6,1.3],[NURSE_BY_PT[0],NURSE_BY_PT[1],1.3]]}],
+       arm:{keys:ARM_SCOPE, search:[[.09,.28]], found:[[.28,.32,[25.9,1.47,14.75]]], held:[[.30,.37,"scope"]]},
        ride:[{a:"scope",at:[.37,.785]}],
        drop:[[0,0],[.2,0],[.28,1],[.38,1],[.44,0],[.62,0],[.68,.82],[.79,.82],[.85,0]],
        uv:[.68,.79],
@@ -282,20 +340,24 @@ const STEPS = [
            {at:.64,until:.8,call:"Cleans it before it goes into OR 2",kind:"prod",prod:"sterile",on:"sterile"},
            {at:.82,until:1,call:"Sam takes it from the wall",kind:"good",on:"nurse"}] } },
 
- { title:"Surgery", product:["granola"], toolT:["computer"], secs:14, zooms:[[.08,.45,"cam"]],
+ { id:"surgery", title:"Surgery", product:["granola","planner","arm"], toolT:["computer"], secs:20, zooms:[[.06,.38,"cam"],[.38,.5,"core"],[.5,.96,"arm"]],
    clock:{t:[485,540], f:[485,540]},
    sayT:"Sam types each item opened. 22 min.",
-   sayF:"The Perception Kit logs items and counts. Sam helps the team.",
+   sayF:"The Perception Kit logs items and counts. With 30 min left, the next case's supplies are picked.",
    t:{ moves:[{a:"nurse",at:[.05,.15],path:[[33,7.5],DESK]}],
        time:[["hands",3,0,.15],["typing",22,.15,.9],["hands",30,.9,1]],
        ev:[{at:.16,until:1,call:"Typing, 22 min",kind:"pain",on:"nurse"}] },
    f:{ moves:[],
+       cam:[.06,.95],
+       arm:ARM_NEXT, fill:{kit2:ARM_NEXT.drops},
        time:[["hands",55,0,1]],
-       ev:[{at:.2,flash:[29.5,6]},{at:.45,flash:[31,7.4]},{at:.7,flash:[29.5,6]},
-           {at:.12,until:1,call:"Logged 14 items. Count correct.",kind:"prod",prod:"granola",on:"cam"},
-           {at:.12,until:1,call:"Helping the team",kind:"good",on:"nurse"}] } },
+       ev:[{at:.15,flash:[29.5,6]},{at:.25,flash:[31,7.4]},{at:.35,flash:[29.5,6]},
+           {at:.08,until:.38,call:"Logged 14 items. Count correct.",kind:"prod",prod:"granola",on:"cam"},
+           {at:.08,until:.5,call:"Helping the team",kind:"good",on:"nurse"},
+           {at:.4,until:.56,call:"30 min left. Sends the pick list for the next case.",kind:"prod",prod:"planner",on:"planner"},
+           {at:.52,until:.96,call:"Picks the next case's supplies",kind:"prod",prod:"arm",on:"arm"}] } },
 
- { title:"Billing", product:["billing"], toolT:["paper"], secs:10,
+ { id:"billing", title:"Billing", product:["billing"], toolT:["paper"], secs:10,
    clock:{t:[540,545], f:[540,545]},
    sayT:"Sam fills out a paper charge sheet. A coder enters codes days later.",
    sayF:"Codes are ready when the case ends. Sam approves.",
@@ -304,11 +366,12 @@ const STEPS = [
        ev:[{at:.05,until:.5,call:"Paper charge sheet",kind:"pain",on:"nurse"},
            {at:.5,until:1,call:"Coded days later",kind:"pain",on:"nurse"}] },
    f:{ moves:[{a:"nurse",at:[.05,.25],path:[[33,7.5],DESK]},{a:"nurse",at:[.75,.95],path:[[33,7.5],NURSE_BY_PT]}],
+       bill:.2,
        time:[["hands",1,0,.25],["typing",1,.3,.7],["hands",3,.7,1]],
        ev:[{at:.22,until:.75,call:"6 codes ready",kind:"prod",prod:"billing",on:"desk"},
            {at:.5,until:.8,call:"Sam approves",kind:"good",on:"nurse"}] } },
 
- { title:"Patient out, tray back", product:["rail"], toolT:["walk","phone"], secs:12, frame:"core",
+ { id:"out", title:"Patient out, tray back", product:["rail"], toolT:["walk","phone"], secs:12, frame:"core",
    clock:{t:[545,552], f:[545,552]},
    sayT:"Sam carries the tray to sterile processing, then calls cleaning.",
    sayF:"A rail box takes the tray. Sam stays with the patient.",
@@ -336,24 +399,33 @@ const STEPS = [
        ev:[{at:.05,until:.3,call:"With the patient",kind:"good",on:"nurse"},
            {at:.38,until:.85,call:"Takes the tray",kind:"prod",prod:"rail",on:"robot"}] } },
 
- { title:"Room cleaning", product:["clean"], toolT:["phone","crew"], secs:13,
+ { id:"clean", title:"Room cleaning", product:["clean","rail","sterile"], toolT:["phone","crew"], secs:18,
    clock:{t:[552,587], f:[552,572]},
    sayT:"The room waits for the crew. Next patient at 09:47.",
-   sayF:"The robot cleans right away. Next patient at 09:32.",
+   sayF:"The robot cleans and disinfects right away. The next case's supplies are already here. Next patient at 09:32.",
    t:{ moves:[{a:"surgeon",at:[0,.2],path:LEAVE(29.6)},{a:"tech",at:[0,.2],path:LEAVE(30.4)},
               {a:"nurse",at:[.2,.3],path:[[33,7.5],[31.5,7.4]]},
-              {a:"crew",at:[.3,.48],path:[[29.5,-1.6],[29.5,1],[26.5,3]]},
-              {a:"crew",at:[.48,.94],path:[...ROOM_LOOP,[32.5,3],[32.5,9],[26.5,9],[26.5,3]]}],
+              {a:"crew",at:[.3,.48],path:[[29.5,-1.6],[29.5,1],[26.5,2.6]]},
+              {a:"crew",at:[.48,.94],path:LANES}],
        time:[["waiting",6,0,.18],["hands",29,.18,1]],
        ev:[{at:0,until:.46,call:"Waiting for the crew",kind:"pain",on:[29.5,1.6,6]},
            {at:.48,until:.94,call:"Crew cleaning",kind:"same",on:"crew"},
            {at:.94,until:1.01,call:"Next patient 09:47",kind:"pain",on:[29.5,1.6,6]}] },
    f:{ moves:[{a:"surgeon",at:[0,.2],path:LEAVE(29.6)},{a:"tech",at:[0,.2],path:LEAVE(30.4)},
               {a:"nurse",at:[.1,.25],path:[[33,7.5],[31.5,7.4]]},
-              {a:"bot",at:[.04,.86],path:[...ROOM_LOOP,[32.5,3],[32.5,9],[26.5,9],[26.5,3],[24,1.2]]}],
+              {a:"bot",at:[.04,.58],path:LANES},{a:"bot",at:[.58,.62],path:[[29.8,5.2]]},{a:"bot",at:[.86,.92],path:[[26.5,9.6],[24.2,10.6]]},
+              {a:"robot",at:[.1,.35],path:[[31,15.4],[31,12.8],...FROM_PASS.slice(1)]},
+              {a:"robot",at:[.55,.75],path:TO_PASS},
+              {a:"kit2",at:[.86,.87],path:[[27,12.35,1.05]]}],
+       ride:[{a:"kit2",at:[.42,.86]}],
+       drop:[[0,.9],[.08,0],[.35,0],[.42,1],[.48,1],[.55,0],[.75,0],[.8,.82],[.9,.82],[.95,0]],
+       uv:[.8,.9], burst:[.62,.86],
        time:[["hands",20,0,1]],
-       ev:[{at:.04,until:.88,call:"Cleaning",kind:"prod",prod:"clean",on:"bot"},
-           {at:.88,until:1.01,call:"Next patient 09:32",kind:"good",on:[29.5,1.6,6]}] } },
+       ev:[{at:.04,until:.58,call:"Wipes up blood and fluids, scrubs the floor",kind:"prod",prod:"clean",on:"bot"},
+           {at:.62,until:.86,call:"UV light on every surface",kind:"prod",prod:"clean",on:"bot"},
+           {at:.6,until:.8,call:"Brings the next case's supplies",kind:"prod",prod:"rail",on:"robot"},
+           {at:.8,until:1.01,call:"Next case's supplies are ready",kind:"prod",prod:"sterile",on:"sterile"},
+           {at:.9,until:1.01,call:"Next patient 09:32",kind:"good",on:[29.5,1.6,6]}] } },
 ];
 /* ============================ helpers ============================ */
 const $ = s => document.querySelector(s);
@@ -388,7 +460,7 @@ mat("rail","#4a5562",{roughness:.4,metalness:.5}); mat("station","#ffffff"); mat
 mat("arm","#0f8b8d",{roughness:.4,metalness:.3}); mat("armJ","#e9eef2",{roughness:.4}); mat("bot","#2a66cf",{roughness:.45}); mat("botTop","#e6eefc");
 mat("cam","#ef6a34",{emissive:"#ef6a34",emissiveIntensity:.5}); mat("skin","#e2b896"); mat("skin2","#a87554"); mat("skin3","#c9946b");
 mat("hair","#2f2622"); mat("curtain","#cfe0e6",{transparent:true,opacity:.85}); mat("light","#ffffff",{emissive:"#fffbe8",emissiveIntensity:.4});
-mat("board","#ffffff"); mat("green","#7cc49a"); mat("plant","#7aa884");
+mat("board","#ffffff"); mat("blood","#8e1b1b",{roughness:.35}); mat("uvT","#b57cf2",{emissive:"#9b59e6",emissiveIntensity:.9}); mat("plan","#c2410c",{emissive:"#c2410c",emissiveIntensity:.45}); mat("planScr","#fff4ec",{emissive:"#fde3d3",emissiveIntensity:.5}); mat("green","#7cc49a"); mat("plant","#7aa884");
 const SCRUB = {nurse:"#e0457b", surgeon:"#3f8f5a", anes:"#7a62c4", tech:"#3d7fc4", crew:"#7d8590", spd:"#c08a3e", other:"#9fb4c4"};
 
 function box(w,h,d,m,x,y,z,r=0){
@@ -505,10 +577,14 @@ function buildScene(future){
   A.patient = new THREE.Group(); bed(A.patient,0,0,Math.PI/2,true,"skin3");
   A.scope = new THREE.Group(); mat("scopeC","#f2b81f",{emissive:"#f2b81f",emissiveIntensity:.25}); A.scope.add(box(.7,.16,.26,"scopeC",0,0,0,.04)); A.scope.add(box(.5,.05,.05,"steel",.05,.1,0));
   A.trayused = new THREE.Group(); A.trayused.add(box(.8,.12,.45,"trayUsed",0,0,0,.03));
+  const kit = ()=>{ const k=new THREE.Group(); k.userData.parts=[["binB",-.3],["binG",0],["binY",.3]].map(([m,x])=>{ const b=box(.26,.22,.34,m,x,0,0,.03); k.add(b); return b; }); return k; };
+  A.kit = kit(); A.kit2 = kit();
+  A.pick = new THREE.Group(); A.pick.add(box(.24,.2,.3,"binY",0,0,0,.03));
   for(const k in A) g.add(A[k]);
 
   const fx = new THREE.Group(); g.add(fx);
   const C = {};
+  C.blood = BLOOD.map(([x,z],k)=>{ const b=new THREE.Mesh(new THREE.CircleGeometry(.28+.08*(k%3),20),M.blood); b.rotation.x=-Math.PI/2; b.position.set(x,.075,z); b.scale.set(1,1.4-(k%2)*.5,1); g.add(b); b.visible=false; return b; });
   if(future){
     // ceiling rail and wall hatches
     RAILS.forEach(([a,b])=>{ const len=Math.hypot(b[0]-a[0],b[1]-a[1]); const horiz=Math.abs(b[1]-a[1])<.01;
@@ -520,6 +596,8 @@ function buildScene(future){
     const gl=box(1.5,1.1,1.3,"glass",27,1.5,12.35,.04); gl.castShadow=false; fx.add(gl);
     C.uv = box(1.3,.05,1.1,"uv",27,2.02,12.35); C.uv.castShadow=false; fx.add(C.uv);
     fx.add(box(1.2,.1,.8,"station",33.2,1.04,15.4,.03));
+    fx.add(box(1.2,.06,.9,"station",27.2,.95,15,.02)); fx.add(box(1.1,.92,.8,"steel",27.2,.46,15,.03));
+    fx.add(box(.1,.9,1.3,"plan",23.2,1.15,2.6,.03)); fx.add(box(.04,.72,1.1,"planScr",23.27,1.15,2.6));
     // rail box
     A.robot = new THREE.Group();
 A.robot.add(box(.5,.18,.34,"dark",0,RAIL_Y,0,.04)); A.robot.add(box(.3,.1,.3,"dark",0,RAIL_Y-.12,0));
@@ -555,33 +633,42 @@ const track = box(8.2,.06,.3,"rail",23.4,.03,14.0); track.castShadow=false; ab.a
       l1.position.copy(SH).lerp(e,.5); l1.lookAt(e); l2.position.copy(e).lerp(end,.5); l2.lookAt(end); j.position.copy(e); gp.position.copy(end).y+=.08; C.armEnd.copy(end); };
     C.arm(ARM_REST,23);
     // cleaning robot
-    A.bot = new THREE.Group(); A.bot.add(cyl(.5,.52,.26,"bot",0,.16,0,32)); A.bot.add(cyl(.4,.4,.04,"botTop",0,.31,0,32));
-    A.bot.add(cyl(.1,.1,.1,"glowB",0,.36,0,16)); g.add(A.bot);
+    A.bot = new THREE.Group();
+    A.bot.add(box(.9,.34,1.2,"bot",0,.24,0,.12)); A.bot.add(box(.84,.08,.3,"dark",0,.06,.52,.03));        // body and scrub deck
+    A.bot.add(box(.5,.05,.06,"glowB",0,.09,.68));                                                    // wet line
+    A.bot.add(cyl(.17,.2,1.4,"botTop",0,1.08,-.15,20));                                              // UV tower
+    for(let k=0;k<4;k++){ const a=k*Math.PI/2+Math.PI/4; A.bot.add(cyl(.045,.045,1.2,"uvT",Math.cos(a)*.2,1.1,-.15+Math.sin(a)*.2,8)); }
+    A.bot.add(cyl(.22,.22,.12,"bot",0,1.84,-.15,20)); A.bot.add(cyl(.06,.06,.1,"glowB",0,1.95,-.15,10));
+    A.bot.add(box(.08,.08,.5,"armJ",.32,.5,.35)); A.bot.add(box(.2,.06,.2,"glowB",.32,.42,.62,.02));  // wiper arm
+    A.bot.scale.setScalar(1.25); g.add(A.bot);
+    const burst = new THREE.Mesh(new THREE.SphereGeometry(1,24,16), new THREE.MeshBasicMaterial({color:"#a970ff",transparent:true,opacity:0,depthWrite:false}));
+    burst.visible=false; g.add(burst); C.burst=burst;
   }
   const flashes = [];
   for(let i=0;i<3;i++){ const r=ring("#ef6a34",1); r.visible=false; g.add(r); flashes.push(r); }
   return {scene, A, C, flashes, future};
 }
-const ARM_REST = new THREE.Vector3(23,2.1,14.4);
-const ARM_KEYS = [ // [progress, base x, target x, y, z]
-  [0,23, 23,2.1,14.4],[.05,23, 23,2.1,14.4],[.09,21.4, 21.4,2.1,14.4],
-  [.11,21.4, 20.8,1.55,14.75],[.13,21.4, 22.0,1.55,14.75],[.15,21.4, 22.0,.95,14.75],[.17,21.4, 20.8,.95,14.75],
-  [.21,24.0, 23.4,1.55,14.75],[.23,24.0, 24.6,1.55,14.75],[.25,24.0, 24.6,.95,14.75],
-  [.28,25.6, 25.9,1.55,14.75],[.30,25.6, 25.9,1.55,14.75],[.34,25.6, 27.2,1.62,15],[.37,25.6, 27.2,1.62,15],[.44,23, 23,2.1,14.4]];
-const SEARCH = [.09,.28], HELD = [.30,.37];
-function armPose(i,p){
-  if(i!==1) return [ARM_REST,23];
-  for(let k=1;k<ARM_KEYS.length;k++){ const A=ARM_KEYS[k-1], B=ARM_KEYS[k]; if(p<=B[0]){ const u=ease(B[0]>A[0]?clamp((p-A[0])/(B[0]-A[0])):1);
+const ARM_REST = new THREE.Vector3(...REST);
+function armPose(def,p){
+  if(!def) return [ARM_REST,23]; const K=def.keys;
+  for(let k=1;k<K.length;k++){ const A=K[k-1], B=K[k]; if(p<=B[0]){ const u=ease(B[0]>A[0]?clamp((p-A[0])/(B[0]-A[0])):1);
     return [new THREE.Vector3(A[2]+(B[2]-A[2])*u, A[3]+(B[3]-A[3])*u, A[4]+(B[4]-A[4])*u), A[1]+(B[1]-A[1])*u]; } }
   return [ARM_REST,23];
 }
+const inW = (ws,p)=>(ws||[]).find(w=>p>=w[0] && p<w[1]);
+// how many items are in a kit at this point in the story
+function fillCount(side,a,i,p){
+  const idx = STEPS.findIndex(s=>s[side].fill && s[side].fill[a]); if(idx<0 || step<0 || i<idx) return 0;
+  return i>idx ? 3 : STEPS[idx][side].fill[a].filter(t=>p>=t).length;
+}
+const SIDX = STEPS.findIndex(s=>s.id==="surgery"), CIDX = STEPS.findIndex(s=>s.id==="clean");
 const DROP = RAIL_Y-.66-1.25; // how far the box lowers at full drop
 function keyAt(keys,p){ if(!keys) return 0; for(let k=1;k<keys.length;k++){ if(p<=keys[k][0]){ const u=ease(clamp((p-keys[k-1][0])/((keys[k][0]-keys[k-1][0])||1))); return keys[k-1][1]+(keys[k][1]-keys[k-1][1])*u; } } return keys.at(-1)[1]; }
 
 const SIDES = { t: buildScene(false), f: buildScene(true) };
-const HOME = { nurse:[27.6,-1.0], patient:[22,-1.2], surgeon:[28.6,7.2], tech:[30.8,7.6], anes:[27.4,5.6], crew:[14,-1.6],
-  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[27.2,15], bot:[24,1.2] };
-const HOME_F = { scope:[25.9,14.75,1.55] };
+const HOME = { nurse:[27.6,-1.0], patient:[22,-1.2], surgeon:[33.6,-1.7], tech:[35,-1.7], anes:[32.2,-1.7], crew:[14,-1.6],
+  scope:[20.5,15.55,1.15], trayused:[31.5,8.5,1.2], robot:[27.2,15], bot:[24.2,10.6], kit:KIT, kit2:[50,0,0], pick:[50,0,0] };
+const HOME_F = { scope:[25.9,14.75,1.55], kit2:STAGE };
 
 /* ============================ camera ============================ */
 const cam = new THREE.OrthographicCamera(-1,1,1,-1,.1,400);
@@ -649,20 +736,20 @@ for(const side of ["t","f"]){
   ROOMS.forEach(r=>LABS[side].push([r, el("lab"+(r.focus?" focus":""), r.name, labs)]));
   SAM[side] = el("sam","Sam, nurse",calls);
 }
-const ANCH = { cam:[35.1,2.75,.7], desk:[34.4,1.9,9.6], arm:null, robot:null, bot:null };
+const ANCH = { cam:[35.1,2.75,.7], desk:[34.4,1.9,9.6], planner:[23.3,2.1,2.6], arm:null, robot:null, bot:null };
 function anchorOf(side,on){
   const S=SIDES[side];
   if(Array.isArray(on)) return on;
-  if(on==="cam"||on==="desk") return ANCH[on];
+  if(ANCH[on]) return ANCH[on];
   if(on==="arm") return [S.C.armBase??26.6,.5,14.0];
   if(on==="sterile") return [27,2.3,12.35];
   const o=S.A[on]; if(!o) return [0,0,0];
-  const y = on==="robot" ? RAIL_Y+.45 : on==="bot" ? .9 : on==="patient" ? 1.4 : on==="nurse" ? 3.15 : 2.5;
+  const y = on==="robot" ? RAIL_Y+.45 : on==="bot" ? 2.1 : on==="patient" ? 1.4 : on==="nurse" ? 3.15 : 2.5;
   return [o.position.x,y,o.position.z];
 }
 // product badges: always shown on the right, so you can see where each product is
 const BADGE_DEF = { t:[{k:"computer",on:"desk",ic:"💻",c:"#d9622b"}],
-  f:[{k:"granola",on:"cam"},{k:"rail",on:"robot"},{k:"arm",on:"arm"},{k:"sterile",on:"sterile"},{k:"clean",on:"bot"},{k:"billing",on:"desk"}] };
+  f:[{k:"planner",on:"planner"},{k:"granola",on:"cam"},{k:"rail",on:"robot"},{k:"arm",on:"arm"},{k:"sterile",on:"sterile"},{k:"clean",on:"bot"},{k:"billing",on:"desk"}] };
 const SEEN = new Set(), TOUCH = matchMedia("(hover: none)").matches;
 const TIP = document.createElement("div"); TIP.className="tip"; document.body.appendChild(TIP);
 const HINT = el("hint", TOUCH ? "Tap to see what it does" : "Hover to see what it does", H.f.querySelector(".calls"));
@@ -746,22 +833,31 @@ function frame(now){
       const o = S.A[a]; const r = posAt(side,a,i,p);
       o.position.set(r.pos[0], r.pos[2]||0, r.pos[1]);
       o.visible = r.pos[0]<41.5;
-      const turn = !["patient","scope","trayused","robot","bot"].includes(a);
+      const turn = !["patient","scope","trayused","robot","kit","kit2","pick"].includes(a);
       if(turn && r.heading && (r.heading[0]||r.heading[1])) o.rotation.y = Math.atan2(r.heading[0],r.heading[1]);
       const body = o.userData.body; if(body) body.position.y = .62 + (r.moving&&!reduced ? Math.abs(Math.sin(now/110))*.05 : 0);
     }
     S.A.nurse.userData.marker.position.y = 1.62 + (reduced?0:Math.sin(now/300)*.06);
-    if(S.C.arm){ const [T,bx]=armPose(step<0?-1:i,p); S.C.arm(T,bx);
-      const searching = i===1 && step>=0 && p>SEARCH[0] && p<SEARCH[1];
-      S.C.beam.visible = searching; if(searching){ const e=S.C.armEnd; S.C.beam.scale.y=Math.max(.1,e.y-.4); S.C.beam.position.set(e.x,(e.y+.4)/2,e.z); }
-      S.C.found.visible = i===1 && step>=0 && p>=SEARCH[1] && p<HELD[0]+.02;
-      if(i===1 && step>=0 && p>=HELD[0] && p<HELD[1]){ const e=S.C.armEnd; S.A.scope.position.set(e.x,e.y-.05,e.z); } }
+    (step>=0 && d.follow||[]).forEach(f=>{ if(p>=f.at[0] && p<f.at[1]){ const o=S.A[f.a], n=S.A[f.of]; o.position.set(n.position.x, 1.3, n.position.z); } });
+    for(const a of ["kit","kit2"]){ const n=fillCount(side,a,i,p); S.A[a].userData.parts.forEach((b,k)=>b.visible=k<n); }
+    S.A.pick.visible=false;
+    if(S.C.arm){ const def = step<0?null:d.arm, [T,bx]=armPose(def,p); S.C.arm(T,bx); const e=S.C.armEnd;
+      const searching = !!(def && inW(def.search,p));
+      S.C.beam.visible = searching; if(searching){ S.C.beam.scale.y=Math.max(.1,e.y-.4); S.C.beam.position.set(e.x,(e.y+.4)/2,e.z); }
+      const fw = def && inW(def.found,p); S.C.found.visible=!!fw; if(fw) S.C.found.position.set(fw[2][0],fw[2][1]-.12,fw[2][2]);
+      const hw = def && inW(def.held,p); if(hw){ const o=S.A[hw[2]]; o.position.set(e.x,e.y-.05,e.z); o.visible=true; } }
+    { const B=S.C.blood; let show = step>=0 && i>=SIDX && i<=CIDX; const grow = i===SIDX ? clamp((p-.45)*5) : 1;
+      let path=null; if(show && i===CIDX){ path=[]; for(let q=0;q<=p;q+=.01) path.push(posAt(side,side==="t"?"crew":"bot",i,q).pos); }
+      B.forEach((b,k)=>{ const [x,z]=BLOOD[k]; const gone = path && path.some(q=>Math.hypot(q[0]-x,q[1]-z)<.8); b.visible = show && grow>0 && !gone; b.scale.x = grow; b.scale.z = grow; }); }
+    if(S.C.burst){ const w = step>=0 && d.burst, on = w && p>=w[0] && p<w[1]; S.C.burst.visible=!!on;
+      if(on){ const u=(p-w[0])/(w[1]-w[0]); const r=.6+5.5*Math.sin(Math.PI*Math.min(1,u*1.2))**.5; S.C.burst.scale.set(r,r*.45,r); S.C.burst.position.set(S.A.bot.position.x,1.2,S.A.bot.position.z); S.C.burst.material.opacity=.16+.06*Math.sin(now/120); }
+      M.uvT.emissiveIntensity = (step>=0 && i===CIDX) ? 1.2+.6*Math.abs(Math.sin(now/150)) : .5; }
     if(S.A.robot){ const dy = keyAt(step<0?null:d.drop,p)*DROP, u=S.A.robot.userData;
       u.box.position.y = RAIL_Y-.66-dy; const len=.32+dy; u.cable.scale.y=len; u.cable.position.y=RAIL_Y-.15-len/2;
       if(step>=0) (d.ride||[]).forEach(r=>{ if(p>=r.at[0] && p<r.at[1]){ const o=S.A[r.a]; o.position.set(S.A.robot.position.x, RAIL_Y-.66-dy+.33, S.A.robot.position.z); } }); }
     if(S.C.uv){ const on = step>=0 && d.uv && p>=d.uv[0] && p<d.uv[1]; S.C.uv.material.emissiveIntensity = on ? 1.2+.8*Math.abs(Math.sin(now/120)) : .4; }
-    if(S.C.coneMat){ const on = (step===0 && p>.3 && p<.85) || (step===2 && p>.08 && p<.9); S.C.coneMat.opacity = on ? .14+.1*Math.abs(Math.sin(now/300)) : .07; M.cam.emissiveIntensity = on ? .6+.5*Math.abs(Math.sin(now/300)) : .5; }
-    if(S.C.bill){ const on = step===3 && p>.2; S.C.bill.material.emissiveIntensity = on ? .9+.3*Math.sin(now/200) : .3; }
+    if(S.C.coneMat){ const on = step>=0 && d.cam && p>d.cam[0] && p<d.cam[1]; S.C.coneMat.opacity = on ? .14+.1*Math.abs(Math.sin(now/300)) : .07; M.cam.emissiveIntensity = on ? .6+.5*Math.abs(Math.sin(now/300)) : .5; }
+    if(S.C.bill){ const on = step>=0 && d.bill!=null && p>d.bill; S.C.bill.material.emissiveIntensity = on ? .9+.3*Math.sin(now/200) : .3; }
     // Sam's ring pulses red while time is lost
     const pain = step>=0 && CALLS[side].some(([ev])=>ev.kind==="pain" && ev.on==="nurse" && p>=ev.at && p<ev.until);
     const rg=S.A.nurse.userData.ring; rg.material.color.set(pain?"#e0392b":SCRUB.nurse);
@@ -784,7 +880,7 @@ function frame(now){
     LABS[side].forEach(([r,e])=>{ const [sx,sy]=project([r.x,.1,r.z],vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`; });
     const placed=[]; let hintAt=null;
     BADGES[side].forEach(([b,e])=>{
-      const a = b.on==="arm"?[(S.C.armBase??26.6)+1.0,.5,14.0] : b.on==="cam"?[35.1,3.25,.7] : b.on==="bot"?anchorOf(side,"bot").map((v,k)=>k===1?1.5:v) : anchorOf(side,b.on);
+      const a = b.on==="arm"?[(S.C.armBase??26.6)+1.0,.5,14.0] : b.on==="cam"?[35.1,3.25,.7] : b.on==="bot"?anchorOf(side,"bot").map((v,k)=>k===1?2.6:v) : anchorOf(side,b.on);
       const [sx,sy]=project(a,vw,vh); e.style.transform=`translate(${sx}px,${sy}px) translate(-50%,-50%)`;
       const vis = sy>L.top+14 && sy<vh-L.bot-14 && sx>10 && sx<vw-10; e.style.visibility = vis?"visible":"hidden";
       if(vis) placed.push([sx-20,sy-20,40,40]);
@@ -856,7 +952,7 @@ const ROI = {
   hwRail: 600000,        // ceiling rail, lifts and boxes (near a large pneumatic tube install)
   hwPass: 125000,        // 5 sterile pass-through boxes with UV, $25K each
   hwArm: 250000,         // one picking arm cell on a track, with vision and software
-  hwClean: 250000,       // 2 cleaning robots at about $125K each (Xenex list price)
+  hwClean: 250000,       // 2 OR cleaning robots at about $125K each (near the Xenex UV robot list price)
   hwServicePct: 0.10,    // yearly service, 10% of hardware
   hwYears: 7, hwRate: 0.08, // financed over 7 years at 8%
 };
@@ -882,6 +978,7 @@ function levels(){
   return [
     { k:"One case", h:"One case",
       html: tiles(`${room} min`,`${nurse} min`) + `<table class="sum"><tr><th>Product</th><th class="t">Today</th><th class="f">With our system</th></tr>`
+        + row(["planner","arm","rail"],"5 min reading the case, 15 min collecting supplies","0 min. Robots bring them.")
         + row(["granola"],"30 min typing","0 min") + row(["arm","rail"],"7 min out of the room for a scope","0 min")
         + row(["billing"],"Paper sheet, coded days later","Approved in 1 min") + row(["rail"],"5 min carrying the tray","0 min")
         + row(["clean"],`Next patient ${hhmm(nextT)}`,`Next patient ${hhmm(nextF)}`) + `</table>`,
@@ -903,7 +1000,7 @@ function levels(){
       html: `<div class="big two"><div><b>$${ROI.pricePerORMonth.toLocaleString()}</b><small>per OR a month for software, plus $${ROI.codingPerCase} a case for coding</small></div><div><b>$${(Math.round(hwYear/12/ROI.ors/100)*100).toLocaleString()}</b><small>per OR a month for the hardware, rent-to-buy over ${n} years, service included</small></div></div>`
         + bars([["Savings per year",saved,"#2a66cf"],["Software subscription",soft,"#3fae67"],["Hardware, rent-to-buy",hwYear,"#8e44d6"],["Total price per year",price,"#14202c"]])
         + `<p class="say2">The floor saves about ${(saved/price).toFixed(1).replace(/\.0$/,"")} times what it pays. After ${n} years the hospital owns the hardware, and the price drops to ${money(soft+hwSvc)} a year.</p>`,
-      note:`Software: Perception Kit and planning software. Hardware: rails, pass-throughs, picking arm and 2 cleaning robots, about ${money(hwUp)} if bought outright. The monthly rent pays it off over ${n} years at ${Math.round(r*100)}%, plus ${Math.round(ROI.hwServicePct*100)}% a year for service. After that, service only. Hardware prices are estimates from similar hospital systems.` },
+      note:`Software: Perception Kit and Case planner. Hardware: rails, pass-throughs, picking arm and 2 cleaning robots, about ${money(hwUp)} if bought outright. The monthly rent pays it off over ${n} years at ${Math.round(r*100)}%, plus ${Math.round(ROI.hwServicePct*100)}% a year for service. After that, service only. Hardware prices are estimates from similar hospital systems.` },
   ];
 }
 function showLevel(n){
